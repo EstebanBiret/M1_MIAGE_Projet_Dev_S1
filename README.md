@@ -7,5 +7,5 @@ Auteurs :
 Clément RIOLS
 Esteban BIRET-TOSCANO
 Yajing LI
-..
-..
+Olive Nabia NOUBA
+Leultaye TAFESSE
