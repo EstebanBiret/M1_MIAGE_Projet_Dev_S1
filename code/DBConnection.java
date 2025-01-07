@@ -13,23 +13,5 @@ public class DBConnection {
             System.out.println("Erreur de connexion : " + e.getMessage());
             return null;
         }
-    }
-
-    // public static void main(String[] args) {
-    //     try (Connection connection = getConnection()) {
-    //         if (connection != null) {
-    //             String query = "SELECT * FROM client";
-    //             Statement stmt = connection.createStatement();
-    //             ResultSet rs = stmt.executeQuery(query);
-
-    //             while (rs.next()) {
-    //                 System.out.println("ID: " + rs.getInt("idClient"));
-    //                 System.out.println("Nom: " + rs.getString("nomClient"));
-    //             }
-    //         }
-    //     } catch (SQLException e) {
-    //         System.out.println("Erreur : " + e.getMessage());
-    //     }
-
-    // }           
+    }    
 }
