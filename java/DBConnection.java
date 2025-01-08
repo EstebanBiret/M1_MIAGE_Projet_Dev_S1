@@ -13,5 +13,7 @@ public class DBConnection {
             System.out.println("Erreur de connexion : " + e.getMessage());
             return null;
         }
+
+        test
     }    
 }
