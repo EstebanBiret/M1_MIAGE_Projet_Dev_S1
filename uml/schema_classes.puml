@@ -1,0 +1,95 @@
+@startuml schema-classes-uml
+
+class Magasin {
+    + idMagasin: int
+    + nomMagasin: varchar(128)
+    + adresseMagasin: varchar(128)
+}
+
+class Produit {
+    + idProduit: int
+    + libelleProduit: varchar(128)
+    + prixUnitaire: DECIMAL(6,2)
+    + prixKilo: DECIMAL(6,2)
+    + nutriscore: char(128)
+    + poidsProduit: DECIMAL(6,3)
+    + conditionnementProduit: varchar(128)
+    + marqueProduit: varchar(128)
+}
+
+class Categorie {
+    + idCategorie: int
+    + nomCategorie: varchar(128)
+}
+
+class Profil {
+    + idProfil: int
+    + nomProfil: varchar(128)
+}
+
+class Client {
+    + idClient: int
+    + idMagasin: int
+    + nomClient: varchar(128)
+    + prenomClient: varchar(128)
+    + adresseClient: varchar(128)
+    + telClient: varchar(128)
+}
+
+class Client_Profil {
+    + idClient: int
+    + idProfil: int
+}
+
+class Appartenir {
+    + idCategorie: int
+    + idProduit: int
+}
+
+class Stocker {
+    + idMagasin: int
+    + idProduit: int
+    + quantiteEnStock: int
+}
+
+class Panier {
+    + idPanier: int
+    + idClient: int
+    + idMagasin: int
+    + panierTermine: boolean
+    + dateDebutPanier: datetime
+    + dateFinPanier: datetime
+}
+
+class Commande {
+    + idCommande: int
+    + idPanier: int
+    + statutCommande: enum
+    + dateCommande: datetime
+}
+
+class Panier_Produit {
+    + idPanier: int
+    + idProduit: int
+    + quantiteDemande: int
+    + modeLivraison: enum
+}
+
+'Les relations entre les tables'
+
+Client "1" --> "0..*" Client_Profil : "a le profil"
+Profil "1" --> "0..*" Client_Profil : "appartient au client"
+
+Client "1" --> "0..*" Panier : "rempli"
+Magasin "1" --> "0..*" Panier : "choisi"
+Panier "1" --> "0..1" Commande : "associé à"
+
+Panier "1" --> "0..*" Panier_Produit : "contiens"
+Produit "1" --> "0..*" Panier_Produit : "est contenu"
+
+Produit "1" --> "0..*" Appartenir : "fait partie"
+Categorie "1" --> "0..*" Appartenir : "possède"
+
+Magasin "1" --> "0..*" Stocker : "stock"
+Produit "1" --> "0..*" Stocker : "fait parti du stock"
+@enduml
