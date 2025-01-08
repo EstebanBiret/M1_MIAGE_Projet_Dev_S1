@@ -120,5 +120,8 @@ public class Main {
         if(supprProduitId.exists()) supprProduitId.delete();
         System.out.println("\n");
 
+        /*--------US 1.2------ */
+        Panier newPanier = new Panier(1, 1, false, null, null);
+        newPanier.afficherPanier(1);
     }
 }
