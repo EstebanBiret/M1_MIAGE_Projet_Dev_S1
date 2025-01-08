@@ -33,6 +33,7 @@ public class Produit {
                 pstmt.setInt(1, idProduit);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
+                        this.idProduit = rs.getInt("idProduit");
                         this.libelleProduit = rs.getString("libelleProduit");
                         this.prixUnitaire = rs.getDouble("prixUnitaire");
                         this.prixKilo = rs.getDouble("prixKilo");
@@ -40,7 +41,6 @@ public class Produit {
                         this.poidsProduit = rs.getDouble("poidsProduit");
                         this.conditionnementProduit = rs.getString("conditionnementProduit");
                         this.marqueProduit = rs.getString("marqueProduit");
-                        this.idProduit = rs.getInt("idProduit");
                     } else {
                         System.out.println("Produit introuvable (" + idProduit + ")");
                     }
@@ -51,13 +51,22 @@ public class Produit {
         }
     }
 
-    public Produit(String libelleProduit) {
+    //booléen en param pour savoir si on récupère un produit par son nom exact ou mot clé
+    public Produit(String libelleProduit, boolean nomExact) {
         try (Connection connection = DBConnection.getConnection()) {
-            String selectQuery = "SELECT * FROM produit WHERE libelleProduit = ?";
+            String selectQuery;
+            if(nomExact) {
+                selectQuery = "SELECT * FROM produit WHERE libelleProduit = ?";
+            } else {
+                selectQuery = "SELECT * FROM produit WHERE libelleProduit LIKE ?";
+                libelleProduit = "%" + libelleProduit + "%";
+            }
+            
             try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
                 pstmt.setString(1, libelleProduit);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
+                        this.idProduit = rs.getInt("idProduit");
                         this.libelleProduit = rs.getString("libelleProduit");
                         this.prixUnitaire = rs.getDouble("prixUnitaire");
                         this.prixKilo = rs.getDouble("prixKilo");
@@ -65,9 +74,12 @@ public class Produit {
                         this.poidsProduit = rs.getDouble("poidsProduit");
                         this.conditionnementProduit = rs.getString("conditionnementProduit");
                         this.marqueProduit = rs.getString("marqueProduit");
-                        this.idProduit = rs.getInt("idProduit");
                     } else {
-                        System.out.println("Produit introuvable (" + libelleProduit + ")");
+                        if(nomExact) {
+                            System.out.println("Produit introuvable (" + libelleProduit + ")");
+                        } else {
+                            System.out.println("Aucun produit trouvé avec le mot clé " + "'"  + libelleProduit + "'.");
+                        }
                     }
                 }
             }
@@ -141,10 +153,15 @@ public class Produit {
         this.idProduit = idProduit;
     }
 
+    //savoir si le produit recherché existe bien en BD
+    public boolean exists() {
+        return this.idProduit != 0;
+    }
+
     @Override
     public String toString() {
-        return "Produit [conditionnementProduit=" + conditionnementProduit + ", libelleProduit=" + libelleProduit
-                + ", marqueProduit=" + marqueProduit + ", nutriscore=" + nutriscore + ", poidsProduit=" + poidsProduit
+        return "Produit [conditionnement=" + conditionnementProduit + ", libellé=" + libelleProduit
+                + ", marque=" + marqueProduit + ", nutriscore=" + nutriscore + ", poids=" + poidsProduit
                 + ", prixKilo=" + prixKilo + ", prixUnitaire=" + prixUnitaire + ", id=" + idProduit + "]";
     }
 
@@ -168,7 +185,7 @@ public class Produit {
                 //exécution de la requête
                 int rowsAffected = pstmt.executeUpdate();
                 if (rowsAffected > 0) {
-                    System.out.println("Produit ajouté avec succès.");
+                    System.out.println("Produit ajouté avec succès (" + this.libelleProduit + ").");
                 } else {
                     System.out.println("Aucun produit ajouté.");
                 }
@@ -184,7 +201,7 @@ public class Produit {
                             this.idProduit = rs.getInt("idProduit");
                             
                         } else {
-                            System.out.println("Produit introuvable (" + libelleProduit + ")");
+                            System.out.println("Produit introuvable (" + libelleProduit + ").");
                         }
                     }
                 }
@@ -216,13 +233,11 @@ public class Produit {
                 pstmt.setString(6, this.conditionnementProduit);
                 pstmt.setString(7, this.marqueProduit);
                 pstmt.setInt(8, this.idProduit);
-
-                System.out.println(this.idProduit);
                 
                 //exécution de la requête
                 int rowsAffected = pstmt.executeUpdate();
                 if (rowsAffected > 0) {
-                    System.out.println("Produit modifié avec succès.");
+                    System.out.println("Produit modifié avec succès (" + this.idProduit + ").");
                 } else {
                     System.out.println("Aucun produit modifié.");
                 }
