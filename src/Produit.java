@@ -269,7 +269,7 @@ public class Produit {
                 //exécution de la requête
                 int rowsAffected = pstmt.executeUpdate();
                 if (rowsAffected > 0) {
-                    System.out.println("Produit supprimé avec succès.");
+                    System.out.println("Produit supprimé avec succès (" + this.idProduit + ").");
                 } else {
                     System.out.println("Aucun produit trouvé avec cet ID.");
                 }
