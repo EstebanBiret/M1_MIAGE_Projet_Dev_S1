@@ -88,75 +88,28 @@ public class Produit {
         }
     }
 
-    public String getLibelleProduit() {
-        return libelleProduit;
-    }
-
-    public void setLibelleProduit(String libelleProduit) {
-        this.libelleProduit = libelleProduit;
-    }
-
-    public double getPrixUnitaire() {
-        return prixUnitaire;
-    }
-    
-    public void setPrixUnitaire(double prixUnitaire) {
-        this.prixUnitaire = prixUnitaire;
-    }
-
-    public double getPrixKilo() {
-        return prixKilo;
-    }
-
-    public void setPrixKilo(double prixKilo) {
-        this.prixKilo = prixKilo;
-    }
-
-    public char getNutriscore() {
-        return nutriscore;
-    }
-
-    public void setNutriscore(char nutriscore) {
-        this.nutriscore = nutriscore;
-    }
-
-    public double getPoidsProduit() {
-        return poidsProduit;
-    }
-
-    public void setPoidsProduit(double poidsProduit) {
-        this.poidsProduit = poidsProduit;
-    }
-
-    public String getConditionnementProduit() {
-        return conditionnementProduit;
-    }
-
-    public void setConditionnementProduit(String conditionnementProduit) {
-        this.conditionnementProduit = conditionnementProduit;
-    }
-
-    public String getMarqueProduit() {
-        return marqueProduit;
-    }
-
-    public void setMarqueProduit(String marqueProduit) {
-        this.marqueProduit = marqueProduit;
-    }
+    //getters & setters
+    public String getLibelleProduit() {return libelleProduit;}
+    public void setLibelleProduit(String libelleProduit) {this.libelleProduit = libelleProduit;}
+    public double getPrixUnitaire() {return prixUnitaire;}
+    public void setPrixUnitaire(double prixUnitaire) {this.prixUnitaire = prixUnitaire;}
+    public double getPrixKilo() {return prixKilo;}
+    public void setPrixKilo(double prixKilo) {this.prixKilo = prixKilo;}
+    public char getNutriscore() {return nutriscore;}
+    public void setNutriscore(char nutriscore) {this.nutriscore = nutriscore;}
+    public double getPoidsProduit() {return poidsProduit;}
+    public void setPoidsProduit(double poidsProduit) {this.poidsProduit = poidsProduit;}
+    public String getConditionnementProduit() {return conditionnementProduit;}
+    public void setConditionnementProduit(String conditionnementProduit) {this.conditionnementProduit = conditionnementProduit;}
+    public String getMarqueProduit() {return marqueProduit;}
+    public void setMarqueProduit(String marqueProduit) {this.marqueProduit = marqueProduit;}
 
     /* Méthodes sur l'ID de la BD */
-    public int getIdProduit() {
-        return idProduit;
-    }
+    public int getIdProduit() {return idProduit;}
+    public void setIdProduit(int idProduit) {this.idProduit = idProduit;}
 
-    public void setIdProduit(int idProduit) {
-        this.idProduit = idProduit;
-    }
-
-    //savoir si le produit recherché existe bien en BD
-    public boolean exists() {
-        return this.idProduit != 0;
-    }
+    // Savoir si le produit recherché existe bien en BD
+    public boolean exists() {return this.idProduit != 0;}
 
     @Override
     public String toString() {
@@ -265,7 +218,7 @@ public class Produit {
             String deleteQuery = "DELETE FROM produit WHERE idProduit = ?";
 
             //TODO : supprimer les références de ce produit dans les tables concernées
-            
+
             try (PreparedStatement pstmt = connection.prepareStatement(deleteQuery)) {
                 pstmt.setInt(1, this.idProduit);
 

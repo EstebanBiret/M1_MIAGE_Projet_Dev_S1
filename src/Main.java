@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Comparator;
 
 public class Main {
 
@@ -77,6 +78,27 @@ public class Main {
         for (Produit produit : produitsBoissons) {
             System.out.println(produit.toString());
         }
+        System.out.println("\n");
+
+        /* ----- 0.4 ----- */
+        System.out.println("----- US 0.4 -----");
+        // Trier les produits par prix, alphabétique, nutriscore et poids
+
+        produitsBoissons.sort(Comparator.comparingDouble(Produit::getPrixUnitaire));
+        System.out.println("Tri par prix unitaire croissant :");
+        produitsBoissons.forEach(System.out::println);
+
+        produitsBoissons.sort(Comparator.comparing(Produit::getLibelleProduit));
+        System.out.println("\nTri alphabétique par libellé :");
+        produitsBoissons.forEach(System.out::println);
+
+        produitsBoissons.sort(Comparator.comparing(Produit::getNutriscore));
+        System.out.println("\nTri par nutriscore :");
+        produitsBoissons.forEach(System.out::println);
+
+        produitsBoissons.sort(Comparator.comparingDouble(Produit::getPoidsProduit));
+        System.out.println("\nTri par poids croissant :");
+        produitsBoissons.forEach(System.out::println);
         System.out.println("\n");
 
         /* ----- US 3.1 ----- */
