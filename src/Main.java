@@ -1,7 +1,51 @@
 package src;
 //import java.sql.*;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Main {
+
+    public static List<Produit> produitsParCategorie(String categorie) {
+        List<Produit> produits = new ArrayList<>();
+
+        try (Connection connection = DBConnection.getConnection()) {
+            //rechercher les produits appartenant à la catégorie en paramètre
+            String selectQuery = "SELECT p.* FROM produit p, appartenir a, categorie c " 
+            + "WHERE p.idProduit = a.idProduit AND a.idCategorie = c.idCategorie AND c.nomCategorie = ?";
+
+            try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
+                pstmt.setString(1, categorie);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        // Créer un produit pour chaque ligne de résultat
+                        Produit produit = new Produit(
+                            rs.getString("libelleProduit"),
+                            rs.getDouble("prixUnitaire"),
+                            rs.getDouble("prixKilo"),
+                            rs.getString("nutriscore").charAt(0),
+                            rs.getDouble("poidsProduit"),
+                            rs.getString("conditionnementProduit"),
+                            rs.getString("marqueProduit")
+                        );
+                        produit.setIdProduit(rs.getInt("idProduit"));
+                        produits.add(produit);
+                    } 
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur : " + e.getMessage());
+        }
+
+        if (produits.isEmpty()) {
+            System.out.println("Aucun produit trouvé dans cette catégorie (" + categorie + ")");
+        }
+        return produits;
+    }
 
     public static void main(String[] args) {
 
@@ -24,6 +68,16 @@ public class Main {
         System.out.println("Recherche par mot clé : Jus d'o");
         Produit produitMotCle = new Produit("Jus d'o", false);
         if(produitMotCle.exists()) System.out.println(produitMotCle.toString() + "\n");
+
+        /* ----- US 0.3 ----- */
+        System.out.println("----- US 0.3 -----");
+        //consulter la liste des produits par catégorie
+        System.out.println("Recherche par catégorie : Boissons");
+        List<Produit> produitsBoissons = produitsParCategorie("Boissons");
+        for (Produit produit : produitsBoissons) {
+            System.out.println(produit.toString());
+        }
+        System.out.println("\n");
 
         /* ----- US 3.1 ----- */
         System.out.println("----- US 3.1 -----");

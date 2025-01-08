@@ -263,6 +263,9 @@ public class Produit {
             connection.setAutoCommit(false);
 
             String deleteQuery = "DELETE FROM produit WHERE idProduit = ?";
+
+            //TODO : supprimer les références de ce produit dans les tables concernées
+            
             try (PreparedStatement pstmt = connection.prepareStatement(deleteQuery)) {
                 pstmt.setInt(1, this.idProduit);
 
