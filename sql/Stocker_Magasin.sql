@@ -5,8 +5,8 @@ CREATE table magasin(
 );
 
 CREATE table stocker(
-    idMagasin int(11),
-    idProduit int(11),
+    idMagasin int(11) NOT NULL,
+    idProduit int(11) NOT NULL,
     quantiteEnStock int(11) NOT NULL,
     PRIMARY KEY(idMagasin,idProduit),
     FOREIGN KEY(idMagasin) REFERENCES magasin(idMagasin),
