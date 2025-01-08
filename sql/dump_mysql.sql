@@ -11,7 +11,7 @@ USE `projet_dev_m1_miage_s1`;
 -- --------------------------------------------------------
 
 --
--- Structure de la table `client`
+-- Création des tables
 --
 
 CREATE table magasin(
@@ -25,7 +25,7 @@ CREATE TABLE `produit` (
   `idProduit` int(11) NOT NULL AUTO_INCREMENT,
   `libelleProduit` varchar(128) NOT NULL,
   `prixUnitaire` DECIMAL(6,2) NOT NULL,
-  `prixKilo` DECIMAL(6,2) NOT NULL,
+  `prixKilo` DECIMAL(6,2),
   `nutriscore` char(128) NOT NULL,
   `poidsProduit` DECIMAL(6,3) NOT NULL,
   `conditionnementProduit` varchar(128) NOT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE `panier_produit` (
 );
 
 --
--- Insertion des données dans la table `client`
+-- Insertion des données
 --
 
 COMMIT;
