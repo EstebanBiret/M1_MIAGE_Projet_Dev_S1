@@ -45,18 +45,11 @@ CREATE TABLE `profil` (
   PRIMARY KEY (idProfil)
 );
 
-CREATE TABLE `commande` (
-  `idCommande` int(11) NOT NULL AUTO_INCREMENT,
-  `statutCommande` varchar(128) NOT NULL,
-  `dateCommande` date NOT NULL,
-  `heureCommande` time NOT NULL,
-  PRIMARY KEY (idCommande)
-);
-
 CREATE TABLE `client` (
   `idClient` int(11) NOT NULL AUTO_INCREMENT,
   `idMagasin` int(11) NOT NULL,
   `nomClient` varchar(128) NOT NULL,
+  `prenomClient` varchar(128) NOT NULL,
   `adresseClient` varchar(128) NOT NULL,
   `telClient` varchar(128) NOT NULL,
   PRIMARY KEY(idClient),
@@ -91,15 +84,29 @@ CREATE table `stocker` (
 CREATE TABLE `panier` (
   `idPanier` int(11) NOT NULL AUTO_INCREMENT,
   `idClient` int(11) NOT NULL,
+  `idMagasin` int(11) NOT NULL,
+  `panierTermine` boolean NOT NULL,
+  `dateDebutPanier` datetime NOT NULL,
+  `dateFinPanier` datetime NOT NULL,
   PRIMARY KEY (idPanier),
-  FOREIGN KEY (idClient) REFERENCES client(idClient)
+  FOREIGN KEY (idClient) REFERENCES client(idClient),
+  FOREIGN KEY (idMagasin) REFERENCES magasin(idMagasin)
+);
+
+CREATE TABLE `commande` (
+  `idCommande` int(11) NOT NULL AUTO_INCREMENT,
+  `idPanier` int(11) NOT NULL,
+  `statutCommande` enum('préparation', 'retrait', 'envoi', 'terminée') NOT NULL,
+  `dateCommande` datetime NOT NULL,
+  PRIMARY KEY (idCommande),
+  FOREIGN KEY (idPanier) REFERENCES panier(idPanier)
 );
 
 CREATE TABLE `panier_produit` (
   `idPanier` int(11) NOT NULL,
   `idProduit` int(11) NOT NULL,
   `quantiteVoulue` int(11) NOT NULL,
-  `modeLivraison` varchar(128) NOT NULL,
+  `modeLivraison` enum('livraison','retrait') NOT NULL,
   PRIMARY KEY (idPanier, idProduit),
   FOREIGN KEY (idPanier) REFERENCES panier(idPanier),
   FOREIGN KEY (idProduit) REFERENCES produit(idProduit)
