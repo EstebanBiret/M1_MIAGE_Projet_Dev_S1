@@ -112,16 +112,16 @@ public class Main {
         newProduit.setLibelleProduit("Test3");
         newProduit.update();
  
-        //suppression d'un produit par son libellé et son ID
-        Produit supprProduitLibelle = new Produit("Test3", true);
+        //suppression d'un produit par son libellé et son ID (TODO supprimer les références dans les tables associées)
+        /*Produit supprProduitLibelle = new Produit("Test3", true);
         if(supprProduitLibelle.exists()) supprProduitLibelle.delete();
  
         Produit supprProduitId = new Produit(3);
-        if(supprProduitId.exists()) supprProduitId.delete();
+        if(supprProduitId.exists()) supprProduitId.delete();*/
         System.out.println("\n");
 
         /*--------US 1.2------ */
-        Panier newPanier = new Panier(1, 1, false, null, null);
-        newPanier.afficherPanier(1);
+        Panier newPanier = new Panier(1, 1);
+        newPanier.afficherPanier();
     }
 }
