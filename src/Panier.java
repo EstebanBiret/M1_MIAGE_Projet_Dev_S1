@@ -14,6 +14,23 @@ public class Panier {
 
     // Constructeur
     public Panier(int idClient, int idMagasin) {
+
+        //vérifier que le client n'a pas déjà un panier en cours
+        String queryTest = "SELECT * FROM panier WHERE idClient = ? AND panierTermine = false;";
+        try (Connection connection = DBConnection.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(queryTest)) {
+            
+            pstmt.setInt(1, idClient);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                System.out.println("Le client a déjà un panier en cours.");
+                return;
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la vérification du panier en cours : " + e.getMessage());
+        }
+
+        //créer le panier en java
         this.idClient = idClient;
         this.idMagasin = idMagasin;
         this.panierTermine = false;
@@ -51,6 +68,16 @@ public class Panier {
     public Date getDateDebutPanier() {return dateDebutPanier;}
     public Date getDateFinPanier() {return dateFinPanier;}
 
+    // Savoir si le panier recherché existe bien en BD
+    public boolean exists() {return this.idPanier != 0;}
+
+    @Override
+    public String toString() {
+        return "Panier [id=" + idPanier + ", idClient=" + idClient + ", idMagasin=" + idMagasin
+                + ", statut_panier=" + panierTermine + ", date_début=" + dateDebutPanier + ", date_fin=" + dateFinPanier
+                + "]";
+    }
+
     // afficher un panier (US 1.2)
     public void afficherPanier() {
         String query = """
@@ -72,12 +99,5 @@ public class Panier {
         } catch (SQLException e) {
             System.out.println("Erreur lors de l'affichage du panier : " + e.getMessage());
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Panier [id=" + idPanier + ", idClient=" + idClient + ", idMagasin=" + idMagasin
-                + ", statut_panier=" + panierTermine + ", date_début=" + dateDebutPanier + ", date_fin=" + dateFinPanier
-                + "]";
     }
 }

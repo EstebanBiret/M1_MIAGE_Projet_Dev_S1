@@ -101,6 +101,27 @@ public class Main {
         produitsBoissons.forEach(System.out::println);
         System.out.println("\n");
 
+        /* ----- US 1.1 ----- */
+
+
+        /* ----- US 1.2 ----- */
+        Panier newPanier = new Panier(1, 1);
+        if(newPanier.exists()) newPanier.afficherPanier() ; System.out.println("\n");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         /* ----- US 3.1 ----- */
         System.out.println("----- US 3.1 -----");
 
@@ -119,9 +140,6 @@ public class Main {
         Produit supprProduitId = new Produit(3);
         if(supprProduitId.exists()) supprProduitId.delete();*/
         System.out.println("\n");
-
-        /*--------US 1.2------ */
-        Panier newPanier = new Panier(1, 1);
-        newPanier.afficherPanier();
+        
     }
 }
