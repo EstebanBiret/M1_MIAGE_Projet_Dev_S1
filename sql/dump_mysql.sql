@@ -88,7 +88,7 @@ CREATE TABLE `panier` (
   `dateDebutPanier` datetime NOT NULL,
   `dateFinPanier` datetime,
   PRIMARY KEY (idPanier),
-  FOREIGN KEY (idClient) REFERENCES client(idClient),
+  FOREIGN KEY (idClient) REFERENCES client(idClient)
 );
 
 CREATE TABLE `commande` (
@@ -206,17 +206,12 @@ INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VAL
 (5, 0, '2025-01-07 13:00:00', NULL), -- Panier en cours (client 5)
 (5, 1, '2024-12-10 16:00:00', '2024-12-11 18:00:00'); -- Ancien panier terminé (client 5)
 
-
 INSERT INTO commande (idPanier, statutCommande, dateCommande) VALUES
 (2, 'terminée', '2025-01-02 16:45:00'),
 (3, 'préparation', '2025-01-03 15:45:00'),
 (5, 'retrait', '2025-01-05 13:30:00'),
 (6, 'livraison', '2025-01-06 19:15:00'),
-(8, 'terminée', '2025-01-08 10:15:00'),
-(9, 'préparation', '2025-01-09 12:30:00'),
-(10, 'livraison', '2025-01-10 17:45:00'),
-(11, 'terminée', '2025-01-11 12:30:00'),
-(12, 'préparation', '2025-01-12 14:45:00');
+(7, 'terminée', '2025-01-08 10:15:00');
 
 INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue, modeLivraison) VALUES
 -- Panier client 1 (en cours)
@@ -234,12 +229,12 @@ INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoul
 (4, 9, 4, 1, 'livraison'),
 -- Panier client 4 (terminé)
 (5, 10, 5, 2, 'retrait'),
-(5, 11, 6, 1, 'livraison'),
+(5, 9, 6, 1, 'livraison'),
 -- Panier client 5 (en cours)
-(6, 12, 7, 3, 'livraison'),
-(6, 13, 7, 2, 'retrait'),
+(6, 8, 7, 3, 'livraison'),
+(6, 7, 7, 2, 'retrait'),
 -- Ancien panier client 5
-(7, 14, 8, 5, 'livraison'),
-(7, 15, 8, 1, 'retrait');
+(7, 2, 8, 5, 'livraison'),
+(7, 3, 8, 1, 'retrait');
 
 COMMIT;
