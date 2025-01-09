@@ -76,7 +76,7 @@ public class Panier {
             pstmt.setInt(1, idPanier);
 
             ResultSet rs = pstmt.executeQuery();
-            System.out.println("Details of Panier ID: " + idPanier);
+            System.out.println("Détails du panier " + idPanier);
             while (rs.next()) {
                 System.out.println("Nom Client: " + rs.getString("nomClient") + " " + rs.getString("prenomClient"));
             }
