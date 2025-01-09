@@ -13,7 +13,6 @@ public class Gestionnaire {
      */
     public void ajouterProduitCatalogue(Produit p) {
         try (Connection connection = DBConnection.getConnection()) {
-            connection.setAutoCommit(false);
 
             //vérifier qu'un produit n'existe pas déjà avec ce libellé
             String selectQuery = "SELECT * FROM produit WHERE libelleProduit = ?";
@@ -45,7 +44,7 @@ public class Gestionnaire {
                 } else {
                     System.out.println("Aucun produit ajouté.");
                 }
-                connection.commit();
+                //connection.commit();
 
                 //récupérer l'id du produit tout juste inséré
                 String getId = "SELECT * FROM produit WHERE libelleProduit = ?";
@@ -77,7 +76,6 @@ public class Gestionnaire {
      */
     public void majProduitCatalogue(Produit p) {
         try (Connection connection = DBConnection.getConnection()) {
-            connection.setAutoCommit(false);
 
             String updateQuery = "UPDATE produit SET libelleProduit = ?, prixUnitaire = ?, prixKilo = ?, nutriscore = ?, poidsProduit = ?, conditionnementProduit = ?, marqueProduit = ? WHERE idProduit = ?";
             try (PreparedStatement pstmt = connection.prepareStatement(updateQuery)) {
@@ -98,7 +96,7 @@ public class Gestionnaire {
                     System.out.println("Aucun produit modifié.");
                 }
 
-                connection.commit();
+                //connection.commit();
 
             } catch (SQLException e) {
                 //rollback si erreur
@@ -117,7 +115,6 @@ public class Gestionnaire {
     */
     public void supprProduitCatalogue(Produit p) {
         try (Connection connection = DBConnection.getConnection()) {
-            connection.setAutoCommit(false);
 
             String deleteQuery = "DELETE FROM produit WHERE idProduit = ?";
             //TODO : supprimer les références de ce produit dans les tables concernées
@@ -133,7 +130,7 @@ public class Gestionnaire {
                     System.out.println("Aucun produit trouvé avec cet ID.");
                 }
 
-                connection.commit();
+                //connection.commit();
             } catch (SQLException e) {
                 //rollback si erreur
                 connection.rollback();

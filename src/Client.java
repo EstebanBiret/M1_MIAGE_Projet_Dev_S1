@@ -62,7 +62,7 @@ public class Client {
             pstmt.setInt(1, this.idClient);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    p = new Panier(rs.getInt("idPanier"), idClient, rs.getDate("dateDebutPanier"));
+                    p = new Panier(rs.getInt("idPanier"), idClient, rs.getTimestamp("dateDebutPanier"));
                 }
             }
         }
@@ -74,57 +74,10 @@ public class Client {
         return p;
     }
 
-    public void creerPanier(int idMagasin) {
+    public Panier creerPanier() {
         //on gère dans la classe panier le cas où le client a déjà un panier en cours
-        //this.panierEnCours = new Panier(this.idClient, idMagasin);
-
-        try (Connection connection = DBConnection.getConnection()) {
-
-            //ajout du panier en BD
-            String insertQuery = "INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VALUES (?, false, ?, null)";
-            try (PreparedStatement pstmt = connection.prepareStatement(insertQuery)) {
-                pstmt.setInt(1, this.idClient); 
-                pstmt.setDate(2, new Date(System.currentTimeMillis()));
-
-                //exécution de la requête
-                int rowsAffected = pstmt.executeUpdate();
-                if (rowsAffected > 0) {
-                    System.out.println("Panier créé avec succès !");
-                } else {
-                    System.out.println("Aucun panier ajouté.");
-                }
-                connection.commit();                
-
-            } catch (SQLException e) {
-                //rollback si erreur
-                connection.rollback();
-                System.out.println("Erreur lors de l'ajout : " + e.getMessage());
-            }
-            connection.close();
-        }
-
-        catch (SQLException e) {
-            System.out.println("Erreur lors de la création du panier : " + e.getMessage());
-        }
+        return new Panier(this.idClient);
     }
-
-    /* 
-    // Ajouter un produit au panier
-    public void ajouterProduitAuPanier(Produit produit, int quantite) {
-        panier.ajouterProduit(produit, quantite);
-    }
-
-    // Retirer un produit du panier
-    public void retirerProduitDuPanier(Produit produit) {
-        panier.retirerProduit(produit);
-    }
-    
-    // Calculer le total du panier
-    public void afficherTotalPanier() {
-        double total = panier.calculerTotal();
-        System.out.println("Total du panier : " + total + "€");
-    }
-    */
 
     @Override
     public String toString() {

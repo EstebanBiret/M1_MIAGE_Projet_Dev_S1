@@ -12,56 +12,63 @@ public class Panier {
     private int idClient;
 
     private boolean panierTermine;
-    private Date dateDebutPanier;
-    private Date dateFinPanier;
+    private Timestamp dateDebutPanier;
+    private Timestamp dateFinPanier;
     //private List<ArrayList<Integer, Integer, String>> produits;
 
-    //construire un nouveau panier
+    // Constructeur pour créer un nouveau panier
     public Panier(int idClient) {
-
-        //vérifier que le client n'a pas déjà un panier en cours
-        String queryTest = "SELECT * FROM panier WHERE idClient = ? AND panierTermine = false;";
-        try (Connection connection = DBConnection.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(queryTest)) {
-            
-            pstmt.setInt(1, idClient);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                System.out.println("Le client a déjà un panier en cours.");
-                return;
-            }
-        } catch (SQLException e) {
-            System.out.println("Erreur lors de la vérification du panier en cours : " + e.getMessage());
-        }
-
-        //créer le panier en java
         this.idClient = idClient;
         this.panierTermine = false;
-        this.dateDebutPanier = new Date(System.currentTimeMillis());
+        this.dateDebutPanier = new Timestamp(System.currentTimeMillis());
         this.dateFinPanier = null;
 
-        //créer le panier en BD, et récupérer son ID
-        String query = "INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VALUES (?, ?, ?, ?);";
-        try (Connection connection = DBConnection.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            
-            pstmt.setInt(1, idClient);
-            pstmt.setBoolean(2, this.panierTermine);
-            pstmt.setDate(3, this.dateDebutPanier);
-            pstmt.setDate(4, this.dateFinPanier);
+        // Utilisation d'une seule connexion
+        try (Connection connection = DBConnection.getConnection()) {
+            connection.setAutoCommit(true); // Active le mode auto-commit
 
-            pstmt.executeUpdate();
-            ResultSet rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                this.idPanier = rs.getInt(1);
+            // Vérification du panier en cours
+            String queryTest = "SELECT * FROM panier WHERE idClient = ? AND panierTermine = false;";
+            try (PreparedStatement pstmt = connection.prepareStatement(queryTest)) {
+                pstmt.setInt(1, idClient);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        System.out.println("Le client a déjà un panier en cours.");
+                        return;
+                    }
+                }
+            }
+
+            // Création du panier
+            String query = "INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+                pstmt.setInt(1, idClient);
+                pstmt.setBoolean(2, this.panierTermine);
+                pstmt.setTimestamp(3, this.dateDebutPanier);
+                pstmt.setTimestamp(4, this.dateFinPanier);
+
+                int rowsAffected = pstmt.executeUpdate();
+
+                // Récupérer l'ID généré
+                if (rowsAffected > 0) {
+                    try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            this.idPanier = rs.getInt(1);
+                            System.out.println("Panier créé avec succès : " + this.toString());
+                        }
+                    }
+                } else {
+                    System.out.println("Aucun panier créé.");
+                }
             }
         } catch (SQLException e) {
             System.out.println("Erreur lors de la création du panier : " + e.getMessage());
         }
     }
+    
 
     //construire un panier en cours d'un client
-    public Panier(int idPanier, int idClient, Date dateDebutPanier) {
+    public Panier(int idPanier, int idClient, Timestamp dateDebutPanier) {
         this.idPanier = idPanier;
         this.idClient = idClient;
         this.panierTermine = false;
@@ -74,8 +81,8 @@ public class Panier {
     public int getIdClient() {return idClient;}
     public boolean isPanierTermine() {return panierTermine;}
     public void setPanierTermine(boolean panierTermine) {this.panierTermine = panierTermine;}
-    public Date getDateDebutPanier() {return dateDebutPanier;}
-    public Date getDateFinPanier() {return dateFinPanier;}
+    public Timestamp getDateDebutPanier() {return dateDebutPanier;}
+    public Timestamp getDateFinPanier() {return dateFinPanier;}
 
     // Savoir si le panier recherché existe bien en BD
     public boolean exists() {return this.idPanier != 0;}
@@ -104,11 +111,6 @@ public class Panier {
 
     //US 1.4
     public void annulerPanier() {
-        /*if(panierEnCours == null) {
-            System.out.println("Aucun panier en cours à annuler.");
-            return;
-        }*/
-
         if(this.panierTermine) {
             System.out.println("Le panier a déjà été annulé/validé.");
             return;
@@ -116,7 +118,6 @@ public class Panier {
 
         //supprimer dans la BD le panier en cours du client
         try (Connection connection = DBConnection.getConnection()){
-            connection.setAutoCommit(false);
 
             //on supprime les produits du panier
             String supprPanierProduits = "DELETE FROM panier_produit_magasin WHERE idPanier = ?";
@@ -131,7 +132,7 @@ public class Panier {
                 } else {
                     System.out.println("Ce client n'a pas de panier en cours, ou aucun produit dans ce panier.");
                 }
-                connection.commit();
+                //connection.commit();
             } catch (SQLException e) {
                 //rollback si erreur
                 connection.rollback();
@@ -146,12 +147,13 @@ public class Panier {
 
                 //exécution de la requête
                 int rowsAffected = pstmt.executeUpdate();
+
                 if (rowsAffected > 0) {
                     System.out.println("Le panier en cours du client a bien été annulé.");
                 } else {
                     System.out.println("Ce client n'a pas de panier en cours.");
                 }
-                connection.commit();
+                //connection.commit();
             } catch (SQLException e) {
                 //rollback si erreur
                 connection.rollback();

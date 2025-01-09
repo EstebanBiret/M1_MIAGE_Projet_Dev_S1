@@ -1,16 +1,15 @@
-package src;
-//import java.sql.*;
+package src.main;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Comparator;
+import java.util.List;
 
-public class Main {
+import src.DBConnection;
+import src.Produit;
 
+public class MainConsultation {
+    
     public static List<Produit> produitsParCategorie(String categorie) {
         List<Produit> produits = new ArrayList<>();
 
@@ -101,61 +100,5 @@ public class Main {
         produitsBoissons.forEach(System.out::println);
         System.out.println("\n");
 
-        /* ----- US 1.1 ----- */
-
-
-        /* ----- US 1.2 ----- */
-        Client client1 = new Client(1); //on récupère le premier client de la BD
-        System.out.println(client1.toString());
-
-        Panier panierClient1 = client1.getPanierEnCours();  
-        if(panierClient1 != null) System.out.println(panierClient1.toString() + "\n");
-
-        //TODO afficher les produits du panier
-
-        /* ----- US 1.3 ----- */
-
-        /* ----- US 1.4 ----- */
-        System.out.println("----- US 1.4 -----");
-        System.out.println("Annulation du panier en cours du client 1 ...");
-        if(panierClient1 != null) panierClient1.annulerPanier();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //création du gestionnaire
-        Gestionnaire Marc = new Gestionnaire();
-
-        /* ----- US 3.1 ----- */
-        System.out.println("\n");
-        System.out.println("----- US 3.1 -----");
-
-        //création d'un produit et sauvegarde en BD
-        Produit newProduit = new Produit("Poulet", 0.0, 0.0, 'A', 0.0, "1kg", "Carrefour");
-        Marc.ajouterProduitCatalogue(newProduit);
- 
-        //modification d'un produit en BD
-        newProduit.setLibelleProduit("NouveauPoulet");
-        Marc.majProduitCatalogue(newProduit);
- 
-        //suppression d'un produit par son libellé et son ID (TODO supprimer les références dans les tables associées)
-        /*Produit supprProduitLibelle = new Produit("Test3", true);
-        if(supprProduitLibelle.exists()) supprProduitLibelle.supprProduitCatalogue();
- 
-        Produit supprProduitId = new Produit(3);
-        if(supprProduitId.exists()) supprProduitId.supprProduitCatalogue();*/
-        System.out.println("\n");
-        
     }
 }
