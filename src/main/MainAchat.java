@@ -23,12 +23,11 @@ public class MainAchat {
         /* ----- US 1.1 ----- */
         System.out.println("----- US 1.1 -----");
 
-
         /* ----- US 1.2 ----- */
         System.out.println("----- US 1.2 -----");        
         System.out.println(panierClient1.toString() + "\n");
         //TODO afficher les produits du panier
-
+        panierClient1.afficherProduitsPanier(panierClient1.getIdPanier());
 
         /* ----- US 1.3 ----- */
         System.out.println("----- US 1.3 -----");
