@@ -3,7 +3,7 @@ import java.sql.*;
 
 public class Produit {
     
-    private int idProduit; //pas dans le constructeur car on prend l'id en BD
+    private int idProduit; //pas dans le constructeur car on prend l'id en BD (auto increment)
     private String libelleProduit;
     private double prixUnitaire;
     private double prixKilo;

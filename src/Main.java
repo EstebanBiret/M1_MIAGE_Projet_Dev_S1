@@ -105,8 +105,20 @@ public class Main {
 
 
         /* ----- US 1.2 ----- */
-        Panier newPanier = new Panier(1, 1);
-        if(newPanier.exists()) newPanier.afficherPanier() ; System.out.println("\n");
+        Client client1 = new Client(1); //on récupère le premier client de la BD
+        System.out.println(client1.toString());
+
+        Panier panierClient1 = client1.getPanierEnCours();  
+        if(panierClient1 != null) System.out.println(panierClient1.toString() + "\n");
+
+        //TODO afficher les produits du panier
+
+        /* ----- US 1.3 ----- */
+
+        /* ----- US 1.4 ----- */
+        System.out.println("----- US 1.4 -----");
+        System.out.println("Annulation du panier en cours du client 1 ...");
+        client1.annulerPanier();
 
 
 
@@ -126,7 +138,7 @@ public class Main {
         Gestionnaire Marc = new Gestionnaire();
 
         /* ----- US 3.1 ----- */
-
+        System.out.println("\n");
         System.out.println("----- US 3.1 -----");
 
         //création d'un produit et sauvegarde en BD

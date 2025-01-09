@@ -1,6 +1,8 @@
 package src;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Panier {
     
@@ -11,8 +13,9 @@ public class Panier {
     private boolean panierTermine;
     private Date dateDebutPanier;
     private Date dateFinPanier;
+    //private List<ArrayList<Integer, Integer, String>> produits;
 
-    // Constructeur
+    //construire un nouveau panier
     public Panier(int idClient, int idMagasin) {
 
         //vérifier que le client n'a pas déjà un panier en cours
@@ -58,8 +61,17 @@ public class Panier {
         }
     }
 
-    //getters & setters
+    //construire un panier en cours d'un client
+    public Panier(int idPanier, int idClient, int idMagasin, Date dateDebutPanier) {
+        this.idPanier = idPanier;
+        this.idClient = idClient;
+        this.idMagasin = idMagasin;
+        this.panierTermine = false;
+        this.dateDebutPanier = dateDebutPanier;
+        this.dateFinPanier = null;
+    }
 
+    //getters & setters
     public int getIdPanier() {return idPanier;}
     public int getIdClient() {return idClient;}
     public int getIdMagasin() {return idMagasin;}
@@ -78,8 +90,8 @@ public class Panier {
                 + "]";
     }
 
-    // afficher un panier (US 1.2)
-    public void afficherPanier() {
+    //afficher un panier (US 1.2)
+    /*public void afficherPanier() {
         String query = """
             SELECT p.idPanier, c.nomClient, c.prenomClient, pr.libelleProduit, pp.quantiteVoulue, pp.modeLivraison
             FROM panier p, client c, panier_produit pp, produit pr
@@ -94,10 +106,10 @@ public class Panier {
             ResultSet rs = pstmt.executeQuery();
             System.out.println("Détails du panier " + this.idPanier);
             while (rs.next()) {
-                System.out.println("Nom Client: " + rs.getString("nomClient") + " " + rs.getString("prenomClient"));
+                System.out.println(this.toString());
             }
         } catch (SQLException e) {
             System.out.println("Erreur lors de l'affichage du panier : " + e.getMessage());
         }
-    }
+    }*/
 }
