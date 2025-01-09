@@ -65,6 +65,8 @@ public class Gestionnaire {
                 connection.rollback();
                 System.out.println("Erreur lors de l'ajout : " + e.getMessage());
             }
+            connection.close();
+
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
@@ -103,6 +105,7 @@ public class Gestionnaire {
                 connection.rollback();
                 System.out.println("Erreur lors de la modification : " + e.getMessage());
             }
+            connection.close();
             
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
@@ -136,6 +139,8 @@ public class Gestionnaire {
                 connection.rollback();
                 System.out.println("Erreur lors de la suppression : " + e.getMessage());
             }
+            connection.close();
+
         } catch (SQLException e) {
             System.out.println("Erreur de connexion : " + e.getMessage());
         }

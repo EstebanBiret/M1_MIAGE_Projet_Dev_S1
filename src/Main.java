@@ -118,7 +118,7 @@ public class Main {
         /* ----- US 1.4 ----- */
         System.out.println("----- US 1.4 -----");
         System.out.println("Annulation du panier en cours du client 1 ...");
-        client1.annulerPanier();
+        if(panierClient1 != null) panierClient1.annulerPanier();
 
 
 

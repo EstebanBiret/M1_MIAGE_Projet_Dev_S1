@@ -46,6 +46,8 @@ public class Produit {
                     }
                 }
             }
+            connection.close();
+
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
@@ -83,7 +85,10 @@ public class Produit {
                     }
                 }
             }
-        } catch (SQLException e) {
+            connection.close();
+
+        } 
+        catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
     }
