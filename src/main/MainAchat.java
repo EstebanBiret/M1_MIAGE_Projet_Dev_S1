@@ -1,6 +1,5 @@
 package src.main;
 
-import src.Algorithmes;
 import src.Client;
 import src.Panier;
 
@@ -24,16 +23,16 @@ public class MainAchat {
 
         //Cas d'un produit qui n'est pas disponible dans le magasin
         panierClient1.ajouterProduitPanier(100, 5, 2, "Livraison");
-  
 
         //ça devrait marcher car les données sont coherentes à celles de BD mais y'a erreur
         panierClient1.ajouterProduitPanier(14, 1, 3, "Retrait");
+
         
         /* ----- US 1.2 ----- */
+
+
         System.out.println("----- US 1.2 -----");        
-        System.out.println(panierClient1.toString() + "\n");
-        //TODO afficher les produits du panier
-        //panierClient1.afficherProduitsPanier(panierClient1.getIdPanier());
+        panierClient1.afficherProduitsPanier();
 
         /* ----- US 1.3 ----- */
         System.out.println("----- US 1.3 -----");

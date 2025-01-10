@@ -1,7 +1,6 @@
 package src;
 
 import java.sql.*;
-import java.util.Map;
 
 public class Panier {
     
@@ -165,7 +164,7 @@ public class Panier {
     }
 
     //US 1.2
-    public void afficherProduitsPanier(int idPanier) {
+    public void afficherProduitsPanier() {
         String query1 = """
             SELECT p.idPanier, c.nomClient, c.prenomClient
             FROM panier p
@@ -175,8 +174,8 @@ public class Panier {
         
         String query2 = """
             SELECT pr.idProduit, pr.libelleProduit, pr.prixUnitaire, ppm.quantiteVoulue, ppm.modeLivraison
-            FROM ppanier_produit_magasin ppm "
-            INNER JOIN produit pr ON pp.idProduit = pr.idProduit
+            FROM panier_produit_magasin ppm
+            INNER JOIN produit pr ON ppm.idProduit = pr.idProduit
             WHERE ppm.idPanier = ?;
         """;
     
