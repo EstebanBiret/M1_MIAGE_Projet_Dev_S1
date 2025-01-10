@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import src.DBConnection;
+import src.Panier;
 import src.Produit;
 
 public class MainConsultation {
@@ -55,7 +56,8 @@ public class MainConsultation {
 
         //recherche et affichage d'un produit par son ID
         Produit produitId = new Produit(5);
-        if(produitId.exists()) System.out.println("ID 5 --> " + produitId.toString());
+        if(produitId.exists()) 
+        System.out.println("ID 5 --> " + produitId.toString());
 
         //recherche et affichage d'un produit par son libellé
         Produit produitLibelle = new Produit("Jus d'orange", true);
@@ -99,6 +101,20 @@ public class MainConsultation {
         System.out.println("\nTri par poids croissant :");
         produitsBoissons.forEach(System.out::println);
         System.out.println("\n");
+
+        //US 1.1 Ajouter un produit dans le panier
+
+        Panier panier = new Panier(1); // Exemple : panier pour le client ID 1
+
+        //Cas d'un produit qui n'est pas dsponible dans le magasin
+panier.ajouterProduit(101, 2, 1,2, "Livraison express");
+
+        //ça devrait marcher car les données sont coherentes à celles de BD mais y'a erreur
+        panier.ajouterProduit(3, 1, 3,1, "Retrait");
+
+        //US 1.2
+        panier.afficherPanier();
+
 
     }
 }
