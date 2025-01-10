@@ -225,12 +225,17 @@ INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VAL
 (5, 0, '2025-01-07 13:00:00', NULL), -- Panier en cours (client 5)
 (5, 1, '2024-12-10 16:00:00', '2024-12-11 18:00:00'); -- Ancien panier terminé (client 5)
 
-INSERT INTO commande (idPanier, statutCommande, dateCommande) VALUES
-(2, 'terminée', '2025-01-02 16:45:00'),
-(3, 'préparation', '2025-01-03 15:45:00'),
-(5, 'retrait', '2025-01-05 13:30:00'),
-(6, 'livraison', '2025-01-06 19:15:00'),
-(7, 'terminée', '2025-01-08 10:15:00');
+INSERT INTO `commande` (`idPanier`, `TypeCommande`, `statutCommande`, `dateReception`, `datePreparation`, `dateFinalisation`) VALUES
+(1, 'livraison', 'en attente', '2025-01-01 10:30:00', NULL, NULL),
+(2, 'retrait', 'preparation', '2025-01-02 11:00:00', '2025-01-02 12:00:00', NULL),
+(3, 'mixte', 'retrait', '2025-01-03 09:00:00', '2025-01-03 10:30:00', '2025-01-03 13:00:00'),
+(4, 'livraison', 'envoi', '2025-01-04 08:45:00', '2025-01-04 10:00:00', NULL),
+(5, 'retrait', 'terminee', '2025-01-05 07:15:00', '2025-01-05 09:30:00', '2025-01-05 12:45:00'),
+(6, 'mixte', 'preparation', '2025-01-06 14:00:00', '2025-01-06 15:30:00', NULL),
+(7, 'livraison', 'en attente', '2025-01-07 16:20:00', NULL, NULL),
+(8, 'retrait', 'retrait', '2025-01-08 17:10:00', '2025-01-08 18:00:00', '2025-01-08 19:30:00'),
+(9, 'mixte', 'terminee', '2025-01-09 13:45:00', '2025-01-09 15:00:00', '2025-01-09 16:30:00'),
+(10, 'livraison', 'envoi', '2025-01-10 12:00:00', '2025-01-10 13:00:00', NULL);
 
 INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue, modeLivraison) VALUES
 -- Panier client 1 (en cours)
