@@ -83,6 +83,63 @@ public class Panier {
     //savoir si le panier recherché existe bien en BD
     public boolean exists() {return this.idPanier != 0;}
 
+    //US 1.1
+    public void ajouterProduitPanier(int idProduit, int qte, int idMagasin, String modeLivraison) {
+        String queryTest = "SELECT quantiteEnStock FROM stocker WHERE idProduit = ? AND idMagasin = ?;";
+        String queryInsert = "INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue, modeLivraison) VALUES (?, ?, ?, ?, ?);";
+    
+        try (Connection connection = DBConnection.getConnection()) {
+            // Vérification du stock
+            try (PreparedStatement pstmtTest = connection.prepareStatement(queryTest)) {
+                pstmtTest.setInt(1, idProduit);
+                pstmtTest.setInt(2, idMagasin);
+    
+                try (ResultSet rs = pstmtTest.executeQuery()) {
+                    if (rs.next()) {
+                        int stockDisponible = rs.getInt("quantiteEnStock");
+    
+                        if (stockDisponible < qte) {
+                            System.out.println("Quantité insuffisante en stock pour le produit " + idProduit);
+
+                            //on fait appel à l'algorithme de remplacement de produit
+                            /*Algorithmes algo = new Algorithmes();
+                            int idNewProduit = algo.remplacementProduit(idClient, idProduit, qte);
+                            idProduit = idNewProduit;*/
+                            return;
+                        }
+                    } else {
+                        System.out.println("Le produit " + idProduit + " n'est pas disponible dans le magasin " + idMagasin);
+                        //on fait appel à l'algorithme de remplacement de produit
+                        /*Algorithmes algo = new Algorithmes();
+                        int idNewProduit = algo.remplacementProduit(idClient, idProduit, qte);
+                        idProduit = idNewProduit;*/
+                        return;
+                    }
+                }
+            }
+    
+            //ajout du produit au panier
+            try (PreparedStatement pstmtInsert = connection.prepareStatement(queryInsert)) {
+                pstmtInsert.setInt(1, this.idPanier);
+                pstmtInsert.setInt(2, idProduit);
+                pstmtInsert.setInt(3, idMagasin);
+                pstmtInsert.setInt(4, qte);
+                pstmtInsert.setString(5, modeLivraison);
+    
+                int rowsAffected = pstmtInsert.executeUpdate();
+                if (rowsAffected > 0) {
+                    System.out.println("Produit " + idProduit + " ajouté au panier avec succès (" + qte + " exemplaire.s).");
+                } else {
+                    System.out.println("Échec de l'ajout du produit au panier.");
+                }
+            }
+            connection.close();
+        } 
+        catch (SQLException e) {
+            System.out.println("Erreur lors de l'ajout du produit au panier : " + e.getMessage());
+        }
+    }   
+    
     //US 1.2
     @Override
     public String toString() {
@@ -226,61 +283,4 @@ public class Panier {
         //enfin, on marque le panier actuel comme terminé
         this.panierTermine = true;
     }
-
-    //US 1.1
-    public void ajouterProduitPanier(int idProduit, int qte, int idMagasin, String modeLivraison) {
-        String queryTest = "SELECT quantiteEnStock FROM stocker WHERE idProduit = ? AND idMagasin = ?;";
-        String queryInsert = "INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue, modeLivraison) VALUES (?, ?, ?, ?, ?);";
-    
-        try (Connection connection = DBConnection.getConnection()) {
-            // Vérification du stock
-            try (PreparedStatement pstmtTest = connection.prepareStatement(queryTest)) {
-                pstmtTest.setInt(1, idProduit);
-                pstmtTest.setInt(2, idMagasin);
-    
-                try (ResultSet rs = pstmtTest.executeQuery()) {
-                    if (rs.next()) {
-                        int stockDisponible = rs.getInt("quantiteEnStock");
-    
-                        if (stockDisponible < qte) {
-                            System.out.println("Quantité insuffisante en stock pour le produit " + idProduit);
-
-                            //on fait appel à l'algorithme de remplacement de produit
-                            /*Algorithmes algo = new Algorithmes();
-                            int idNewProduit = algo.remplacementProduit(idClient, idProduit, qte);
-                            idProduit = idNewProduit;*/
-                            return;
-                        }
-                    } else {
-                        System.out.println("Le produit " + idProduit + " n'est pas disponible dans le magasin " + idMagasin);
-                        //on fait appel à l'algorithme de remplacement de produit
-                        /*Algorithmes algo = new Algorithmes();
-                        int idNewProduit = algo.remplacementProduit(idClient, idProduit, qte);
-                        idProduit = idNewProduit;*/
-                        return;
-                    }
-                }
-            }
-    
-            //ajout du produit au panier
-            try (PreparedStatement pstmtInsert = connection.prepareStatement(queryInsert)) {
-                pstmtInsert.setInt(1, this.idPanier);
-                pstmtInsert.setInt(2, idProduit);
-                pstmtInsert.setInt(3, idMagasin);
-                pstmtInsert.setInt(4, qte);
-                pstmtInsert.setString(5, modeLivraison);
-    
-                int rowsAffected = pstmtInsert.executeUpdate();
-                if (rowsAffected > 0) {
-                    System.out.println("Produit " + idProduit + " ajouté au panier avec succès (" + qte + " exemplaire.s).");
-                } else {
-                    System.out.println("Échec de l'ajout du produit au panier.");
-                }
-            }
-            connection.close();
-        } 
-        catch (SQLException e) {
-            System.out.println("Erreur lors de l'ajout du produit au panier : " + e.getMessage());
-        }
-    }   
 }
