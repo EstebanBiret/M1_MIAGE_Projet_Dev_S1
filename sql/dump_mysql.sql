@@ -106,7 +106,7 @@ CREATE TABLE `panier_produit_magasin` (
   `idMagasin` int(11) NOT NULL,
   `quantiteVoulue` int(11) NOT NULL,
   `modeLivraison` enum('livraison','retrait') NOT NULL,
-  PRIMARY KEY (idPanier, idProduit),
+  PRIMARY KEY (idPanier, idProduit,idMagasin),
   FOREIGN KEY (idPanier) REFERENCES panier(idPanier),
   FOREIGN KEY (idProduit) REFERENCES produit(idProduit),
   FOREIGN KEY (idMagasin) REFERENCES magasin(idMagasin)
