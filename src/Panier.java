@@ -173,9 +173,10 @@ public class Panier {
         """;
         
         String query2 = """
-            SELECT pr.idProduit, pr.libelleProduit, pr.prixUnitaire, ppm.quantiteVoulue, ppm.modeLivraison
+            SELECT pr.idProduit, m.nomMagasin, pr.libelleProduit, pr.prixUnitaire, ppm.quantiteVoulue, ppm.modeLivraison
             FROM panier_produit_magasin ppm
             INNER JOIN produit pr ON ppm.idProduit = pr.idProduit
+            INNER JOIN magasin m ON ppm.idMagasin = m.idMagasin
             WHERE ppm.idPanier = ?;
         """;
     
@@ -205,14 +206,15 @@ public class Panier {
                     System.out.println("Produits dans le panier ID " + idPanier + ":");
                     while (rs2.next()) {
                         int idProduit = rs2.getInt("idProduit");
+                        String nomMagasin = rs2.getString("nomMagasin");
                         String libelleProduit = rs2.getString("libelleProduit");
                         double prixUnitaire = rs2.getDouble("prixUnitaire");
                         int quantite = rs2.getInt("quantiteVoulue");
                         String modeLivraison = rs2.getString("modeLivraison");
     
                         System.out.printf(
-                            "ID Produit: %d, Nom: %s, Prix: %.2f, Quantité: %d, Mode de Livraison: %s%n",
-                            idProduit, libelleProduit, prixUnitaire, quantite, modeLivraison
+                            "ID Produit: %d, Magasin: %s, Nom: %s, Prix: %.2f, Quantité: %d, Mode de Livraison: %s%n",
+                            idProduit, nomMagasin, libelleProduit, prixUnitaire, quantite, modeLivraison, nomMagasin
                         );
                     }
                 }
