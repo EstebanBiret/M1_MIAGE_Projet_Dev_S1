@@ -10,47 +10,67 @@ import java.util.Scanner;
 
 public class Algorithmes {
 
-    /*public int remplacementProduit(int idClient, int idProduit, int qte) {
+    /*public int remplacementProduitHabitudes(int idClient, int idProduit, int qte) {
         //en se basant sur les habitudes de conso du client et le produit désiré, on propose une liste de produits de remplacement, et on laisse le client choisir
     }*/
 
-    // Remplacement d'un produit avec gestion des alternatives, retourne l'ID du produit de remplacement
-    public static int remplacementProduit(int idProduit, int idClient, int idMagasin, int quantiteDemandee) {
+    //remplacement d'un produit avec gestion des alternatives, retourne l'ID du produit de remplacement
+    public static int remplacementProduit(int idProduit, int idMagasin, int quantiteDemandee) {
         List<Produit> produitsAlternatifs = new ArrayList<>();
-        boolean libelleExact = true; // On commence avec un libellé exact
-        int filtreEtape = 0; // Suivi de l'incrémentation des filtres
+        int nbIterations = 0;
     
-        while (produitsAlternatifs.size() < 5 && (libelleExact || filtreEtape <= 3)) {
-            String query = construireQuery(libelleExact, filtreEtape);
+        //tant que la liste n'est pas pleine ou que l'on a pas encore fait tous les filtres
+        while (produitsAlternatifs.size() < 5 && nbIterations < 5) {
+            String query = construireQuery(nbIterations, idProduit);
     
             try (Connection connection = DBConnection.getConnection();
-                 PreparedStatement statement = connection.prepareStatement(query)) {
+                PreparedStatement statement = connection.prepareStatement(query)) {
     
-                int paramIndex = 1;
-    
-                //pas le même produit
-                statement.setInt(paramIndex, idProduit);
+                switch (nbIterations) {
+                    case 0:
+                        statement.setInt(1, idProduit);       
+                        statement.setInt(2, idProduit);      
+                        statement.setInt(3, idProduit);       
+                        statement.setInt(4, idProduit);       
+                        statement.setInt(5, idMagasin);       
+                        statement.setInt(6, idProduit);      
+                        break;
 
-                // Quantité demandée
-                statement.setInt(paramIndex++, quantiteDemandee);
-    
-                // Libellé exact ou différent
-                statement.setInt(paramIndex++, idProduit);
-    
-                // Filtres conditionnels
-                if (filtreEtape <= 0) {
-                    statement.setInt(paramIndex++, idProduit); // Nutriscore
+                    case 1:
+                        statement.setInt(1, idProduit);       
+                        statement.setInt(2, idProduit);       
+                        statement.setInt(3, idProduit);       
+                        statement.setInt(4, idProduit);      
+                        statement.setInt(5, idProduit);       
+                        break;
+
+                    case 2:
+                        statement.setInt(1, idProduit);       
+                        statement.setInt(2, idProduit);       
+                        statement.setInt(3, idProduit);      
+                        statement.setInt(4, idProduit);      
+                        break;
+
+                    case 3:
+                        statement.setInt(1, idProduit);    
+                        statement.setInt(2, idProduit);
+                        statement.setInt(3, idProduit);  
+                        break;
+
+                    case 4:
+                        statement.setInt(1, idProduit);       
+                        statement.setInt(2, idProduit);       
+                        break;
+                
+                    default:
+                        break;
                 }
-                if (filtreEtape <= 1) {
-                    statement.setInt(paramIndex++, idProduit); // Marque
-                }
-                if (filtreEtape <= 2) {
-                    statement.setInt(paramIndex++, idProduit); // Catégorie
-                }
     
+                // Exécution de la requête et ajout des résultats à la liste
                 try (ResultSet resultSet = statement.executeQuery()) {
                     while (resultSet.next() && produitsAlternatifs.size() < 5) {
                         Produit produit = new Produit(
+                                resultSet.getInt("idProduit"),
                                 resultSet.getString("libelleProduit"),
                                 resultSet.getDouble("prixUnitaire"),
                                 resultSet.getDouble("prixKilo"),
@@ -59,8 +79,14 @@ public class Algorithmes {
                                 resultSet.getString("conditionnementProduit"),
                                 resultSet.getString("marqueProduit")
                         );
-    
-                        if (!produitsAlternatifs.contains(produit)) {
+
+                        //System.out.println("test : " + produit.toString() + nbIterations);
+
+                        //on regarde grâce à un stream si un produit dans la liste a déjà le même id que le produit que l'on veut ajouter à celle-ci
+                        boolean produitExistant = produitsAlternatifs.stream().anyMatch(p -> p.getIdProduit() == produit.getIdProduit());
+                        //System.out.println("test : " + produitExistant);
+
+                        if (!produitExistant) {
                             produitsAlternatifs.add(produit);
                         }
                     }
@@ -69,25 +95,16 @@ public class Algorithmes {
                 e.printStackTrace();
             }
     
-            // Passer à l'étape suivante
-            if (produitsAlternatifs.isEmpty()) {
-                if (filtreEtape >= 3) {
-                    libelleExact = false; // Passer à un libellé différent
-                    filtreEtape = 0; // Réinitialiser les filtres
-                } else {
-                    filtreEtape++; // Relâcher un filtre
-                }
-            } else {
-                break; // Arrêter si on a trouvé des produits
-            }
+            nbIterations++;
         }
     
-        // Affichage des produits trouvés
+        // Si aucun produit n'a été trouvé
         if (produitsAlternatifs.isEmpty()) {
             System.out.println("Aucun produit alternatif trouvé.");
             return -1;
         }
     
+        // Proposition des produits à l'utilisateur
         System.out.println("Produits disponibles en remplacement :");
         for (int i = 0; i < produitsAlternatifs.size(); i++) {
             Produit produit = produitsAlternatifs.get(i);
@@ -98,7 +115,7 @@ public class Algorithmes {
                     produit.getMarqueProduit());
         }
     
-        // Choix du produit par l'utilisateur
+        // Choix de l'utilisateur
         try (Scanner scanner = new Scanner(System.in)) {
             int choix;
             do {
@@ -112,31 +129,83 @@ public class Algorithmes {
     
             return produitsAlternatifs.get(choix - 1).getIdProduit();
         }
-    }    
-
-    // Construction dynamique de la requête SQL
-    private static String construireQuery(boolean libelleExact, int filtreEtape) {
-        StringBuilder query = new StringBuilder("""
-            SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore,
-                p.poidsProduit, p.conditionnementProduit, p.marqueProduit
-            FROM produit p, appartenir a, stocker s
-            WHERE p.idProduit = a.idProduit AND p.idProduit != ? AND p.idProduit = s.idProduit AND s.quantiteEnStock >= ?
-        """);
-
-        if (libelleExact) {
-            query.append(" AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?) ");
-        }
-
-        if (filtreEtape <= 0) {
-            query.append(" AND p.nutriscore = (SELECT nutriscore FROM produit WHERE idProduit = ?) ");
-        }
-        if (filtreEtape <= 1) {
-            query.append(" AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?) ");
-        }
-        if (filtreEtape <= 2) {
-            query.append(" AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?) ");
-        }
-        return query.toString();
     }
-
+    
+    private static String construireQuery(int nbIterations, int idProduit) {
+        String requete = "";
+    
+        switch (nbIterations) {
+            case 0: // même libellé, catégorie, marque, nutriscore et magasin
+                requete += """
+                    SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
+                           p.poidsProduit, p.conditionnementProduit, p.marqueProduit
+                    FROM produit p, appartenir a, stocker s
+                    WHERE p.idProduit = a.idProduit
+                    AND s.idProduit = p.idProduit
+                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                    AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
+                    AND p.nutriscore = (SELECT nutriscore FROM produit WHERE idProduit = ?)
+                    AND s.idMagasin = ?
+                    AND p.idProduit != ?;
+                """;
+                break;
+    
+            case 1: // même libellé, catégorie, marque et nutriscore
+                requete += """
+                    SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
+                        p.poidsProduit, p.conditionnementProduit, p.marqueProduit
+                    FROM produit p, appartenir a
+                    WHERE p.idProduit = a.idProduit
+                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                    AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
+                    AND p.nutriscore = (SELECT nutriscore FROM produit WHERE idProduit = ?)
+                    AND p.idProduit != ?;
+                """;
+                break;
+    
+            case 2: // même libellé, catégorie et marque
+                requete += """
+                    SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
+                        p.poidsProduit, p.conditionnementProduit, p.marqueProduit
+                    FROM produit p, appartenir a
+                    WHERE p.idProduit = a.idProduit
+                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                    AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
+                    AND p.idProduit != ?;
+                """;
+                break;
+    
+            case 3: // même libellé et catégorie
+                requete += """
+                    SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
+                        p.poidsProduit, p.conditionnementProduit, p.marqueProduit
+                    FROM produit p, appartenir a
+                    WHERE p.idProduit = a.idProduit
+                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                    AND p.idProduit != ?;
+                """;
+                break;
+    
+            case 4: // même catégorie
+                requete += """
+                    SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
+                        p.poidsProduit, p.conditionnementProduit, p.marqueProduit
+                    FROM produit p, appartenir a
+                    WHERE p.idProduit = a.idProduit
+                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                    AND p.idProduit != ?;
+                """;
+                break;
+    
+            default:
+                throw new IllegalArgumentException("Étape inconnue : " + nbIterations);
+        }
+    
+        return requete;
+    }
+    
 }

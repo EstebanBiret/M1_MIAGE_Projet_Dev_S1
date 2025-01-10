@@ -75,6 +75,10 @@ public class Panier {
     //getters & setters
     public int getIdPanier() {return idPanier;}
     public int getIdClient() {return idClient;}
+    public Client getClient() {
+        Client client = new Client(idClient);
+        return client;
+    }
     public boolean isPanierTermine() {return panierTermine;}
     public void setPanierTermine(boolean panierTermine) {this.panierTermine = panierTermine;}
     public Timestamp getDateDebutPanier() {return dateDebutPanier;}
@@ -84,10 +88,25 @@ public class Panier {
     public boolean exists() {return this.idPanier != 0;}
 
     //US 1.1
-    public void ajouterProduitPanier(int idProduit, int qte, int idMagasin, String modeLivraison) {
+    public void ajouterProduitPanier(int idProduit, int qte) {
+
+        if(qte < 1) {
+            System.out.println("La quantité doit être supérieure à 0.");
+            return;
+        }
+
+        //regarder si le produit pour le magasin favori n'est pas déjà présent dans le panier, et si oui, juste augmenter la qte
+        //TODO
+
+        Client client = getClient();
+        int idMagasin = client.getIdMagasinFavori();
+
+        //TODO si produit déjà dans le panier, on modifie juste sa quantité 
+
         String queryTest = "SELECT quantiteEnStock FROM stocker WHERE idProduit = ? AND idMagasin = ?;";
-        String queryInsert = "INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue, modeLivraison) VALUES (?, ?, ?, ?, ?);";
-    
+        String queryInsert = "INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue) VALUES (?, ?, ?, ?);";
+        String queryUpdate ="UPDATE panier_produit_magasin SET quantiteVoulue = ? WHERE idPanier = ? AND idProduit = ? AND idMagasin = ?;";
+
         try (Connection connection = DBConnection.getConnection()) {
             // Vérification du stock
             try (PreparedStatement pstmtTest = connection.prepareStatement(queryTest)) {
@@ -99,21 +118,29 @@ public class Panier {
                         int stockDisponible = rs.getInt("quantiteEnStock");
     
                         if (stockDisponible < qte) {
-                            System.out.println("Quantité insuffisante en stock pour le produit " + idProduit);
+                            System.out.println("Quantité insuffisante en stock dans votre magasin favori pour le produit " + idProduit);
 
                             //on fait appel à l'algorithme de remplacement de produit
                             /*Algorithmes algo = new Algorithmes();
                             int idNewProduit = algo.remplacementProduit(idClient, idProduit, qte);
                             idProduit = idNewProduit;*/
-                            return;
+
+                            //on peut changer idProduit, idMagasin et qte.
+                            //TODO + voir si ce produit pour nouveau magasin n'est pas déjà présent dans panier, sinon modif qte
+
+
+                            
                         }
                     } else {
-                        System.out.println("Le produit " + idProduit + " n'est pas disponible dans le magasin " + idMagasin);
+                        System.out.println("Le produit " + idProduit + " n'est pas disponible dans votre magasin favori.");
                         //on fait appel à l'algorithme de remplacement de produit
                         /*Algorithmes algo = new Algorithmes();
                         int idNewProduit = algo.remplacementProduit(idClient, idProduit, qte);
                         idProduit = idNewProduit;*/
-                        return;
+
+                        //on peut changer idProduit, idMagasin et qte.
+                        //TODO + voir si ce produit pour nouveau magasin n'est pas déjà présent dans panier, sinon modif qte
+                        
                     }
                 }
             }
@@ -124,7 +151,6 @@ public class Panier {
                 pstmtInsert.setInt(2, idProduit);
                 pstmtInsert.setInt(3, idMagasin);
                 pstmtInsert.setInt(4, qte);
-                pstmtInsert.setString(5, modeLivraison);
     
                 int rowsAffected = pstmtInsert.executeUpdate();
                 if (rowsAffected > 0) {
@@ -139,7 +165,7 @@ public class Panier {
             System.out.println("Erreur lors de l'ajout du produit au panier : " + e.getMessage());
         }
     }   
-    
+
     //US 1.2
     @Override
     public String toString() {

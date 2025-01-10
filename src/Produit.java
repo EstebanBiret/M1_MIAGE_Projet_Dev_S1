@@ -12,6 +12,21 @@ public class Produit {
     private String conditionnementProduit;
     private String marqueProduit;
 
+
+    /*
+     * Constructeur de produit AVEC l'ID pour l'algo de recommandation, ne pas utiliser sinon
+     */
+    public Produit(int idProduit, String libelleProduit, double prixUnitaire, double prixKilo, char nutriscore, double poidsProduit, String conditionnementProduit, String marqueProduit) {
+        this.idProduit = idProduit;
+        this.libelleProduit = libelleProduit;
+        this.prixUnitaire = prixUnitaire;
+        this.prixKilo = prixKilo;
+        this.nutriscore = nutriscore;
+        this.poidsProduit = poidsProduit;
+        this.conditionnementProduit = conditionnementProduit;
+        this.marqueProduit = marqueProduit;
+    }
+
     /*
      * US 3.1 : importation de produits pour maj le catalogue
      */

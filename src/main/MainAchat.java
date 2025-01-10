@@ -18,9 +18,10 @@ public class MainAchat {
         /* ----- US 1.1 ----- */
         System.out.println("----- US 1.1 -----");
 
-        //Cas d'un produit qui n'est pas disponible dans le magasin
-        panierClient1.ajouterProduitPanier(100, 5, 2, "Livraison");
-        panierClient1.ajouterProduitPanier(14, 1, 3, "Retrait");
+        //Cas d'un produit qui n'est pas disponible dans le magasin favori du client
+        panierClient1.ajouterProduitPanier(100, 5);
+
+        panierClient1.ajouterProduitPanier(14, 1);
         
         /* ----- US 1.2 ----- */
         System.out.println("----- US 1.2 -----");        
@@ -32,7 +33,7 @@ public class MainAchat {
         /* ----- US 1.4 ----- */
         System.out.println("----- US 1.4 -----");
         System.out.println("Annulation du panier en cours du client 1 ...");
-        //panierClient1.annulerPanier();
+        panierClient1.annulerPanier();
 
         /* ----- US 1.5 ----- */
         System.out.println("----- US 1.5 -----");

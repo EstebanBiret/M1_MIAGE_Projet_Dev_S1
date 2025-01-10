@@ -94,7 +94,7 @@ CREATE TABLE `panier` (
 CREATE TABLE `commande` (
   `idCommande` int(11) NOT NULL AUTO_INCREMENT,
   `idPanier` int(11) NOT NULL,
-  `TypeCommande` enum('livraison', 'retrait', 'mixte') NOT NULL,
+  `typeCommande` enum('livraison', 'retrait', 'mixte') NOT NULL,
   `statutCommande` enum('en attente', 'preparation', 'retrait', 'envoi', 'terminee') NOT NULL,
   `dateReception` datetime NOT NULL,
   `datePreparation` datetime,
@@ -108,7 +108,6 @@ CREATE TABLE `panier_produit_magasin` (
   `idProduit` int(11) NOT NULL,
   `idMagasin` int(11) NOT NULL,
   `quantiteVoulue` int(11) NOT NULL,
-  `modeLivraison` enum('livraison','retrait') NOT NULL,
   PRIMARY KEY (idPanier, idProduit, idMagasin),
   FOREIGN KEY (idPanier) REFERENCES panier(idPanier),
   FOREIGN KEY (idProduit) REFERENCES produit(idProduit),
@@ -202,7 +201,6 @@ INSERT INTO stocker (idMagasin, idProduit, quantiteEnStock) VALUES
 INSERT INTO categorie (nomCategorie) VALUES 
 ('Boissons'), ('Viandes'), ('Produits Laitiers'), ('Epicerie'), ('Surgelés');
 
-
 INSERT INTO appartenir (idCategorie, idProduit) VALUES 
 (1, 1), (1, 2), (1, 3), -- Jus d'orange
 (4, 4), (4, 5), -- Pâtes Penne
@@ -215,7 +213,6 @@ INSERT INTO appartenir (idCategorie, idProduit) VALUES
 (3, 16), (3, 17), -- Lait demi-écrémé
 (2, 18), (2, 19); -- Saumon fumé
 
-
 INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VALUES
 (1, 0, '2025-01-06 09:00:00', NULL), -- Panier en cours (client 1)
 (1, 1, '2024-12-20 10:00:00', '2024-12-21 12:00:00'), -- Ancien panier terminé (client 1)
@@ -225,35 +222,35 @@ INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VAL
 (5, 0, '2025-01-07 13:00:00', NULL), -- Panier en cours (client 5)
 (5, 1, '2024-12-10 16:00:00', '2024-12-11 18:00:00'); -- Ancien panier terminé (client 5)
 
-INSERT INTO `commande` (`idPanier`, `TypeCommande`, `statutCommande`, `dateReception`, `datePreparation`, `dateFinalisation`) VALUES
+INSERT INTO `commande` (`idPanier`, `typeCommande`, `statutCommande`, `dateReception`, `datePreparation`, `dateFinalisation`) VALUES
 (1, 'livraison', 'en attente', '2025-01-01 10:30:00', NULL, NULL),
 (2, 'retrait', 'preparation', '2025-01-02 11:00:00', '2025-01-02 12:00:00', NULL),
 (3, 'mixte', 'retrait', '2025-01-03 09:00:00', '2025-01-03 10:30:00', '2025-01-03 13:00:00'),
 (4, 'livraison', 'envoi', '2025-01-04 08:45:00', '2025-01-04 10:00:00', NULL),
 (5, 'retrait', 'terminee', '2025-01-05 07:15:00', '2025-01-05 09:30:00', '2025-01-05 12:45:00');
 
-INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue, modeLivraison) VALUES
+INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue) VALUES
 -- Panier client 1 (en cours)
-(1, 1, 1, 3, 'retrait'),
-(1, 2, 2, 1, 'livraison'),
+(1, 1, 1, 3),
+(1, 2, 2, 1),
 -- Ancien panier client 1
-(2, 3, 1, 2, 'livraison'),
-(2, 4, 1, 5, 'retrait'),
+(2, 3, 1, 2),
+(2, 4, 1, 5),
 -- Panier client 2 (terminé)
-(3, 5, 2, 1, 'retrait'),
-(3, 6, 3, 2, 'livraison'),
+(3, 5, 2, 1),
+(3, 6, 3, 2),
 -- Panier client 3 (en cours)
-(4, 7, 4, 4, 'livraison'),
-(4, 8, 4, 6, 'retrait'),
-(4, 9, 4, 1, 'livraison'),
+(4, 7, 4, 4),
+(4, 8, 4, 6),
+(4, 9, 4, 1),
 -- Panier client 4 (terminé)
-(5, 10, 5, 2, 'retrait'),
-(5, 9, 6, 1, 'livraison'),
+(5, 10, 5, 2),
+(5, 9, 6, 1),
 -- Panier client 5 (en cours)
-(6, 8, 7, 3, 'livraison'),
-(6, 7, 7, 2, 'retrait'),
+(6, 8, 7, 3),
+(6, 7, 7, 2),
 -- Ancien panier client 5
-(7, 2, 8, 5, 'livraison'),
-(7, 3, 8, 1, 'retrait');
+(7, 2, 8, 5),
+(7, 3, 8, 1);
 
 COMMIT;

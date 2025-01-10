@@ -7,7 +7,7 @@ public class Client {
     private String prenomClient;
     private String adresseClient;
     private String telClient;
-    //private Panier panierEnCours;
+    private int idMagasinFavori;
 
     //constructeur avec un paramètre (récupérer un client de la BD avec son ID)
     public Client(int idClient) {
@@ -25,6 +25,7 @@ public class Client {
                         this.prenomClient = rs.getString("prenomClient");
                         this.adresseClient = rs.getString("adresseClient");
                         this.telClient = rs.getString("telClient");
+                        this.idMagasinFavori = rs.getInt("idMagasin");
 
                         //on ajoute le panier en cours du client s'il en a un, requête dans la table panier
                         /*String selectPanier = "SELECT * FROM panier WHERE idClient = ? AND panierTermine = false";
@@ -48,6 +49,10 @@ public class Client {
             System.out.println("Erreur : " + e.getMessage());
         }
     }
+
+    //getters & setters
+    public int getIdClient() {return idClient;}
+    public int getIdMagasinFavori() {return idMagasinFavori;}
 
     //retourne le panier en cours du client, null si aucun panier en cours
     public Panier getPanierEnCours() {  
@@ -80,6 +85,6 @@ public class Client {
 
     @Override
     public String toString() {
-        return "Client [id=" + idClient + ", nom=" + nomClient + ", prenom=" + prenomClient + ", adresse=" + adresseClient + ", tel=" + telClient + "]";
+        return "Client [id=" + idClient + ", nom=" + nomClient + ", prenom=" + prenomClient + ", adresse=" + adresseClient + ", tel=" + telClient + ", magasin favori=" + idMagasinFavori + "]";
     }
 }

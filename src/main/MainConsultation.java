@@ -68,6 +68,8 @@ public class MainConsultation {
         System.out.println("----- US 0.2 -----");
 
         //recherche d'un produit par mot clé
+
+        //TODO modifier si plusieurs produits matchent
         System.out.println("Recherche par mot clé : Jus d'o");
         Produit produitMotCle = new Produit("Jus d'o", false);
         if(produitMotCle.exists()) System.out.println(produitMotCle.toString() + "\n");
