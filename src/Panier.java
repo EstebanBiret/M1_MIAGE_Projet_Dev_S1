@@ -166,7 +166,7 @@ public class Panier {
     //US 1.2
     public void afficherProduitsPanier() {
         String query1 = """
-            SELECT p.idPanier, c.nomClient, c.prenomClient
+            SELECT p.idPanier, c.nomClient, c.prenomClient, p.dateDebutPanier
             FROM panier p
             INNER JOIN client c ON p.idClient = c.idClient
             WHERE p.idPanier = ?;
@@ -191,10 +191,19 @@ public class Panier {
                 if (rs1.next()) {
                     System.out.println("Détails du panier " + idPanier);
                     System.out.println("Client: " + rs1.getString("nomClient") + " " + rs1.getString("prenomClient"));
+                    Timestamp dateDebutPanier = rs1.getTimestamp("dateDebutPanier");
+                    if (dateDebutPanier != null) {
+                        System.out.println("Date Debut: " + dateDebutPanier.toLocalDateTime());
+                    } else {
+                        System.out.println("La date de début du panier est nulle.");
+                    }
                 } else {
                     System.out.println("Aucun panier trouvé pour l'ID " + idPanier);
                 }
+            } catch (SQLException e) {
+                System.out.println("Erreur lors de l'affichage du panier : " + e.getMessage());
             }
+            
 
             pstmt2.setInt(1, idPanier);
     
@@ -214,7 +223,7 @@ public class Panier {
     
                         System.out.printf(
                             "ID Produit: %d, Magasin: %s, Nom: %s, Prix: %.2f, Quantité: %d, Mode de Livraison: %s%n",
-                            idProduit, nomMagasin, libelleProduit, prixUnitaire, quantite, modeLivraison, nomMagasin
+                            idProduit, nomMagasin, libelleProduit, prixUnitaire, quantite, modeLivraison
                         );
                     }
                 }
@@ -223,6 +232,8 @@ public class Panier {
             System.out.println("Erreur lors de l'affichage du panier : " + e.getMessage());
         }
     }
+
+
 
     public void ajouterProduitPanier(int idProduit, int qte, int idMagasin, String modeLivraison) {
         String queryTest = "SELECT quantiteEnStock FROM stocker WHERE idProduit = ? AND idMagasin = ?;";
