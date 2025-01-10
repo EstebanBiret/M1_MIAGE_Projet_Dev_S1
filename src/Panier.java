@@ -1,8 +1,6 @@
 package src;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class Panier {
@@ -168,28 +166,66 @@ public class Panier {
         this.panierTermine = true;
     }
 
-    //afficher un panier (US 1.2)
-    /*public void afficherPanier() {
-        String query = """
-            SELECT p.idPanier, c.nomClient, c.prenomClient, pr.libelleProduit, pp.quantiteVoulue, pp.modeLivraison
-            FROM panier p, client c, panier_produit pp, produit pr
-            WHERE p.idClient = c.idClient AND p.idPanier = pp.idPanier AND pp.idProduit = pr.idProduit AND p.idPanier = ?;
+    //US 1.2
+    public void afficherProduitsPanier(int idPanier) {
+        String query1 = """
+            SELECT p.idPanier, c.nomClient, c.prenomClient
+            FROM panier p
+            INNER JOIN client c ON p.idClient = c.idClient
+            WHERE p.idPanier = ?;
         """;
-
+        
+        String query2 = """
+            SELECT pr.idProduit, pr.libelleProduit, pr.prixUnitaire, ppm.quantiteVoulue, ppm.modeLivraison
+            FROM ppanier_produit_magasin ppm "
+            INNER JOIN produit pr ON pp.idProduit = pr.idProduit
+            WHERE ppm.idPanier = ?;
+        """;
+    
         try (Connection connection = DBConnection.getConnection();
-            PreparedStatement pstmt = connection.prepareStatement(query)) {
-             
-            pstmt.setInt(1, this.idPanier);
+             PreparedStatement pstmt1 = connection.prepareStatement(query1);
+             PreparedStatement pstmt2 = connection.prepareStatement(query2)) {
 
-            ResultSet rs = pstmt.executeQuery();
-            System.out.println("Détails du panier " + this.idPanier);
-            while (rs.next()) {
-                System.out.println(this.toString());
+            pstmt1.setInt(1, idPanier);
+    
+            // Exécuter première requête
+            try (ResultSet rs1 = pstmt1.executeQuery()) {
+                if (rs1.next()) {
+                    System.out.println("Détails du panier " + idPanier);
+                    System.out.println("Client: " + rs1.getString("nomClient") + " " + rs1.getString("prenomClient"));
+                } else {
+                    System.out.println("Aucun panier trouvé pour l'ID " + idPanier);
+                }
+            }
+
+            pstmt2.setInt(1, idPanier);
+    
+            // Exécuter deuxième requête
+            try (ResultSet rs2 = pstmt2.executeQuery()) {
+                if (!rs2.isBeforeFirst()) {
+                    System.out.println("Le panier ID " + idPanier + " est vide.");
+                } else {
+                    System.out.println("Produits dans le panier ID " + idPanier + ":");
+                    while (rs2.next()) {
+                        int idProduit = rs2.getInt("idProduit");
+                        String libelleProduit = rs2.getString("libelleProduit");
+                        double prixUnitaire = rs2.getDouble("prixUnitaire");
+                        int quantite = rs2.getInt("quantiteVoulue");
+                        String modeLivraison = rs2.getString("modeLivraison");
+    
+                        System.out.printf(
+                            "ID Produit: %d, Nom: %s, Prix: %.2f, Quantité: %d, Mode de Livraison: %s%n",
+                            idProduit, libelleProduit, prixUnitaire, quantite, modeLivraison
+                        );
+                    }
+                }
             }
         } catch (SQLException e) {
             System.out.println("Erreur lors de l'affichage du panier : " + e.getMessage());
         }
-    }*/
+    }
+    
+    
 
     /*public void ajouterProduit(int idProduit, int qte, int magasin, String modeLivraison) {
         //vérifier que le produit est disponible dans le magasin
@@ -239,9 +275,15 @@ public class Panier {
 
 
 
-    public void ajouterProduit(int idProduit, int qte, int magasin, String modeLivraison) {
+    
+    
+
+    public void ajouterProduit(int idProduit, int idPanier, int qte, int magasin, String modeLivraison) {
+       
+    
+    
         String queryTest = "SELECT quantiteEnStock FROM stocker WHERE idProduit = ? AND idMagasin = ?;";
-        String queryInsert = "INSERT INTO panier_produit (idPanier, idProduit, quantiteVoulue, modeLivraison) VALUES (?, ?, ?, ?);";
+        String queryInsert = "INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue, modeLivraison) VALUES (?, ?, ?, ?, ?);";
     
         try (Connection connection = DBConnection.getConnection()) {
             // Vérification du stock
@@ -266,10 +308,11 @@ public class Panier {
     
             // Ajout du produit au panier
             try (PreparedStatement pstmtInsert = connection.prepareStatement(queryInsert)) {
-                pstmtInsert.setInt(1, this.idPanier);
+                pstmtInsert.setInt(1, idPanier);
                 pstmtInsert.setInt(2, idProduit);
-                pstmtInsert.setInt(3, qte);
-                pstmtInsert.setString(4, modeLivraison);
+                pstmtInsert.setInt(3, magasin);
+                pstmtInsert.setInt(4, qte);
+                pstmtInsert.setString(5, modeLivraison);
     
                 int rowsAffected = pstmtInsert.executeUpdate();
                 if (rowsAffected > 0) {
@@ -281,6 +324,57 @@ public class Panier {
         } catch (SQLException e) {
             System.out.println("Erreur lors de l'ajout du produit au panier : " + e.getMessage());
         }
+    }
+    
+
+
+//US 1.2
+    public void afficherPanier() {
+        String query = "SELECT ppm.idProduit, ppm.quantiteVoulue, ppm.modeLivraison, p.libelleProduit, p.prixUnitaire " +
+                       "FROM panier_produit_magasin ppm " +
+                       "JOIN produit p ON ppm.idProduit = p.idProduit " +
+                       "WHERE ppm.idPanier = ?;";
+    
+        System.out.println("\n=== Contenu du panier ID " + this.idPanier + " ===");
+    
+        try (Connection connection = DBConnection.getConnection()) {
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+                pstmt.setInt(1, this.idPanier);
+    
+               // System.out.println("Exécution de la requête : " + query);
+                //System.out.println("  - Paramètre 1 (idPanier) : " + this.idPanier);
+    
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    boolean panierVide = true;
+    
+                    while (rs.next()) {
+                        panierVide = false;
+                        int idProduit = rs.getInt("idProduit");
+                        int quantite = rs.getInt("quantiteVoulue");
+                        String modeLivraison = rs.getString("modeLivraison");
+                        String nomProduit = rs.getString("libelleProduit");
+                        double prixUnitaire = rs.getDouble("prixUnitaire");
+                        double totalPrix = quantite * prixUnitaire;
+    
+                        System.out.println("Produit : " + nomProduit);
+                        System.out.println("  - ID Produit : " + idProduit);
+                        System.out.println("  - Quantité : " + quantite);
+                        System.out.println("  - Mode de livraison : " + modeLivraison);
+                        System.out.println("  - Prix unitaire : " + prixUnitaire + " €");
+                        System.out.println("  - Total : " + totalPrix + " €");
+                        System.out.println("-----------------------------------");
+                    }
+    
+                    if (panierVide) {
+                        System.out.println("Votre panier est vide.");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("ERREUR : Une exception SQL est survenue : " + e.getMessage());
+        }
+    
+        System.out.println("=== Fin de l'affichage du panier ===\n");
     }
     
 }
