@@ -230,12 +230,7 @@ INSERT INTO `commande` (`idPanier`, `TypeCommande`, `statutCommande`, `dateRecep
 (2, 'retrait', 'preparation', '2025-01-02 11:00:00', '2025-01-02 12:00:00', NULL),
 (3, 'mixte', 'retrait', '2025-01-03 09:00:00', '2025-01-03 10:30:00', '2025-01-03 13:00:00'),
 (4, 'livraison', 'envoi', '2025-01-04 08:45:00', '2025-01-04 10:00:00', NULL),
-(5, 'retrait', 'terminee', '2025-01-05 07:15:00', '2025-01-05 09:30:00', '2025-01-05 12:45:00'),
-(6, 'mixte', 'preparation', '2025-01-06 14:00:00', '2025-01-06 15:30:00', NULL),
-(7, 'livraison', 'en attente', '2025-01-07 16:20:00', NULL, NULL),
-(8, 'retrait', 'retrait', '2025-01-08 17:10:00', '2025-01-08 18:00:00', '2025-01-08 19:30:00'),
-(9, 'mixte', 'terminee', '2025-01-09 13:45:00', '2025-01-09 15:00:00', '2025-01-09 16:30:00'),
-(10, 'livraison', 'envoi', '2025-01-10 12:00:00', '2025-01-10 13:00:00', NULL);
+(5, 'retrait', 'terminee', '2025-01-05 07:15:00', '2025-01-05 09:30:00', '2025-01-05 12:45:00');
 
 INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue, modeLivraison) VALUES
 -- Panier client 1 (en cours)
