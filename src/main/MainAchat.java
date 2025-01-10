@@ -25,14 +25,12 @@ public class MainAchat {
         panierClient1.ajouterProduitPanier(100, 5, 2, "Livraison");
 
         //ça devrait marcher car les données sont coherentes à celles de BD mais y'a erreur
-        panierClient1.ajouterProduitPanier(14, 1, 3, "Retrait");
-
+        //panierClient1.ajouterProduitPanier(14, 1, 3, "Retrait");
         
         /* ----- US 1.2 ----- */
-
-
         System.out.println("----- US 1.2 -----");        
         panierClient1.afficherProduitsPanier();
+        //System.out.println(panierClient1.toString());
 
         /* ----- US 1.3 ----- */
         System.out.println("----- US 1.3 -----");
@@ -51,12 +49,5 @@ public class MainAchat {
         //test algo de remplacement
         /*int idNewProduit = Algorithmes.remplacementProduit(1, 1, 1, 1000);  
         System.out.println("ID du produit de remplacement : " + idNewProduit);  */
-
-          //US 1.1 Ajouter un produit dans le panier
-
-          
-  
-          //US 1.2
-          //panier.afficherPanier();
     }
 }

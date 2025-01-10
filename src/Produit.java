@@ -118,8 +118,8 @@ public class Produit {
 
     @Override
     public String toString() {
-        return "Produit [conditionnement=" + conditionnementProduit + ", libellé=" + libelleProduit
+        return "Produit [id=" + idProduit + ", conditionnement=" + conditionnementProduit + ", libellé=" + libelleProduit
                 + ", marque=" + marqueProduit + ", nutriscore=" + nutriscore + ", poids=" + poidsProduit
-                + ", prixKilo=" + prixKilo + ", prixUnitaire=" + prixUnitaire + ", id=" + idProduit + "]";
+                + ", prixKilo=" + prixKilo + ", prixUnitaire=" + prixUnitaire + "]";
     }
 }

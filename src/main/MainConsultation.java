@@ -4,13 +4,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
 import src.DBConnection;
-import src.Panier;
 import src.Produit;
 
 public class MainConsultation {
     
+    //fonction qui retourne la liste des produits de la catégorie fournie en paramètre
     public static List<Produit> produitsParCategorie(String categorie) {
         List<Produit> produits = new ArrayList<>();
 
@@ -22,8 +21,9 @@ public class MainConsultation {
             try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
                 pstmt.setString(1, categorie);
                 try (ResultSet rs = pstmt.executeQuery()) {
+
+                    //tant qu'il y a des produits, on les ajoute à la liste
                     while (rs.next()) {
-                        // Créer un produit pour chaque ligne de résultat
                         Produit produit = new Produit(
                             rs.getString("libelleProduit"),
                             rs.getDouble("prixUnitaire"),
@@ -51,6 +51,7 @@ public class MainConsultation {
     public static void main(String[] args) {
 
         /* ----- US 0.1 ----- */
+        System.out.println("\n");
         System.out.println("----- US 0.1 -----");
         System.out.println("Visualiser les détails d'un produit par son ID et son libellé");
 
@@ -74,17 +75,18 @@ public class MainConsultation {
         /* ----- US 0.3 ----- */
         System.out.println("----- US 0.3 -----");
         //consulter la liste des produits par catégorie
-        System.out.println("Recherche par catégorie : Boissons");
-        List<Produit> produitsBoissons = produitsParCategorie("Boissons");
+        String categorie = "Boissons";
+        System.out.println("Recherche par catégorie : " + categorie);
+        List<Produit> produitsBoissons = produitsParCategorie(categorie);
         for (Produit produit : produitsBoissons) {
             System.out.println(produit.toString());
         }
-        System.out.println("\n");
 
         /* ----- 0.4 ----- */
+        System.out.println("\n");
         System.out.println("----- US 0.4 -----");
-        // Trier les produits par prix, alphabétique, nutriscore et poids
 
+        //tri de la liste des produits par prix, ordre alphabétique, nutriscore et poids
         produitsBoissons.sort(Comparator.comparingDouble(Produit::getPrixUnitaire));
         System.out.println("Tri par prix unitaire croissant :");
         produitsBoissons.forEach(System.out::println);
@@ -101,6 +103,5 @@ public class MainConsultation {
         System.out.println("\nTri par poids croissant :");
         produitsBoissons.forEach(System.out::println);
         System.out.println("\n");
-
     }
 }

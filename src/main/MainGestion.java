@@ -25,7 +25,7 @@ public class MainGestion {
         //suppression d'un produit par son libellé et son ID (TODO supprimer les références dans les tables associées)
         /*Produit supprProduitLibelle = new Produit("Test3", true);
         if(supprProduitLibelle.exists()) supprProduitLibelle.supprProduitCatalogue();
- 
+        
         Produit supprProduitId = new Produit(3);
         if(supprProduitId.exists()) supprProduitId.supprProduitCatalogue();*/
         System.out.println("\n");

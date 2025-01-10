@@ -1,6 +1,5 @@
 package src;
 import java.sql.*;
-import java.util.List;
 
 public class Client {
     private int idClient; //id en BD (auto increment)
