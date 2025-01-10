@@ -106,7 +106,7 @@ CREATE TABLE `panier_produit_magasin` (
   `idMagasin` int(11) NOT NULL,
   `quantiteVoulue` int(11) NOT NULL,
   `modeLivraison` enum('livraison','retrait') NOT NULL,
-  PRIMARY KEY (idPanier, idProduit,idMagasin),
+  PRIMARY KEY (idPanier, idProduit, idMagasin),
   FOREIGN KEY (idPanier) REFERENCES panier(idPanier),
   FOREIGN KEY (idProduit) REFERENCES produit(idProduit),
   FOREIGN KEY (idMagasin) REFERENCES magasin(idMagasin)
@@ -154,48 +154,64 @@ INSERT INTO client_profil (idClient, idProfil) VALUES
 (7, 1), -- Sophie Bernard est Famille
 (8, 2); -- Laura Girard est Bio
 
-INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES ('Jus d\'orange', 2.5, 3.2, 'A', 1.0, '1L', 'Tropicana');
-INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES ('Poulet entier', 8.99, 0.0, 'A', 1.5, '1 pièce', 'Label Rouge');
-INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES ('Chocolat noir', 1.8, 18.0, 'C', 0.1, '100g', 'Lindt');
-INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES ('Pâtes Penne', 1.2, 2.4, 'B', 0.5, '500g', 'Barilla');
-INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES ('Lait demi-écrémé', 0.89, 0.89, 'B', 1.0, '1L', 'Lactel');
-INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES ('Pizza surgelée', 4.5, 0.0, 'D', 0.4, '1 pièce', 'Buitoni');
-INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES ('Yaourt nature', 0.5, 0.0, 'A', 0.125, '1 pot', 'Danone');
-INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES ('Céréales chocolat', 3.8, 0.0, 'C', 0.375, '375g', 'Kellogg\'s');
-INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES ('Eau minérale', 0.6, 0.0, 'A', 1.5, '1.5L', 'Evian');
-INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES ('Saumon fumé', 5.0, 25.0, 'B', 0.2, '200g', 'Labeyrie');
+INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES 
+('Jus d\'orange', 2.5, 3.2, 'A', 1.0, '1L', 'Tropicana'),
+('Jus d\'orange', 1.8, 2.5, 'B', 1.0, '1L', 'Carrefour'),
+('Jus d\'orange', 3.0, 3.8, 'A', 1.5, '1.5L', 'Andros'),
+('Pâtes Penne', 1.2, 2.4, 'B', 0.5, '500g', 'Barilla'),
+('Pâtes Penne', 1.0, 2.0, 'C', 0.5, '500g', 'Panzani'),
+('Pâtes Spaghetti', 1.5, 3.0, 'A', 0.5, '500g', 'Barilla'),
+('Chocolat noir', 1.8, 18.0, 'C', 0.1, '100g', 'Lindt'),
+('Chocolat noir', 2.0, 20.0, 'B', 0.1, '100g', 'Nestlé'),
+('Céréales chocolat', 3.8, 10.1, 'C', 0.375, '375g', 'Kellogg\'s'),
+('Céréales chocolat', 4.0, 10.6, 'B', 0.375, '375g', 'Nestlé'),
+('Poulet entier', 8.99, 0.0, 'A', 1.5, '1 pièce', 'Label Rouge'),
+('Pizza surgelée', 4.5, 11.2, 'D', 0.4, '1 pièce', 'Buitoni'),
+('Pizza surgelée', 5.0, 12.5, 'C', 0.4, '1 pièce', 'Dr. Oetker'),
+('Eau minérale', 0.6, 0.0, 'A', 1.5, '1.5L', 'Evian'),
+('Eau minérale', 0.4, 0.0, 'B', 1.5, '1.5L', 'Cristaline'),
+('Lait demi-écrémé', 0.89, 0.89, 'B', 1.0, '1L', 'Lactel'),
+('Lait demi-écrémé', 1.0, 1.0, 'A', 1.0, '1L', 'Candia'),
+('Saumon fumé', 5.0, 25.0, 'B', 0.2, '200g', 'Labeyrie'),
+('Saumon fumé', 4.8, 24.0, 'A', 0.2, '200g', 'Delpeyrat');
 
 INSERT INTO stocker (idMagasin, idProduit, quantiteEnStock) VALUES
-(1, 1, 120), -- Carrefour Toulouse Purpan a 120 Jus d'orange
-(1, 4, 80),  -- Carrefour Toulouse Purpan a 80 Pâtes Penne
-(2, 3, 150), -- Auchan Toulouse Balma a 150 Chocolat noir
-(2, 5, 100), -- Auchan Toulouse Balma a 100 Lait demi-écrémé
-(3, 6, 50),  -- Intermarché Saint-Orens a 50 Pizzas surgelées
-(4, 9, 200), -- Lidl Blagnac a 200 Eaux minérales
-(5, 10, 30), -- Biocoop Toulouse Minimes a 30 Saumons fumés
-(6, 8, 70),  -- Monoprix Capitole a 70 Céréales chocolat
-(7, 7, 90),  -- Leclerc Roques-sur-Garonne a 90 Yaourts nature
-(8, 2, 60);  -- Casino Ramonville a 60 Poulets entiers
+(1, 1, 120), -- Carrefour Toulouse Purpan
+(1, 4, 80), -- Carrefour Toulouse Purpan
+(1, 6, 50), -- Carrefour Toulouse Purpan
+(2, 2, 100), -- Auchan Toulouse Balma
+(2, 8, 30), -- Auchan Toulouse Balma
+(2, 10, 70), -- Auchan Toulouse Balma
+(3, 12, 40), -- Intermarché Saint-Orens
+(3, 14, 60), -- Intermarché Saint-Orens
+(3, 17, 100), -- Intermarché Saint-Orens
+(4, 3, 80), -- Lidl Blagnac
+(4, 5, 60), -- Lidl Blagnac
+(4, 9, 20), -- Lidl Blagnac
+(5, 11, 45), -- Biocoop Toulouse Minimes
+(5, 18, 10), -- Biocoop Toulouse Minimes
+(6, 7, 30), -- Monoprix Capitole
+(6, 15, 25), -- Monoprix Capitole
+(7, 13, 90), -- Leclerc Roques-sur-Garonne
+(7, 16, 40), -- Leclerc Roques-sur-Garonne
+(8, 19, 35); -- Casino Ramonville
 
-INSERT INTO categorie (nomCategorie) VALUES ('Boissons');
-INSERT INTO categorie (nomCategorie) VALUES ('Viandes');
-INSERT INTO categorie (nomCategorie) VALUES ('Produits Laitiers');
-INSERT INTO categorie (nomCategorie) VALUES ('Epicerie');
-INSERT INTO categorie (nomCategorie) VALUES ('Surgelés');
+INSERT INTO categorie (nomCategorie) VALUES 
+('Boissons'), ('Viandes'), ('Produits Laitiers'), ('Epicerie'), ('Surgelés');
 
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (1, 1); -- Jus d'orange dans Boissons
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (3, 1); -- Jus d'orange dans Produits Laitiers (exemple pour une catégorie mixte)
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (2, 2); -- Poulet entier dans Viandes
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (4, 3); -- Chocolat noir dans Epicerie
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (4, 4); -- Pâtes Penne dans Epicerie
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (3, 5); -- Lait demi-écrémé dans Produits Laitiers
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (1, 5); -- Lait demi-écrémé dans Boissons
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (5, 6); -- Pizza surgelée dans Surgelés
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (3, 7); -- Yaourt nature dans Produits Laitiers
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (4, 8); -- Céréales chocolat dans Epicerie
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (1, 9); -- Eau minérale dans Boissons
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (2, 10); -- Saumon fumé dans Viandes
-INSERT INTO appartenir (idCategorie, idProduit) VALUES (5, 10); -- Saumon fumé dans Surgelés
+
+INSERT INTO appartenir (idCategorie, idProduit) VALUES 
+(1, 1), (1, 2), (1, 3), -- Jus d'orange
+(4, 4), (4, 5), -- Pâtes Penne
+(4, 6), -- Pâtes Spaghetti
+(4, 7), (4, 8), -- Chocolat noir
+(4, 9), (4, 10), -- Céréales chocolat
+(2, 11), -- Poulet entier
+(5, 12), (5, 13), -- Pizza surgelée
+(1, 14), (1, 15), -- Eau minérale
+(3, 16), (3, 17), -- Lait demi-écrémé
+(2, 18), (2, 19); -- Saumon fumé
+
 
 INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VALUES
 (1, 0, '2025-01-06 09:00:00', NULL), -- Panier en cours (client 1)
