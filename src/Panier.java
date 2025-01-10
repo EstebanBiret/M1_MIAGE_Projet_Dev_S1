@@ -247,8 +247,21 @@ public class Panier {
             return;
         }
 
-        //transformer le panier en cours en commande
+        //actualiser la quantite en stock.
         //TODO
+
+        //verifier la modeLivraison de chaque produit dans le panier afin de savoir typeCommande.
+        //"envoi" ou "retrait" ou "mixt"
+        String typeCommade = "";
+
+        try (Connection connection = DBConnection.getConnection()) {
+            String query = "Select * FROM produit_panier_magasin Where idmagasin =? And idPnaier = ? And idProduit =?;";
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la création du commande : " + e.getMessage());
+        }
+
+        //transformer le panier en cours en commande
+        Commande commande = new Commande(this.idPanier, null, this.dateFinPanier);
 
         //puis supprimer le panier en cours du client
         this.panierTermine = true;
