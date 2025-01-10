@@ -11,10 +11,7 @@ public class MainAchat {
         //System.out.println(client1.toString());
 
         //on récupère le panier en cours du client 1
-        Panier panierClient1 = client1.getPanierEnCours();  
-
-        System.out.println("Panier en cours du client 1 : " + panierClient1);
-        
+        Panier panierClient1 = client1.getPanierEnCours();          
         //si le client n'a pas de panier en cours, on en crée un
         if(panierClient1 == null) panierClient1 = client1.creerPanier();
 
@@ -23,14 +20,11 @@ public class MainAchat {
 
         //Cas d'un produit qui n'est pas disponible dans le magasin
         panierClient1.ajouterProduitPanier(100, 5, 2, "Livraison");
-
-        //ça devrait marcher car les données sont coherentes à celles de BD mais y'a erreur
-        //panierClient1.ajouterProduitPanier(14, 1, 3, "Retrait");
+        panierClient1.ajouterProduitPanier(14, 1, 3, "Retrait");
         
         /* ----- US 1.2 ----- */
         System.out.println("----- US 1.2 -----");        
-        panierClient1.afficherProduitsPanier();
-        //System.out.println(panierClient1.toString());
+        System.out.println(panierClient1.toString());
 
         /* ----- US 1.3 ----- */
         System.out.println("----- US 1.3 -----");
