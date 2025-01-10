@@ -94,8 +94,8 @@ CREATE TABLE `panier` (
 CREATE TABLE `commande` (
   `idCommande` int(11) NOT NULL AUTO_INCREMENT,
   `idPanier` int(11) NOT NULL,
-  `TypeCommande` enum(`livraison`, `retrait`, `mixte`)
-  `statutCommande` enum('préparation', 'retrait', 'envoi', 'terminée') NOT NULL,
+  `TypeCommande` enum(`livraison`, `retrait`, `mixte`),
+  `statutCommande` enum('preparation', 'retrait', 'envoi', 'terminee') NOT NULL,
   `dateReception` datetime NOT NULL,
   `datePreparation` datetime NOT NULL,
   `dateFinalisation` datetime NOT NULL,
