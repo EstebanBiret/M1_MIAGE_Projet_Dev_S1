@@ -95,10 +95,10 @@ CREATE TABLE `commande` (
   `idCommande` int(11) NOT NULL AUTO_INCREMENT,
   `idPanier` int(11) NOT NULL,
   `TypeCommande` enum('livraison', 'retrait', 'mixte') NOT NULL,
-  `statutCommande` enum('preparation', 'retrait', 'envoi', 'terminee') NOT NULL,
+  `statutCommande` enum('en attente', 'preparation', 'retrait', 'envoi', 'terminee') NOT NULL,
   `dateReception` datetime NOT NULL,
-  `datePreparation` datetime NOT NULL,
-  `dateFinalisation` datetime NOT NULL,
+  `datePreparation` datetime,
+  `dateFinalisation` datetime,
   PRIMARY KEY (idCommande),
   FOREIGN KEY (idPanier) REFERENCES panier(idPanier)
 );
