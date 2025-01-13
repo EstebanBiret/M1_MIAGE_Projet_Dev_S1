@@ -39,7 +39,7 @@ public class Commande {
                 }
     
                 //création d'une commande en BD
-                String query = "INSERT INTO commande (idCommande,idPanier, statutCommande, typeCommande, dateReception,datePreparation,dateFinialisation) VALUES (?, ?, ?, ?,?,?,?)";
+                String query = "INSERT INTO commande (idCommande,idPanier, statutCommande, typeCommande, dateReception,datePreparation,dateFinalisation) VALUES (?, ?, ?, ?,?,?,?)";
                 try (PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
                     pstmt.setInt(1, idCommande);
                     pstmt.setInt(2, this.idPanier);
