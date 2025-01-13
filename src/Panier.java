@@ -261,14 +261,39 @@ public class Panier {
                     System.out.println("Aucune mise à jour des stocks effectuée.");
                 }
             }
-    
-            // Création de la commande
+     
+            // Insertion de la commande dans la base de données
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            Commande commande = new Commande(this.idPanier, null, now);
             String insertCommandeQuery = "INSERT INTO commande (idPanier, typeCommande, statutCommande, dateReception) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement pstmtInsertCommande = connection.prepareStatement(insertCommandeQuery, Statement.RETURN_GENERATED_KEYS)) {
+                pstmtInsertCommande.setInt(1, this.idPanier);
+                pstmtInsertCommande.setString(2, null);
+                pstmtInsertCommande.setString(3, "en attente");
+                pstmtInsertCommande.setTimestamp(4, now);
+    
+                int rowsInserted = pstmtInsertCommande.executeUpdate();
+                if (rowsInserted > 0) {
+                    try (ResultSet rs = pstmtInsertCommande.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            int idCommande = rs.getInt(1);
+                            System.out.println("Commande créée avec succès. ID : " + idCommande);
+                        }
+                    }
+                } else {
+                    System.out.println("Échec de la création de la commande.");
+                }
+            }
     
             // Marquer le panier comme terminé
-            this.panierTermine = true;
+            String queryUpdatePanier = "UPDATE panier SET panierTermine = true, dateFinPanier = ? WHERE idPanier = ?";
+            try (PreparedStatement pstmtUpdatePanier = connection.prepareStatement(queryUpdatePanier)) {
+                pstmtUpdatePanier.setTimestamp(1, now);
+                pstmtUpdatePanier.setInt(2, this.idPanier);
+                pstmtUpdatePanier.executeUpdate();
+                this.panierTermine = true;
+                this.dateFinPanier = now;
+                System.out.println("Le panier a été validé et transformé en commande.");
+            }
         } catch (SQLException e) {
             System.out.println("Erreur lors de la validation du panier : " + e.getMessage());
         }
