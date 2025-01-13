@@ -179,7 +179,7 @@ public class Panier {
         """;
         
         String query2 = """
-            SELECT pr.idProduit, m.nomMagasin, pr.libelleProduit, pr.prixUnitaire, ppm.quantiteVoulue, ppm.modeLivraison
+            SELECT pr.idProduit, m.nomMagasin, pr.libelleProduit, pr.prixUnitaire, ppm.quantiteVoulue
             FROM panier_produit_magasin ppm
             INNER JOIN produit pr ON ppm.idProduit = pr.idProduit
             INNER JOIN magasin m ON ppm.idMagasin = m.idMagasin
@@ -237,11 +237,29 @@ public class Panier {
         }
         return details + "\n";
     }
-
+    public boolean estVide() {
+        try (Connection connection = DBConnection.getConnection()) {
+            String query = "SELECT 1 FROM panier_produit_magasin WHERE idPanier = ?";
+            try (PreparedStatement pstmtCheckStock = connection.prepareStatement(query)) {
+                pstmtCheckStock.setInt(1, this.idPanier);
+                try (ResultSet rs = pstmtCheckStock.executeQuery()) {
+                    // Retourne false si au moins un produit est trouvé
+                    return !rs.next();
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la vérification du panier : " + e.getMessage());
+            return true;  // Par défaut, on considère le panier vide en cas d'erreur
+        }
+    }    
     //US 1.3
     public void validerPanier() {
         if (this.panierTermine) {
             System.out.println("Le panier a déjà été annulé/validé.");
+            return;
+        }
+        if(this.estVide()){
+            System.out.println("Le Panier est vide.");
             return;
         }
     
@@ -249,7 +267,7 @@ public class Panier {
             connection.setAutoCommit(false); // Démarrer la transaction
             
             // Vérification des quantités pour chaque produit du panier
-            String queryCheckStock = "SELECT ppm.idProduit, ppm.quantiteVoulue, s.quantiteEnStock " +
+            String queryCheckStock = "SELECT ppm.idMagasin,ppm.idProduit, ppm.quantiteVoulue, s.quantiteEnStock " +
                                      "FROM panier_produit_magasin ppm " +
                                      "JOIN stocker s ON ppm.idProduit = s.idProduit AND ppm.idMagasin = s.idMagasin " +
                                      "WHERE ppm.idPanier = ?";
@@ -262,8 +280,9 @@ public class Panier {
                         int quantiteVoulue = rs.getInt("quantiteVoulue");
                         int quantiteEnStock = rs.getInt("quantiteEnStock");
                         int idProduit = rs.getInt("idProduit");
+                        int idMagasin = rs.getInt("idMagasin");
                         if (quantiteVoulue > quantiteEnStock) {
-                            System.out.println("Echec de la Validation du panier en raison de stock insuffisant du produit ID : " + idProduit);                            
+                            System.out.println("Echec de la Validation du panier en raison de stock insuffisant du produit ID : " + idProduit+" dans le magasin "+idMagasin);                            
                             connection.rollback();
                             //des truc de remplacement.
                             return;

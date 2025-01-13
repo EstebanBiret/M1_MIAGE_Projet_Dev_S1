@@ -19,7 +19,7 @@ public class MainAchat {
         System.out.println("----- US 1.1 -----");
         //Cas d'un produit qui n'est pas disponible dans le magasin favori du client
         //panierClient1.ajouterProduitPanier(100, 5);
-        panierClient1.ajouterProduitPanier(4, 2);
+        //panierClient1.ajouterProduitPanier(4, 2);
         
         /* ----- US 1.2 ----- */
         System.out.println("----- US 1.2 -----");        
