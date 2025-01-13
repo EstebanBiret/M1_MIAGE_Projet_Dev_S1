@@ -38,6 +38,8 @@ public class MainConsultation {
                     } 
                 }
             }
+            connection.close();
+
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
@@ -48,31 +50,88 @@ public class MainConsultation {
         return produits;
     }
 
+    //booléen en param pour savoir si on récupère un produit par son nom exact ou mot clé
+    public static List<Produit> getProduitsByLibelle(String libelleProduit, boolean nomExact) {
+        List<Produit> produits = new ArrayList<>();
+
+        try (Connection connection = DBConnection.getConnection()) {
+            String selectQuery;
+            if(nomExact) {
+                selectQuery = "SELECT * FROM produit WHERE libelleProduit = ?";
+            } else {
+                selectQuery = "SELECT * FROM produit WHERE libelleProduit LIKE ?";
+                libelleProduit = "%" + libelleProduit + "%";
+            }
+            
+            try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
+                pstmt.setString(1, libelleProduit);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        Produit produit = new Produit(
+                            rs.getString("libelleProduit"),
+                            rs.getDouble("prixUnitaire"),
+                            rs.getDouble("prixKilo"),
+                            rs.getString("nutriscore").charAt(0),
+                            rs.getDouble("poidsProduit"),
+                            rs.getString("conditionnementProduit"),
+                            rs.getString("marqueProduit")
+                        );
+                        produit.setIdProduit(rs.getInt("idProduit"));
+                        produits.add(produit);
+                    } 
+                }
+            }
+            connection.close();
+
+        } 
+        catch (SQLException e) {
+            System.out.println("Erreur : " + e.getMessage());
+        }
+
+        if(produits.isEmpty()){
+            if(nomExact) {
+                System.out.println("Produit introuvable (" + libelleProduit + ")");
+            } else {
+                System.out.println("Aucun produit trouvé avec le mot clé " + "'"  + libelleProduit + "'.");
+            }
+        }
+        return produits;
+    }
+
     public static void main(String[] args) {
 
         /* ----- US 0.1 ----- */
         System.out.println("\n");
         System.out.println("----- US 0.1 -----");
-        System.out.println("Visualiser les détails d'un produit par son ID et son libellé");
+        System.out.println("Visualiser les détails d'un produit par son ID");
 
         //recherche et affichage d'un produit par son ID
         Produit produitId = new Produit(5);
         if(produitId.exists()) 
         System.out.println("ID 5 --> " + produitId.toString());
+        System.out.println("\n");
 
-        //recherche et affichage d'un produit par son libellé
-        Produit produitLibelle = new Produit("Jus d'orange", true);
-        if(produitLibelle.exists()) System.out.println("Jus d'orange --> " + produitLibelle.toString() + '\n');
+        //recherche et affichage de produit.s par son libellé
+
+        String libelle = "Jus d'orange";
+        System.out.println("Visualiser les détails des " + libelle);
+        List<Produit> produitsLibelle = getProduitsByLibelle(libelle, true);
+        for (Produit produit : produitsLibelle) {
+            System.out.println(produit.toString());
+        }
+        System.out.println("\n");
 
         /* ----- US 0.2 ----- */
         System.out.println("----- US 0.2 -----");
 
-        //recherche d'un produit par mot clé
-
-        //TODO modifier si plusieurs produits matchent
-        System.out.println("Recherche par mot clé : Jus d'o");
-        Produit produitMotCle = new Produit("Jus d'o", false);
-        if(produitMotCle.exists()) System.out.println(produitMotCle.toString() + "\n");
+        //recherche de produits par mot clé
+        String motCle = "Jus d'o";
+        System.out.println("Recherche par mot clé : " + motCle);
+        List<Produit> produitsMotCle = getProduitsByLibelle(libelle, false);
+        for (Produit produit : produitsMotCle) {
+            System.out.println(produit.toString());
+        }
+        System.out.println("\n");
 
         /* ----- US 0.3 ----- */
         System.out.println("----- US 0.3 -----");

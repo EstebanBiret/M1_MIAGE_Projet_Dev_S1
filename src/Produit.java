@@ -1,5 +1,7 @@
 package src;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Produit {
     
@@ -64,46 +66,6 @@ public class Produit {
             connection.close();
 
         } catch (SQLException e) {
-            System.out.println("Erreur : " + e.getMessage());
-        }
-    }
-
-    //booléen en param pour savoir si on récupère un produit par son nom exact ou mot clé
-    public Produit(String libelleProduit, boolean nomExact) {
-        try (Connection connection = DBConnection.getConnection()) {
-            String selectQuery;
-            if(nomExact) {
-                selectQuery = "SELECT * FROM produit WHERE libelleProduit = ?";
-            } else {
-                selectQuery = "SELECT * FROM produit WHERE libelleProduit LIKE ?";
-                libelleProduit = "%" + libelleProduit + "%";
-            }
-            
-            try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
-                pstmt.setString(1, libelleProduit);
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        this.idProduit = rs.getInt("idProduit");
-                        this.libelleProduit = rs.getString("libelleProduit");
-                        this.prixUnitaire = rs.getDouble("prixUnitaire");
-                        this.prixKilo = rs.getDouble("prixKilo");
-                        this.nutriscore = rs.getString("nutriscore").charAt(0);
-                        this.poidsProduit = rs.getDouble("poidsProduit");
-                        this.conditionnementProduit = rs.getString("conditionnementProduit");
-                        this.marqueProduit = rs.getString("marqueProduit");
-                    } else {
-                        if(nomExact) {
-                            System.out.println("Produit introuvable (" + libelleProduit + ")");
-                        } else {
-                            System.out.println("Aucun produit trouvé avec le mot clé " + "'"  + libelleProduit + "'.");
-                        }
-                    }
-                }
-            }
-            connection.close();
-
-        } 
-        catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
     }
