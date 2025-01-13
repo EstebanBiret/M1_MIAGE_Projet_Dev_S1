@@ -15,12 +15,15 @@ public class Algorithmes {
     }*/
 
     //remplacement d'un produit avec gestion des alternatives, retourne l'ID du produit de remplacement
+
+    //TODO changer le type de retour pour avoir l'idProduit, l'idMagasin et la quantité demandée
     public static int remplacementProduit(int idProduit, int idMagasin, int quantiteDemandee) {
         List<Produit> produitsAlternatifs = new ArrayList<>();
         int nbIterations = 0;
     
         //tant que la liste n'est pas pleine ou que l'on a pas encore fait tous les filtres
         while (produitsAlternatifs.size() < 5 && nbIterations < 5) {
+            //TODO rajouter le nom du magasin dans la requête
             String query = construireQuery(nbIterations, idProduit);
     
             try (Connection connection = DBConnection.getConnection();
@@ -105,6 +108,8 @@ public class Algorithmes {
         }
     
         // Proposition des produits à l'utilisateur
+
+        //TODO rajouter magasin et la quantité disponible
         System.out.println("Produits disponibles en remplacement :");
         for (int i = 0; i < produitsAlternatifs.size(); i++) {
             Produit produit = produitsAlternatifs.get(i);
@@ -125,8 +130,9 @@ public class Algorithmes {
                     scanner.next();
                 }
                 choix = scanner.nextInt();
-            } while (choix < 1 || choix > produitsAlternatifs.size());
+            } while (choix < 1 || choix > produitsAlternatifs.size());  
     
+            //TODO avant return, regarder si la quantité initalement prévue est > que la quantité disponible du new produit, si oui on donne tout, si non on donne la quantité initiale
             return produitsAlternatifs.get(choix - 1).getIdProduit();
         }
     }
