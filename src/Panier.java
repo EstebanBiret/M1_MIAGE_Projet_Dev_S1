@@ -105,7 +105,6 @@ public class Panier {
 
         String queryTest = "SELECT quantiteEnStock FROM stocker WHERE idProduit = ? AND idMagasin = ?;";
         String queryInsert = "INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue) VALUES (?, ?, ?, ?);";
-        String queryUpdate ="UPDATE panier_produit_magasin SET quantiteVoulue = ? WHERE idPanier = ? AND idProduit = ? AND idMagasin = ?;";
 
         try (Connection connection = DBConnection.getConnection()) {
             // Vérification du stock
@@ -251,15 +250,16 @@ public class Panier {
             String queryStockUpdate = "UPDATE stocker s " +
                                        "JOIN panier_produit_magasin ppm ON s.idProduit = ppm.idProduit AND s.idMagasin = ppm.idMagasin " +
                                        "SET s.quantiteEnStock = s.quantiteEnStock - ppm.quantiteVoulue " +
-                                       "WHERE ppm.idPanier = ?";
+                                       "WHERE ppm.idPanier = ?"+
+                                       "AND s.quantiteEnStock >= ppm.quantiteVoulue";
             try (PreparedStatement pstmtStockUpdate = connection.prepareStatement(queryStockUpdate)) {
                 pstmtStockUpdate.setInt(1, this.idPanier);
                 int rowsUpdated = pstmtStockUpdate.executeUpdate();
-                if (rowsUpdated > 0) {
-                    System.out.println("Les quantités en stock ont été mises à jour.");
-                } else {
-                    System.out.println("Aucune mise à jour des stocks effectuée.");
-                }
+                if (rowsUpdated > 0) { 
+                    System.out.println("Les quantités en stock ont été mises à jour avec succès après vérification."); 
+                } else { 
+                    System.out.println("Aucune mise à jour des stocks effectuée. Les quantités en stock sont insuffisantes.");
+                 } 
             }
      
             // Insertion de la commande dans la base de données
