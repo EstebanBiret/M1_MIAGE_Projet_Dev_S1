@@ -29,6 +29,7 @@ public class MainAchat {
 
         /* ----- US 1.3 ----- */
         System.out.println("----- US 1.3 -----");
+        panierClient1.validerPanier();
 
         /* ----- US 1.4 ----- */
         System.out.println("----- US 1.4 -----");

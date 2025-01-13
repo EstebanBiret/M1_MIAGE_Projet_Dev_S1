@@ -241,31 +241,66 @@ public class Panier {
 
     //US 1.3
     public void validerPanier() {
-
-        if(this.panierTermine) {
+        if (this.panierTermine) {
             System.out.println("Le panier a déjà été annulé/validé.");
             return;
         }
-
-        //actualiser la quantite en stock.
-        //TODO
-
-        //verifier la modeLivraison de chaque produit dans le panier afin de savoir typeCommande.
-        //"envoi" ou "retrait" ou "mixt"
-        String typeCommade = "";
-
+    
         try (Connection connection = DBConnection.getConnection()) {
-            String query = "Select * FROM produit_panier_magasin Where idmagasin =? And idPnaier = ? And idProduit =?;";
+            // Mise à jour des quantités en stock
+            String queryStockUpdate = "UPDATE stocker s " +
+                                       "JOIN panier_produit_magasin ppm ON s.idProduit = ppm.idProduit AND s.idMagasin = ppm.idMagasin " +
+                                       "SET s.quantiteEnStock = s.quantiteEnStock - ppm.quantiteVoulue " +
+                                       "WHERE ppm.idPanier = ?";
+            try (PreparedStatement pstmtStockUpdate = connection.prepareStatement(queryStockUpdate)) {
+                pstmtStockUpdate.setInt(1, this.idPanier);
+                int rowsUpdated = pstmtStockUpdate.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("Les quantités en stock ont été mises à jour.");
+                } else {
+                    System.out.println("Aucune mise à jour des stocks effectuée.");
+                }
+            }
+    
+            // Création de la commande
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            Commande commande = new Commande(this.idPanier, null, now);
+            String insertCommandeQuery = "INSERT INTO commande (idPanier, typeCommande, statutCommande, dateReception) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement pstmtInsertCommande = connection.prepareStatement(insertCommandeQuery, Statement.RETURN_GENERATED_KEYS)) {
+                pstmtInsertCommande.setInt(1, this.idPanier);
+                pstmtInsertCommande.setString(2, null);
+                pstmtInsertCommande.setString(3, "en attente");
+                pstmtInsertCommande.setTimestamp(4, now);
+    
+                int rowsInserted = pstmtInsertCommande.executeUpdate();
+                if (rowsInserted > 0) {
+                    try (ResultSet rs = pstmtInsertCommande.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            int idCommande = rs.getInt(1);
+                            System.out.println("Commande créée avec succès. ID : " + idCommande);
+                        }
+                    }
+                } else {
+                    System.out.println("Échec de la création de la commande.");
+                }
+            }
+    
+            // Marquer le panier comme terminé
+            this.panierTermine = true;
+            String queryUpdatePanier = "UPDATE panier SET panierTermine = true, dateFinPanier = ? WHERE idPanier = ?";
+            try (PreparedStatement pstmtUpdatePanier = connection.prepareStatement(queryUpdatePanier)) {
+                pstmtUpdatePanier.setTimestamp(1, now);
+                pstmtUpdatePanier.setInt(2, this.idPanier);
+                pstmtUpdatePanier.executeUpdate();
+                this.panierTermine = true;
+                this.dateFinPanier = now;
+                System.out.println("Le panier a été validé et transformé en commande.");
+            }
         } catch (SQLException e) {
-            System.out.println("Erreur lors de la création du commande : " + e.getMessage());
+            System.out.println("Erreur lors de la validation du panier : " + e.getMessage());
         }
-
-        //transformer le panier en cours en commande
-        Commande commande = new Commande(this.idPanier, null, this.dateFinPanier);
-
-        //puis supprimer le panier en cours du client
-        this.panierTermine = true;
     }
+    
 
     //US 1.4
     public void annulerPanier() {
