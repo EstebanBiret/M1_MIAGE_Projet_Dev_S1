@@ -246,22 +246,45 @@ public class Panier {
         }
     
         try (Connection connection = DBConnection.getConnection()) {
+            connection.setAutoCommit(false); // Démarrer la transaction
+            
+            // Vérification des quantités pour chaque produit du panier
+            String queryCheckStock = "SELECT ppm.idProduit, ppm.quantiteVoulue, s.quantiteEnStock " +
+                                     "FROM panier_produit_magasin ppm " +
+                                     "JOIN stocker s ON ppm.idProduit = s.idProduit AND ppm.idMagasin = s.idMagasin " +
+                                     "WHERE ppm.idPanier = ?";
+    
+            try (PreparedStatement pstmtCheckStock = connection.prepareStatement(queryCheckStock)) {
+                pstmtCheckStock.setInt(1, this.idPanier);
+                try (ResultSet rs = pstmtCheckStock.executeQuery()) {
+                    
+                    while (rs.next()) {
+                        int quantiteVoulue = rs.getInt("quantiteVoulue");
+                        int quantiteEnStock = rs.getInt("quantiteEnStock");
+                        int idProduit = rs.getInt("idProduit");
+                        if (quantiteVoulue > quantiteEnStock) {
+                            System.out.println("Echec de la Validation du panier en raison de stock insuffisant du produit ID : " + idProduit);                            
+                            connection.rollback();
+                            //des truc de remplacement.
+                            return;
+                        }
+                    }
+                    
+                }
+            }
+    
             // Mise à jour des quantités en stock
             String queryStockUpdate = "UPDATE stocker s " +
                                        "JOIN panier_produit_magasin ppm ON s.idProduit = ppm.idProduit AND s.idMagasin = ppm.idMagasin " +
                                        "SET s.quantiteEnStock = s.quantiteEnStock - ppm.quantiteVoulue " +
-                                       "WHERE ppm.idPanier = ?"+
-                                       "AND s.quantiteEnStock >= ppm.quantiteVoulue";
+                                       "WHERE ppm.idPanier = ?";
+    
             try (PreparedStatement pstmtStockUpdate = connection.prepareStatement(queryStockUpdate)) {
                 pstmtStockUpdate.setInt(1, this.idPanier);
-                int rowsUpdated = pstmtStockUpdate.executeUpdate();
-                if (rowsUpdated > 0) { 
-                    System.out.println("Les quantités en stock ont été mises à jour avec succès après vérification."); 
-                } else { 
-                    System.out.println("Aucune mise à jour des stocks effectuée. Les quantités en stock sont insuffisantes.");
-                 } 
+                pstmtStockUpdate.executeUpdate();
+                System.out.println("Les quantités en stock ont été mises à jour avec succès.");
             }
-     
+    
             // Insertion de la commande dans la base de données
             Timestamp now = new Timestamp(System.currentTimeMillis());
             String insertCommandeQuery = "INSERT INTO commande (idPanier, typeCommande, statutCommande, dateReception) VALUES (?, ?, ?, ?)";
@@ -281,6 +304,8 @@ public class Panier {
                     }
                 } else {
                     System.out.println("Échec de la création de la commande.");
+                    connection.rollback();
+                    return;
                 }
             }
     
@@ -294,10 +319,13 @@ public class Panier {
                 this.dateFinPanier = now;
                 System.out.println("Le panier a été validé et transformé en commande.");
             }
+    
+            connection.commit();
         } catch (SQLException e) {
             System.out.println("Erreur lors de la validation du panier : " + e.getMessage());
         }
     }
+    
     
 
     //US 1.4
