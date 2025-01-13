@@ -1,95 +1,181 @@
 @startuml schema-classes-uml
 
-class Magasin {
-    + idMagasin: int
-    + nomMagasin: varchar(128)
-    + adresseMagasin: varchar(128)
+class Magasin 
+{
+    - idMagasin: int
+    - nomMagasin: String
+    - adresseMagasin: String
 }
 
-class Produit {
-    + idProduit: int
-    + libelleProduit: varchar(128)
-    + prixUnitaire: DECIMAL(6,2)
-    + prixKilo: DECIMAL(6,2)
-    + nutriscore: char(128)
-    + poidsProduit: DECIMAL(6,3)
-    + conditionnementProduit: varchar(128)
-    + marqueProduit: varchar(128)
+class Produit 
+{
+    - idProduit: int
+    - libelleProduit: String
+    - prixUnitaire: double
+    - prixKilo: double
+    - nutriscore: char
+    - poidsProduit: double
+    - conditionnementProduit: String
+    - marqueProduit: String
+
+    + Produit(idProduit: int, libelleProduit: String, prixUnitaire: double, prixKilo: double, nutriscore: char, poidsProduit: double, conditionnementProduit: String, marqueProduit: String)
+    + Produit(libelleProduit: String, prixUnitaire: double, prixKilo: double, nutriscore: char, poidsProduit: double, conditionnementProduit: String, marqueProduit: String)
+    + Produit(idProduit: int)
+    + Produit(libelleProduit: String, nomExact: boolean)
+    
+    + getLibelleProduit(): String
+    + setLibelleProduit(libelleProduit: String): void
+    + getPrixUnitaire(): double
+    + setPrixUnitaire(prixUnitaire: double): void
+    + getPrixKilo(): double
+    + setPrixKilo(prixKilo: double): void
+    + getNutriscore(): char
+    + setNutriscore(nutriscore: char): void
+    + getPoidsProduit(): double
+    + setPoidsProduit(poidsProduit: double): void
+    + getConditionnementProduit(): String
+    + setConditionnementProduit(conditionnementProduit: String): void
+    + getMarqueProduit(): String
+    + setMarqueProduit(marqueProduit: String): void
+    + getIdProduit(): int
+    + setIdProduit(idProduit: int): void
+    + exists(): boolean
+    + toString(): String
 }
 
-class Categorie {
-    + idCategorie: int
-    + nomCategorie: varchar(128)
+class Categorie 
+{
+    - idCategorie: int
+    - nomCategorie: String
 }
 
-class Profil {
-    + idProfil: int
-    + nomProfil: varchar(128)
+class Profil 
+{
+    - idProfil: int
+    - nomProfil: String
 }
 
-class Client {
-    + idClient: int
-    + idMagasin: int
-    + nomClient: varchar(128)
-    + prenomClient: varchar(128)
-    + adresseClient: varchar(128)
-    + telClient: varchar(128)
+class Client 
+{
+    - idClient: int
+    - nomClient: String
+    - prenomClient: String
+    - adresseClient: String
+    - telClient: String
+    - idMagasinFavori: int
+
+    + Client(idClient: int)
+    + getIdClient(): int
+    + getIdMagasinFavori(): int
+    + getPanierEnCours(): Panier
+    + creerPanier(): Panier
+    + toString(): String
 }
 
-class Client_Profil {
-    + idClient: int
-    + idProfil: int
+class Client_Profil 
+{
+    - idClient: int
+    - idProfil: int
 }
 
-class Appartenir {
-    + idCategorie: int
-    + idProduit: int
+class Appartenir 
+{
+    - idCategorie: int
+    - idProduit: int
 }
 
-class Stocker {
-    + idMagasin: int
-    + idProduit: int
-    + quantiteEnStock: int
+class Stocker 
+{
+    - idMagasin: int
+    - idProduit: int
+    - quantiteEnStock: int
 }
 
-class Panier {
-    + idPanier: int
-    + idClient: int
-    + idMagasin: int
-    + panierTermine: boolean
-    + dateDebutPanier: datetime
-    + dateFinPanier: datetime
+class Panier 
+{
+    - idPanier: int
+    - idClient: int
+    - panierTermine: boolean
+    - dateDebutPanier: Timestamp
+    - dateFinPanier: Timestamp
+
+    + Panier(idClient: int)
+    + Panier(idPanier: int, idClient: int, dateDebutPanier: Timestamp)
+    + ajouterProduitPanier(idProduit: int, qte: int, idMagasin: int, modeLivraison: String): void
+    + validerPanier(): void
+    + annulerPanier(): void
+    + comparaisonTemps(): void
+    + getIdPanier(): int
+    + setIdPanier(idPanier: int): void
+    + getIdClient(): int
+    + setIdClient(idClient: int): void
+    + isPanierTermine(): boolean
+    + setPanierTermine(panierTermine: boolean): void
+    + getDateDebutPanier(): Timestamp
+    + setDateDebutPanier(dateDebutPanier: Timestamp): void
+    + getDateFinPanier(): Timestamp
+    + setDateFinPanier(dateFinPanier: Timestamp): void
+    + exists(): boolean
+    + toString(): String
 }
 
-class Commande {
-    + idCommande: int
-    + idPanier: int
-    + statutCommande: enum
-    + dateCommande: datetime
+class Commande 
+{
+    - idCommande: int
+    - idPanier: int
+    - statutCommande: String
+    - typeCommande: String
+    - dateReception: Timestamp
+    - datePreparation: Timestamp
+    - dateFinalisation: Timestamp
+
+    + Commande(idPanier: int, typeCommande: String, dateReception: Timestamp)
+    + getIdCommande(): int
+    + getIdPanier(): int
+    + getStatutCommande(): String
+    + getTypeCommande(): String
+    + getDateReception(): Timestamp
+    + getDatePreparation(): Timestamp
+    + getDateFinalisation(): Timestamp
+    + setIdCommande(idCommande: int): void
+    + setIdPanier(idPanier: int): void
+    + setStatutCommande(statutCommande: String): void
+    + setTypeCommande(typeCommande: String): void
+    + setDateReception(dateReception: Timestamp): void
+    + setDatePreparation(datePreparation: Timestamp): void
+    + setDateFinalisation(dateFinalisation: Timestamp): void
+    + toString(): String
 }
 
-class Panier_Produit {
-    + idPanier: int
-    + idProduit: int
+class Panier_Produit 
+{
+    - idPanier: int
+    - idProduit: int
     + quantiteDemande: int
     + modeLivraison: enum
+}
+
+class Gestionnaire 
+{
+    + ajouterProduitCatalogue(p: Produit): void
+    + majProduitCatalogue(p: Produit): void
+    + supprProduitCatalogue(p: Produit): void
+    + majStockProduit(idProduit: int, quantite: int, idsMagasins: List<int>, augmenter: boolean): void
 }
 
 'Les relations entre les tables'
 
 Client "1" --> "0..*" Client_Profil : "a le profil"
 Profil "1" --> "0..*" Client_Profil : "appartient au client"
-
 Client "1" --> "0..*" Panier : "rempli"
 Magasin "1" --> "0..*" Panier : "choisi"
 Panier "1" --> "0..1" Commande : "associé à"
-
 Panier "1" --> "0..*" Panier_Produit : "contiens"
 Produit "1" --> "0..*" Panier_Produit : "est contenu"
-
 Produit "1" --> "0..*" Appartenir : "fait partie"
 Categorie "1" --> "0..*" Appartenir : "possède"
-
 Magasin "1" --> "0..*" Stocker : "stock"
 Produit "1" --> "0..*" Stocker : "fait parti du stock"
+Gestionnaire "1" --> "0..*" Produit : "gère"
+
 @enduml
