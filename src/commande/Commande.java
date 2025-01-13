@@ -1,8 +1,6 @@
 package src.commande;
 import java.sql.*;
 
-import src.DBConnection; 
-
 public class Commande {
     
     //propriétés

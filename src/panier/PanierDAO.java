@@ -72,7 +72,6 @@ public class PanierDAO {
         //panier en cours du client
         ClientDAO clientDAO = new ClientDAO();
         Client client = clientDAO.getClientById(idClient);
-        Panier panier = clientDAO.getPanierEnCours(idClient);
         int idMagasin = client.getIdMagasinFavori();
 
         //regarder si le produit pour le magasin favori n'est pas déjà présent dans le panier, et si oui, juste augmenter la qte en vérifiant si la qte n'est toujours pas dépassé

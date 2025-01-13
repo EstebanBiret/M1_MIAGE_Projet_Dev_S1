@@ -1,10 +1,7 @@
 package src.main;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import src.DBConnection;
 import src.produit.Produit;
 import src.produit.ProduitDAO;
 
