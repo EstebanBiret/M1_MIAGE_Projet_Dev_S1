@@ -12,6 +12,10 @@ public class MainTableauDeBord {
         //Création du client
         Client client = new Client(1);
 
-        List<Produit> produits = client.getProduitsPlusCommandes();
+        //produits les plus commandés
+        List<String> produits = client.getProduitsPlusCommandes();
+        for (String produit : produits) {
+            System.out.println(produit);
+        }
     }
 }

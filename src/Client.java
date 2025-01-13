@@ -1,7 +1,9 @@
 package src;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Client {
     private int idClient; //id en BD (auto increment)
@@ -76,14 +78,63 @@ public class Client {
     /*
      * Retourne une liste des produits les plus commandés du client actuel
      */
-    public List<Produit> getProduitsPlusCommandes() {
-        List<Produit> produits = new ArrayList<>();
+    public List<String> getProduitsPlusCommandes() {
+        List<String> produits = new ArrayList<>();
 
         //récupérer les commandes de ce client
         List<Commande> commandes = getCommandes();
-        for (Commande commande : commandes) {
-            System.out.println(commande.toString());
+
+        if (commandes.isEmpty()) {
+            System.out.println("Aucune commande trouvée pour ce client.");
+            return produits;
         }
+        
+        // Map pour compter les occurrences des produits
+        Map<Integer, Integer> produitCounts = new HashMap<>();
+
+        String query = """
+            SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
+                p.poidsProduit, p.conditionnementProduit, p.marqueProduit, ppm.quantiteVoulue
+            FROM panier_produit_magasin ppm
+            INNER JOIN produit p ON ppm.idProduit = p.idProduit
+            WHERE ppm.idPanier = ?
+        """;
+
+        try (Connection connection = DBConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query)) {
+
+            // Parcourir chaque commande pour récupérer ses produits
+            for (Commande commande : commandes) {
+                statement.setInt(1, commande.getIdPanier());
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        int idProduit = resultSet.getInt("idProduit");
+                        int quantiteVoulue = resultSet.getInt("quantiteVoulue");
+
+                        // Ajouter au compteur ou incrémenter
+                        produitCounts.put(idProduit, produitCounts.getOrDefault(idProduit, 0) + quantiteVoulue);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Trier les produits par nombre de commandes décroissant
+        produitCounts.entrySet().stream()
+            .sorted((entry1, entry2) -> Integer.compare(entry2.getValue(), entry1.getValue()))
+            .forEach(entry -> {
+                int idProduit = entry.getKey();
+                int quantite = entry.getValue();
+
+                // Récupérer les informations du produit
+                Produit produit = new Produit(idProduit);
+                if (produit != null) {
+                    String description = produit + " (Commandé " + quantite + " fois)";
+                    produits.add(description);
+                }
+            });
+
         return produits;
     }
 
