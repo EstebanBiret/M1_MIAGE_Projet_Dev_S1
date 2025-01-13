@@ -42,7 +42,7 @@ public class MainGestion {
 
         /* ----- US 3.2 ----- */
         System.out.println("----- US 3.2 -----");
-        System.out.println("\n");
+        System.out.println(Marc.calculerTempsMoyenRealisation());
 
         /* ----- US 3.3 ----- */
         System.out.println("----- US 3.3 -----");

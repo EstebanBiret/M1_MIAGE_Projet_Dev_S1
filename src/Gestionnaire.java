@@ -359,5 +359,24 @@ public class Gestionnaire {
         return topClients;
     }
     
-    
+    //US 3.2
+    // Méthode pour calculer le temps moyen de réalisation des paniers terminés
+    public double calculerTempsMoyenRealisation() {
+        try (Connection connection = DBConnection.getConnection()){
+        String queryTempsMoyen = "SELECT AVG(TIMESTAMPDIFF(HOUR, dateDebutPanier, dateFinPanier)) AS tempsMoyen " +
+                                 "FROM panier " +
+                                 "WHERE panierTermine = TRUE AND dateFinPanier IS NOT NULL";
+        try (PreparedStatement pstmtTempsMoyen = connection.prepareStatement(queryTempsMoyen)) {
+            try (ResultSet rs = pstmtTempsMoyen.executeQuery()) {
+                if (rs.next()) {
+                    double tempsMoyenHeures = rs.getDouble("tempsMoyen");
+                    System.out.println("Temps moyen de réalisation des paniers (en heures) : ");
+                    return tempsMoyenHeures;
+                }
+            }
+        } } catch (SQLException e) {
+            System.err.println("Erreur lors du calcul du temps moyen de réalisation des paniers : " + e.getMessage());
+        }
+        return 0;
+    }
 }
