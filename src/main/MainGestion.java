@@ -33,9 +33,40 @@ public class MainGestion {
         Produit supprProduitId = new Produit(3);
         if(supprProduitId.exists()) supprProduitId.supprProduitCatalogue();*/
 
-        //modification du stock d'un produit
-        //Marc.majStockProduit(1, 5, List.of(1, true));
+        //augmenter les stocks d'un produit
+        List<Integer> magasins = List.of(1, 2, 3);
+        Marc.majStockProduit(1, 5, magasins, true);
+        //baisser les stocks d'un produit
+        Marc.majStockProduit(1, 2, magasins, false);
         System.out.println("\n");
+
+        /* ----- US 3.2 ----- */
+        System.out.println("----- US 3.2 -----");
+        System.out.println("\n");
+
+        /* ----- US 3.3 ----- */
+        System.out.println("----- US 3.3 -----");
+        System.out.println("Produit les plus commandé :");
+        System.out.println(Marc.getProduitPlusCommande());
+
+        System.out.println("\n");
+        System.out.println("Catégories les plus commandées :");
+        System.out.println(Marc.getTopCategories());
+
+        System.out.println("\n");
+        System.out.println("Clients ayant effectués le plus de commandes :");
+        List<String> topClients = Marc.getTopClientsNbCommandes();
+        for (String client : topClients) {
+            System.out.println(client);
+        }
+
+        System.out.println("\n");
+        System.out.println("Clients ayant générés le plus d'argent :");
+        List<String> topClients2 = Marc.getTopClientsChiffreAffaires();
+        for (String client : topClients2) {
+            System.out.println(client);
+        }
+
 
     }
 }

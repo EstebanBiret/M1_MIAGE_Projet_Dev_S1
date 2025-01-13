@@ -1,6 +1,7 @@
 package src;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 //classe pour les US 3, Marc - Gérer
@@ -190,4 +191,170 @@ public class Gestionnaire {
             System.out.println("Erreur lors de la mise à jour des stocks.");
         }
     }
+
+    public String getProduitPlusCommande() {
+        String res = "Aucun produit commandé.";
+    
+        String query = """
+            SELECT ppm.idProduit, SUM(ppm.quantiteVoulue) AS totalQuantite
+            FROM panier_produit_magasin ppm, panier p, commande c
+            WHERE ppm.idPanier = p.idPanier
+            AND p.idPanier = c.idPanier
+            GROUP BY ppm.idProduit
+            ORDER BY totalQuantite DESC
+            LIMIT 1
+        """;
+    
+        try (Connection connection = DBConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query)) {
+    
+            // Exécute la requête pour récupérer le produit le plus commandé
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    int idProduit = resultSet.getInt("idProduit");
+                    int totalQuantite = resultSet.getInt("totalQuantite");
+    
+                    // Récupérer les détails du produit correspondant
+                    Produit produitPlusCommande = new Produit(idProduit);
+    
+                    if (produitPlusCommande != null) {
+                        res = produitPlusCommande.toString() + 
+                        " (Commandé " + totalQuantite + " fois)";
+                    }
+                }
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    public List<String> getTopCategories() {
+        List<String> topCategories = new ArrayList<>();
+
+        String query = """
+            SELECT ca.nomCategorie, SUM(ppm.quantiteVoulue) AS totalQuantite
+            FROM panier_produit_magasin ppm, panier p, commande c, produit prod, categorie ca, appartenir a
+            WHERE ppm.idPanier = p.idPanier
+            AND p.idPanier = c.idPanier
+            AND ppm.idProduit = prod.idProduit
+            AND prod.idProduit = a.idProduit
+            AND a.idCategorie = ca.idCategorie
+            GROUP BY ca.nomCategorie
+            ORDER BY totalQuantite DESC
+            LIMIT 5;        
+            """;
+
+        try (Connection connection = DBConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query)) {
+
+            // Exécuter la requête pour récupérer les catégories les plus commandées
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String categorie = resultSet.getString("nomCategorie");
+                    int totalQuantite = resultSet.getInt("totalQuantite");
+
+                    // Ajouter les détails au résultat
+                    topCategories.add(categorie + " (Commandé " + totalQuantite + " fois)");
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return topCategories;
+    }
+
+    /*
+     * Permet de récupérer le client qui a le plus commandé
+     */
+    public List<String> getTopClientsNbCommandes() {
+        List<String> topClients = new ArrayList<>();
+    
+        String query = """
+            SELECT idClient, COUNT(*) AS nbCommandes
+            FROM panier
+            WHERE dateFinPanier IS NOT NULL
+            GROUP BY idClient
+            HAVING COUNT(*) = (
+                SELECT MAX(nbCommandes) 
+                FROM (
+                    SELECT COUNT(*) AS nbCommandes
+                    FROM panier 
+                    WHERE dateFinPanier IS NOT NULL
+                    GROUP BY idClient
+                ) AS commandesParClient
+            )
+        """;
+    
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+    
+            // Exécute la requête pour récupérer les clients ayant le plus commandé
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    int idClient = resultSet.getInt("idClient");
+                    int nbCommandes = resultSet.getInt("nbCommandes");
+    
+                    // Charger les informations sur le client
+                    Client client = new Client(idClient);
+                    topClients.add(client.toString() + " (Commandes: " + nbCommandes + ")");
+                }
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return topClients;
+    }
+
+    public List<String> getTopClientsChiffreAffaires() {
+        List<String> topClients = new ArrayList<>();
+    
+        String query = """
+            SELECT p.idClient, SUM(ppm.quantiteVoulue * pr.prixUnitaire) AS totalCA
+            FROM panier p
+            JOIN panier_produit_magasin ppm ON p.idPanier = ppm.idPanier
+            JOIN produit pr ON ppm.idProduit = pr.idProduit
+            WHERE p.dateFinPanier IS NOT NULL
+            GROUP BY p.idClient
+            HAVING SUM(ppm.quantiteVoulue * pr.prixUnitaire) = (
+                SELECT MAX(totalCA) 
+                FROM (
+                    SELECT SUM(ppm.quantiteVoulue * pr.prixUnitaire) AS totalCA
+                    FROM panier p
+                    JOIN panier_produit_magasin ppm ON p.idPanier = ppm.idPanier
+                    JOIN produit pr ON ppm.idProduit = pr.idProduit
+                    WHERE p.dateFinPanier IS NOT NULL
+                    GROUP BY p.idClient
+                ) AS caParClient
+            )
+        """;
+    
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+    
+            // Exécute la requête pour récupérer les clients ayant généré le plus de chiffre d'affaires
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    int idClient = resultSet.getInt("idClient");
+                    double totalCA = resultSet.getDouble("totalCA");
+    
+                    // Charger les informations sur le client
+                    Client client = new Client(idClient);
+                    topClients.add(client.toString() + " (Chiffre d'Affaires: " + totalCA + " euros)");
+                }
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        return topClients;
+    }
+    
+    
 }

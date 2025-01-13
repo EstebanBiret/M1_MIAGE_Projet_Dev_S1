@@ -95,9 +95,9 @@ public class Client {
         String query = """
             SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
                 p.poidsProduit, p.conditionnementProduit, p.marqueProduit, ppm.quantiteVoulue
-            FROM panier_produit_magasin ppm
-            INNER JOIN produit p ON ppm.idProduit = p.idProduit
-            WHERE ppm.idPanier = ?
+            FROM panier_produit_magasin ppm, produit p
+            WHERE ppm.idProduit = p.idProduit
+            AND ppm.idPanier = ?
         """;
 
         try (Connection connection = DBConnection.getConnection();
