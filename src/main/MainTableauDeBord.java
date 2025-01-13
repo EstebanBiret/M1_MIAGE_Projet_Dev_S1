@@ -1,9 +1,8 @@
 package src.main;
 
 import java.util.List;
-
+import java.util.Map;
 import src.Client;
-import src.Produit;
 
 public class MainTableauDeBord {
     
@@ -16,6 +15,15 @@ public class MainTableauDeBord {
         List<String> produits = client.getProduitsPlusCommandes();
         for (String produit : produits) {
             System.out.println(produit);
+        }
+
+        // Tester le calcul des habitudes de consommation pour le client
+        Map<String, Integer> habitudes = client.calculerHabitudesConsommation(client.getIdClient());
+
+        // Afficher les habitudes
+        for (Map.Entry<String, Integer> habitude : habitudes.entrySet()) {
+            System.out.println(habitude.getKey() + " : " + habitude.getValue());
+         
         }
     }
 }
