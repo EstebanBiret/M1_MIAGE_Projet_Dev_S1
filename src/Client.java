@@ -1,5 +1,7 @@
 package src;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Client {
     private int idClient; //id en BD (auto increment)
@@ -26,18 +28,6 @@ public class Client {
                         this.adresseClient = rs.getString("adresseClient");
                         this.telClient = rs.getString("telClient");
                         this.idMagasinFavori = rs.getInt("idMagasin");
-
-                        //on ajoute le panier en cours du client s'il en a un, requête dans la table panier
-                        /*String selectPanier = "SELECT * FROM panier WHERE idClient = ? AND panierTermine = false";
-                        try (PreparedStatement pstmt2 = connection.prepareStatement(selectPanier)) {
-                            pstmt2.setInt(1, idClient);
-                            try (ResultSet rs2 = pstmt2.executeQuery()) {
-                                if (rs2.next()) {
-                                    this.panierEnCours = new Panier(rs2.getInt("idPanier"), idClient, rs2.getInt("idMagasin"), rs2.getDate("dateDebutPanier"));
-                                }
-                                else this.panierEnCours = null;
-                            }
-                        }*/
                     } else {
                         System.out.println("Client introuvable (" + idClient + ")");
                     }
@@ -81,6 +71,59 @@ public class Client {
     public Panier creerPanier() {
         //on gère dans la classe panier le cas où le client a déjà un panier en cours
         return new Panier(this.idClient);
+    }
+
+    /*
+     * Retourne une liste des produits les plus commandés du client actuel
+     */
+    public List<Produit> getProduitsPlusCommandes() {
+        List<Produit> produits = new ArrayList<>();
+
+        //récupérer les commandes de ce client
+        List<Commande> commandes = getCommandes();
+        for (Commande commande : commandes) {
+            System.out.println(commande.toString());
+        }
+        return produits;
+    }
+
+    /*
+     * Retourne une liste des commandes du client actuel
+     */
+    public List<Commande> getCommandes() {
+        List<Commande> commandes = new ArrayList<>();
+
+        //récupérer en BD les commandes de ce client
+        try (Connection connection = DBConnection.getConnection()) {
+
+            String commandesQuery = "SELECT * FROM commande c, panier p WHERE c.idPanier = p.idPanier AND p.idClient = ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(commandesQuery)) {
+                pstmt.setInt(1, this.idClient);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        Commande commande = new Commande(
+                            rs.getInt("idCommande"),
+                            rs.getInt("idPanier"),
+                            rs.getString("typeCommande"),
+                            rs.getString("statutCommande"),
+                            rs.getTimestamp("dateReception"),
+                            rs.getTimestamp("datePreparation"),
+                            rs.getTimestamp("dateFinalisation")
+                        );
+                        commandes.add(commande);
+                    } 
+                }
+            }
+            connection.close();
+    
+            } catch (SQLException e) {
+                System.out.println("Erreur : " + e.getMessage());
+            }
+
+        if(commandes.isEmpty()) {
+            System.out.println("Ce client n'a pas de commandes.");
+        }
+        return commandes;
     }
 
     @Override

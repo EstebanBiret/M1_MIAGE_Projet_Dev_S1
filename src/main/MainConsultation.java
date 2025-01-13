@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import src.DBConnection;
 import src.Produit;
+import java.util.Scanner;
 
 public class MainConsultation {
     
@@ -106,13 +107,24 @@ public class MainConsultation {
         System.out.println("Visualiser les détails d'un produit par son ID");
 
         //recherche et affichage d'un produit par son ID
-        Produit produitId = new Produit(5);
+        //scanner pour choisir l'id du produit
+        int idProduit;
+        try (Scanner scanner = new Scanner(System.in)) {
+            
+            System.out.print("Veuillez entrer le numéro du produit souhaité : ");
+            while (!scanner.hasNextInt()) {
+                System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                scanner.next();
+            }
+            idProduit = scanner.nextInt();
+        }
+
+        Produit produitId = new Produit(idProduit);
         if(produitId.exists()) 
-        System.out.println("ID 5 --> " + produitId.toString());
+        System.out.println(produitId.toString());
         System.out.println("\n");
 
-        //recherche et affichage de produit.s par son libellé
-
+        //recherche et affichage de produit.s par son libellé exact
         String libelle = "Jus d'orange";
         System.out.println("Visualiser les détails des " + libelle);
         List<Produit> produitsLibelle = getProduitsByLibelle(libelle, true);
