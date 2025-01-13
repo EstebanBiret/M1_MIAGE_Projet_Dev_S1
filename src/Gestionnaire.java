@@ -315,24 +315,27 @@ public class Gestionnaire {
         List<String> topClients = new ArrayList<>();
     
         String query = """
-            SELECT p.idClient, SUM(ppm.quantiteVoulue * pr.prixUnitaire) AS totalCA
-            FROM panier p
-            JOIN panier_produit_magasin ppm ON p.idPanier = ppm.idPanier
-            JOIN produit pr ON ppm.idProduit = pr.idProduit
-            WHERE p.dateFinPanier IS NOT NULL
-            GROUP BY p.idClient
-            HAVING SUM(ppm.quantiteVoulue * pr.prixUnitaire) = (
-                SELECT MAX(totalCA) 
-                FROM (
-                    SELECT SUM(ppm.quantiteVoulue * pr.prixUnitaire) AS totalCA
-                    FROM panier p
-                    JOIN panier_produit_magasin ppm ON p.idPanier = ppm.idPanier
-                    JOIN produit pr ON ppm.idProduit = pr.idProduit
-                    WHERE p.dateFinPanier IS NOT NULL
-                    GROUP BY p.idClient
-                ) AS caParClient
-            )
-        """;
+        SELECT p.idClient, SUM(ppm.quantiteVoulue * pr.prixUnitaire) AS totalCA
+        FROM panier p, panier_produit_magasin ppm, produit pr, commande c
+        WHERE p.idPanier = ppm.idPanier
+        AND ppm.idProduit = pr.idProduit
+        AND p.idPanier = c.idPanier
+        AND p.dateFinPanier IS NOT NULL
+        GROUP BY p.idClient
+        HAVING SUM(ppm.quantiteVoulue * pr.prixUnitaire) = (
+            SELECT MAX(totalCA)
+            FROM (
+                SELECT SUM(ppm.quantiteVoulue * pr.prixUnitaire) AS totalCA
+                FROM panier p, panier_produit_magasin ppm, produit pr, commande c
+                WHERE p.idPanier = ppm.idPanier
+                AND ppm.idProduit = pr.idProduit
+                AND p.idPanier = c.idPanier
+                AND p.dateFinPanier IS NOT NULL
+                GROUP BY p.idClient
+            ) AS caParClient
+        )
+    """;
+
     
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
