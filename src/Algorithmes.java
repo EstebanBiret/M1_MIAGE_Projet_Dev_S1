@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import src.produit.ProduitRemplacement;
+
 public class Algorithmes {
 
     /*public int remplacementProduitHabitudes(int idClient, int idProduit, int qte) {
@@ -16,14 +18,12 @@ public class Algorithmes {
 
     //remplacement d'un produit avec gestion des alternatives, retourne l'ID du produit de remplacement
 
-    //TODO changer le type de retour pour avoir l'idProduit, l'idMagasin et la quantité demandée
-    public static int remplacementProduit(int idProduit, int idMagasin, int quantiteDemandee) {
-        List<Produit> produitsAlternatifs = new ArrayList<>();
+    public static ProduitRemplacement remplacementProduit(int idProduit, int idMagasin, int quantiteDemandee) {
+        List<ProduitRemplacement> produitsAlternatifs = new ArrayList<>();
         int nbIterations = 0;
     
         //tant que la liste n'est pas pleine ou que l'on a pas encore fait tous les filtres
         while (produitsAlternatifs.size() < 5 && nbIterations < 5) {
-            //TODO rajouter le nom du magasin dans la requête
             String query = construireQuery(nbIterations, idProduit);
     
             try (Connection connection = DBConnection.getConnection();
@@ -72,16 +72,19 @@ public class Algorithmes {
                 // Exécution de la requête et ajout des résultats à la liste
                 try (ResultSet resultSet = statement.executeQuery()) {
                     while (resultSet.next() && produitsAlternatifs.size() < 5) {
-                        Produit produit = new Produit(
-                                resultSet.getInt("idProduit"),
-                                resultSet.getString("libelleProduit"),
-                                resultSet.getDouble("prixUnitaire"),
-                                resultSet.getDouble("prixKilo"),
-                                resultSet.getString("nutriscore").charAt(0),
-                                resultSet.getDouble("poidsProduit"),
-                                resultSet.getString("conditionnementProduit"),
-                                resultSet.getString("marqueProduit")
-                        );
+                        ProduitRemplacement produit = new ProduitRemplacement (
+                        resultSet.getInt("idProduit"),
+                        resultSet.getString("libelleProduit"),
+                        resultSet.getDouble("prixUnitaire"),
+                        resultSet.getDouble("prixKilo"),
+                        resultSet.getString("nutriscore").charAt(0),
+                        resultSet.getDouble("poidsProduit"),
+                        resultSet.getString("conditionnementProduit"),
+                        resultSet.getString("marqueProduit"),
+                        resultSet.getInt("quantiteEnStock"),
+                        resultSet.getInt("idMagasin"),
+                        resultSet.getString("nomMagasin")
+                    );
 
                         //System.out.println("test : " + produit.toString() + nbIterations);
 
@@ -104,20 +107,22 @@ public class Algorithmes {
         // Si aucun produit n'a été trouvé
         if (produitsAlternatifs.isEmpty()) {
             System.out.println("Aucun produit alternatif trouvé.");
-            return -1;
+            return null;
         }
     
         // Proposition des produits à l'utilisateur
 
-        //TODO rajouter magasin et la quantité disponible
         System.out.println("Produits disponibles en remplacement :");
         for (int i = 0; i < produitsAlternatifs.size(); i++) {
-            Produit produit = produitsAlternatifs.get(i);
-            System.out.printf("%d. %s (Nutriscore: %c, Prix: %.2f€, Prix/Kg: %.2f€/kg, Poids: %.2fkg, Conditionnement: %s, Marque: %s)%n",
-                    i + 1, produit.getLibelleProduit(), produit.getNutriscore(),
-                    produit.getPrixUnitaire(), produit.getPrixKilo(),
-                    produit.getPoidsProduit(), produit.getConditionnementProduit(),
-                    produit.getMarqueProduit());
+            ProduitRemplacement produit = produitsAlternatifs.get(i);
+            System.out.printf(
+            "%d. %s (Nutriscore: %c, Prix: %.2f€, Prix/Kg: %.2f€/kg, Poids: %.2fkg, Conditionnement: %s, Marque: %s, Quantité Disponible: %d, Magasin: %s)%n",
+            i + 1, produit.getLibelleProduit(), produit.getNutriscore(),
+            produit.getPrixUnitaire(), produit.getPrixKilo(),
+            produit.getPoidsProduit(), produit.getConditionnementProduit(),
+            produit.getMarqueProduit(), produit.getQuantiteDisponible(),
+            produit.getNomMagasin()
+            );
         }
     
         // Choix de l'utilisateur
@@ -132,8 +137,17 @@ public class Algorithmes {
                 choix = scanner.nextInt();
             } while (choix < 1 || choix > produitsAlternatifs.size());  
     
-            //TODO avant return, regarder si la quantité initalement prévue est > que la quantité disponible du new produit, si oui on donne tout, si non on donne la quantité initiale
-            return produitsAlternatifs.get(choix - 1).getIdProduit();
+            ProduitRemplacement produitChoisi = produitsAlternatifs.get(choix - 1);
+
+            // Gestion de la quantité à retourner
+            int quantiteRetournee = Math.min(quantiteDemandee, produitChoisi.getQuantiteDisponible());
+            System.out.printf(
+                "Produit choisi : %s (Quantité demandée : %d, Quantité retournée : %d)%n",
+                produitChoisi.getLibelleProduit(), quantiteDemandee, quantiteRetournee
+            );
+
+            produitChoisi.setQuantiteChoisie(quantiteRetournee);
+            return produitChoisi;
         }
     }
     
@@ -144,11 +158,13 @@ public class Algorithmes {
             case 0: // même libellé, catégorie, marque, nutriscore et magasin
                 requete += """
                     SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
-                           p.poidsProduit, p.conditionnementProduit, p.marqueProduit
-                    FROM produit p, appartenir a, stocker s
-                    WHERE p.idProduit = a.idProduit
-                    AND s.idProduit = p.idProduit
-                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                           p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
+                           s.quantiteEnStock, s.idMagasin, m.nomMagasin
+                    FROM produit p
+                    JOIN appartenir a ON p.idProduit = a.idProduit
+                    JOIN stocker s ON s.idProduit = p.idProduit
+                    JOIN magasin m ON s.idMagasin = m.idMagasin
+                    WHERE p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
                     AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.nutriscore = (SELECT nutriscore FROM produit WHERE idProduit = ?)
@@ -160,10 +176,13 @@ public class Algorithmes {
             case 1: // même libellé, catégorie, marque et nutriscore
                 requete += """
                     SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
-                        p.poidsProduit, p.conditionnementProduit, p.marqueProduit
-                    FROM produit p, appartenir a
-                    WHERE p.idProduit = a.idProduit
-                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                           p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
+                           s.quantiteEnStock, s.idMagasin, m.nomMagasin
+                    FROM produit p
+                    JOIN appartenir a ON p.idProduit = a.idProduit
+                    JOIN stocker s ON s.idProduit = p.idProduit
+                    JOIN magasin m ON s.idMagasin = m.idMagasin
+                    WHERE p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
                     AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.nutriscore = (SELECT nutriscore FROM produit WHERE idProduit = ?)
@@ -174,10 +193,13 @@ public class Algorithmes {
             case 2: // même libellé, catégorie et marque
                 requete += """
                     SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
-                        p.poidsProduit, p.conditionnementProduit, p.marqueProduit
-                    FROM produit p, appartenir a
-                    WHERE p.idProduit = a.idProduit
-                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                           p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
+                           s.quantiteEnStock, s.idMagasin, m.nomMagasin
+                    FROM produit p
+                    JOIN appartenir a ON p.idProduit = a.idProduit
+                    JOIN stocker s ON s.idProduit = p.idProduit
+                    JOIN magasin m ON s.idMagasin = m.idMagasin
+                    WHERE p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
                     AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.idProduit != ?;
@@ -187,10 +209,13 @@ public class Algorithmes {
             case 3: // même libellé et catégorie
                 requete += """
                     SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
-                        p.poidsProduit, p.conditionnementProduit, p.marqueProduit
-                    FROM produit p, appartenir a
-                    WHERE p.idProduit = a.idProduit
-                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                           p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
+                           s.quantiteEnStock, s.idMagasin, m.nomMagasin
+                    FROM produit p
+                    JOIN appartenir a ON p.idProduit = a.idProduit
+                    JOIN stocker s ON s.idProduit = p.idProduit
+                    JOIN magasin m ON s.idMagasin = m.idMagasin
+                    WHERE p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
                     AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.idProduit != ?;
                 """;
@@ -199,10 +224,13 @@ public class Algorithmes {
             case 4: // même catégorie
                 requete += """
                     SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
-                        p.poidsProduit, p.conditionnementProduit, p.marqueProduit
-                    FROM produit p, appartenir a
-                    WHERE p.idProduit = a.idProduit
-                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                           p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
+                           s.quantiteEnStock, s.idMagasin, m.nomMagasin
+                    FROM produit p
+                    JOIN appartenir a ON p.idProduit = a.idProduit
+                    JOIN stocker s ON s.idProduit = p.idProduit
+                    JOIN magasin m ON s.idMagasin = m.idMagasin
+                    WHERE a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.idProduit != ?;
                 """;
                 break;
@@ -213,5 +241,4 @@ public class Algorithmes {
     
         return requete;
     }
-    
 }

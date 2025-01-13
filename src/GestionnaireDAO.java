@@ -4,8 +4,16 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import src.client.Client;
+import src.client.ClientDAO;
+import src.produit.Produit;
+import src.produit.ProduitDAO;
+
 //classe pour les US 3, Marc - Gérer
-public class Gestionnaire {
+public class GestionnaireDAO {
+
+    ClientDAO clientDAO = new ClientDAO();
+    ProduitDAO produitDAO = new ProduitDAO();
 
     /*
      * Permet de sauvegarder en BD un nouveau produit
@@ -215,7 +223,7 @@ public class Gestionnaire {
                     int totalQuantite = resultSet.getInt("totalQuantite");
     
                     // Récupérer les détails du produit correspondant
-                    Produit produitPlusCommande = new Produit(idProduit);
+                    Produit produitPlusCommande = produitDAO.getProduitById(idProduit);
     
                     if (produitPlusCommande != null) {
                         res = produitPlusCommande.toString() + 
@@ -299,7 +307,7 @@ public class Gestionnaire {
                     int nbCommandes = resultSet.getInt("nbCommandes");
     
                     // Charger les informations sur le client
-                    Client client = new Client(idClient);
+                    Client client = clientDAO.getClientById(idClient);
                     topClients.add(client.toString() + " (Commandes: " + nbCommandes + ")");
                 }
             }
@@ -347,7 +355,7 @@ public class Gestionnaire {
                     double totalCA = resultSet.getDouble("totalCA");
     
                     // Charger les informations sur le client
-                    Client client = new Client(idClient);
+                    Client client = clientDAO.getClientById(idClient);
                     topClients.add(client.toString() + " (Chiffre d'Affaires: " + totalCA + " euros)");
                 }
             }

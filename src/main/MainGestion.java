@@ -3,15 +3,15 @@ package src.main;
 import java.util.ArrayList;
 import java.util.List;
 
-import src.Gestionnaire;
-import src.Produit;
+import src.GestionnaireDAO;
+import src.produit.Produit;
 
 public class MainGestion {
     
     public static void main(String[] args) {
 
         //création du gestionnaire
-        Gestionnaire Marc = new Gestionnaire();
+        GestionnaireDAO Marc = new GestionnaireDAO();
 
         /* ----- US 3.1 ----- */
         System.out.println("\n");

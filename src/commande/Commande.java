@@ -1,9 +1,11 @@
-package src;
-import java.sql.*; 
+package src.commande;
+import java.sql.*;
+
+import src.DBConnection; 
 
 public class Commande {
     
-    //propritetes
+    //propriétés
     private int idCommande;
     private int idPanier;
     private String typeCommande;
@@ -31,52 +33,11 @@ public class Commande {
         this.statutCommande = "en attente";
         this.datePreparation = null;
         this.dateFinalisation = null;
-
-            try (Connection connection = DBConnection.getConnection()) {
-
-            String queryTest = "SELECT * FROM commande WHERE idPanier = ?";
-            try (PreparedStatement pstmt = connection.prepareStatement(queryTest)) {
-                pstmt.setInt(1, idPanier);
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        System.out.println("La commande existe déjà .");
-                        return;
-                    }
-                }
-            }
-
-            //création d'une commande en BD
-            String query = "INSERT INTO commande (idCommande,idPanier, statutCommande, typeCommande, dateReception,datePreparation,dateFinalisation) VALUES (?, ?, ?, ?,?,?,?)";
-            try (PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-                pstmt.setInt(1, idCommande);
-                pstmt.setInt(2, this.idPanier);
-                pstmt.setString(3, this.statutCommande);
-                pstmt.setString(4, this.typeCommande);
-                pstmt.setTimestamp(5, this.dateReception);
-                pstmt.setTimestamp(6, this.datePreparation); 
-                pstmt.setTimestamp(7, this.dateFinalisation); 
-
-                int rowsAffected = pstmt.executeUpdate();
-
-                //on récupère l'id auto increment de la ligne tout juste générée pour l'attribuer à notre commande java
-                if (rowsAffected > 0) {
-                    try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                        if (rs.next()) {
-                            this.idCommande = rs.getInt(1);
-                            System.out.println("Commande créé avec succès : " + this.toString());
-                        }
-                    }
-                } else {
-                    System.out.println("Aucune Commande créé.");
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Erreur lors de la création du commande : " + e.getMessage());
-        }
     }
 
     //getters & setters
     public int getIdCommande() {return idCommande;}
+    public void setIdCommande(int idCommande) {this.idCommande = idCommande;}
     public int getIdPanier() {return idPanier;}
     public String getStatutCommande() {return statutCommande;}
     public String getTypeCommande() {return typeCommande;}

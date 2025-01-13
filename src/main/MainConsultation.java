@@ -5,99 +5,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import src.DBConnection;
-import src.Produit;
+import src.produit.Produit;
+import src.produit.ProduitDAO;
+
 import java.util.Scanner;
 
 public class MainConsultation {
-    
-    //fonction qui retourne la liste des produits de la catégorie fournie en paramètre
-    public static List<Produit> produitsParCategorie(String categorie) {
-        List<Produit> produits = new ArrayList<>();
-
-        try (Connection connection = DBConnection.getConnection()) {
-            //rechercher les produits appartenant à la catégorie en paramètre
-            String selectQuery = "SELECT p.* FROM produit p, appartenir a, categorie c " 
-            + "WHERE p.idProduit = a.idProduit AND a.idCategorie = c.idCategorie AND c.nomCategorie = ?";
-
-            try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
-                pstmt.setString(1, categorie);
-                try (ResultSet rs = pstmt.executeQuery()) {
-
-                    //tant qu'il y a des produits, on les ajoute à la liste
-                    while (rs.next()) {
-                        Produit produit = new Produit(
-                            rs.getString("libelleProduit"),
-                            rs.getDouble("prixUnitaire"),
-                            rs.getDouble("prixKilo"),
-                            rs.getString("nutriscore").charAt(0),
-                            rs.getDouble("poidsProduit"),
-                            rs.getString("conditionnementProduit"),
-                            rs.getString("marqueProduit")
-                        );
-                        produit.setIdProduit(rs.getInt("idProduit"));
-                        produits.add(produit);
-                    } 
-                }
-            }
-            connection.close();
-
-        } catch (SQLException e) {
-            System.out.println("Erreur : " + e.getMessage());
-        }
-
-        if (produits.isEmpty()) {
-            System.out.println("Aucun produit trouvé dans cette catégorie (" + categorie + ")");
-        }
-        return produits;
-    }
-
-    //booléen en param pour savoir si on récupère un produit par son nom exact ou mot clé
-    public static List<Produit> getProduitsByLibelle(String libelleProduit, boolean nomExact) {
-        List<Produit> produits = new ArrayList<>();
-
-        try (Connection connection = DBConnection.getConnection()) {
-            String selectQuery;
-            if(nomExact) {
-                selectQuery = "SELECT * FROM produit WHERE libelleProduit = ?";
-            } else {
-                selectQuery = "SELECT * FROM produit WHERE libelleProduit LIKE ?";
-                libelleProduit = "%" + libelleProduit + "%";
-            }
-            
-            try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
-                pstmt.setString(1, libelleProduit);
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    while (rs.next()) {
-                        Produit produit = new Produit(
-                            rs.getString("libelleProduit"),
-                            rs.getDouble("prixUnitaire"),
-                            rs.getDouble("prixKilo"),
-                            rs.getString("nutriscore").charAt(0),
-                            rs.getDouble("poidsProduit"),
-                            rs.getString("conditionnementProduit"),
-                            rs.getString("marqueProduit")
-                        );
-                        produit.setIdProduit(rs.getInt("idProduit"));
-                        produits.add(produit);
-                    } 
-                }
-            }
-            connection.close();
-
-        } 
-        catch (SQLException e) {
-            System.out.println("Erreur : " + e.getMessage());
-        }
-
-        if(produits.isEmpty()){
-            if(nomExact) {
-                System.out.println("Produit introuvable (" + libelleProduit + ")");
-            } else {
-                System.out.println("Aucun produit trouvé avec le mot clé " + "'"  + libelleProduit + "'.");
-            }
-        }
-        return produits;
-    }
 
     public static void main(String[] args) {
 
@@ -109,25 +22,36 @@ public class MainConsultation {
         //recherche et affichage d'un produit par son ID
         //scanner pour choisir l'id du produit
         int idProduit;
+        Produit produitId = null;
+        ProduitDAO produitDAO = new ProduitDAO();
+
+        //tant que le produit voulu n'existe pas
         try (Scanner scanner = new Scanner(System.in)) {
-            
-            System.out.print("Veuillez entrer le numéro du produit souhaité : ");
-            while (!scanner.hasNextInt()) {
-                System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
-                scanner.next();
+            while (produitId == null) {
+                System.out.print("Veuillez entrer le numéro du produit souhaité : ");
+                while (!scanner.hasNextInt()) {
+                    System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                    scanner.next();
+                }
+                idProduit = scanner.nextInt();
+
+                // Recherche du produit via le DAO
+                produitId = produitDAO.getProduitById(idProduit);
+
+                if (produitId == null) {
+                    System.out.println("Produit introuvable avec l'ID : " + idProduit);
+                }
             }
-            idProduit = scanner.nextInt();
         }
 
-        Produit produitId = new Produit(idProduit);
-        if(produitId.exists()) 
+        // Affichage des détails du produit
         System.out.println(produitId.toString());
         System.out.println("\n");
 
         //recherche et affichage de produit.s par son libellé exact
         String libelle = "Jus d'orange";
         System.out.println("Visualiser les détails des " + libelle);
-        List<Produit> produitsLibelle = getProduitsByLibelle(libelle, true);
+        List<Produit> produitsLibelle = produitDAO.getProduitsByLibelle(libelle, true);
         for (Produit produit : produitsLibelle) {
             System.out.println(produit.toString());
         }
@@ -139,7 +63,7 @@ public class MainConsultation {
         //recherche de produits par mot clé
         String motCle = "Jus d'o";
         System.out.println("Recherche par mot clé : " + motCle);
-        List<Produit> produitsMotCle = getProduitsByLibelle(libelle, false);
+        List<Produit> produitsMotCle = produitDAO.getProduitsByLibelle(libelle, false);
         for (Produit produit : produitsMotCle) {
             System.out.println(produit.toString());
         }
@@ -150,7 +74,7 @@ public class MainConsultation {
         //consulter la liste des produits par catégorie
         String categorie = "Boissons";
         System.out.println("Recherche par catégorie : " + categorie);
-        List<Produit> produitsBoissons = produitsParCategorie(categorie);
+        List<Produit> produitsBoissons = produitDAO.produitsParCategorie(categorie);
         for (Produit produit : produitsBoissons) {
             System.out.println(produit.toString());
         }
