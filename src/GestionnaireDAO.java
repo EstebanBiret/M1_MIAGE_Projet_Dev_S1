@@ -2,7 +2,9 @@ package src;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import src.client.Client;
 import src.client.ClientDAO;
 import src.produit.Produit;
@@ -413,36 +415,103 @@ public double calculerTempsMoyenPreparation() {
 }
 
     //-----US 3.5-----//
-    public List<String> getClientProfiles() {
-        List<String> clientProfiles = new ArrayList<>();
-
-        String query = """
+    public Map<String, String> determineClientProfiles() {
+        Map<String, String> clientProfiles = new HashMap<>();
+    
+        // Query for individual client profiles
+        String clientProfileQuery = """
             SELECT c.nomClient, c.prenomClient, p.nomProfil
             FROM client c
-            JOIN client_profil cp ON c.idClient = cp.idClient
+            JOIN panier pn ON c.idClient = pn.idClient
+            JOIN commande cm ON pn.idPanier = cm.idPanier
+            JOIN panier_produit_magasin ppm ON cm.idPanier = ppm.idPanier
+            JOIN produit pr ON ppm.idProduit = pr.idProduit
+            JOIN Appartenir ap ON pr.idProduit = ap.idProduit
+            JOIN categorie cat ON ap.idCategorie = cat.idCategorie
+            JOIN client_profil cp ON cp.idClient = c.idClient
             JOIN profil p ON cp.idProfil = p.idProfil
         """;
-
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-
-        
-            try (ResultSet resultSet = statement.executeQuery()) {
+    
+        // Query for profile analytics
+        String profileAnalyticsQuery = """
+            SELECT 
+                p.nomProfil,
+                COUNT(DISTINCT c.idClient) AS nombreClients,
+                COUNT(DISTINCT cm.idCommande) AS nombreCommandes,
+                GROUP_CONCAT(DISTINCT cat.nomCategorie SEPARATOR ', ') AS categoriesAchats
+            FROM client c
+            JOIN panier pn ON c.idClient = pn.idClient
+            JOIN commande cm ON pn.idPanier = cm.idPanier
+            JOIN panier_produit_magasin ppm ON cm.idPanier = ppm.idPanier
+            JOIN produit pr ON ppm.idProduit = pr.idProduit
+            JOIN Appartenir ap ON pr.idProduit = ap.idProduit
+            JOIN categorie cat ON ap.idCategorie = cat.idCategorie
+            JOIN client_profil cp ON cp.idClient = c.idClient
+            JOIN profil p ON cp.idProfil = p.idProfil
+            GROUP BY p.nomProfil
+            ORDER BY nombreClients DESC
+        """;
+    
+        try (Connection connection = DBConnection.getConnection()) {
+    
+            // Process individual client profiles
+            try (PreparedStatement statement = connection.prepareStatement(clientProfileQuery);
+                 ResultSet resultSet = statement.executeQuery()) {
+    
+                Map<String, Map<String, Integer>> clientProfileCounts = new HashMap<>();
+    
                 while (resultSet.next()) {
-                    String nomClient = resultSet.getString("nomClient");
-                    String prenomClient = resultSet.getString("prenomClient");
-                    String nomProfil = resultSet.getString("nomProfil");
-                    clientProfiles.add(nomClient + " " + prenomClient + " - Profil: " + nomProfil);
+                    String clientName = resultSet.getString("nomClient") + " " + resultSet.getString("prenomClient");
+                    String profileName = resultSet.getString("nomProfil");
+    
+                    clientProfileCounts.putIfAbsent(clientName, new HashMap<>());
+                    Map<String, Integer> profileCounts = clientProfileCounts.get(clientName);
+    
+                    profileCounts.put(profileName, profileCounts.getOrDefault(profileName, 0) + 1);
+                }
+    
+                // Find the most frequent profile for each client
+                for (Map.Entry<String, Map<String, Integer>> entry : clientProfileCounts.entrySet()) {
+                    String clientName = entry.getKey();
+                    Map<String, Integer> profileCounts = entry.getValue();
+    
+                    String mostFrequentProfile = profileCounts.entrySet().stream()
+                        .max(Map.Entry.comparingByValue())
+                        .map(Map.Entry::getKey)
+                        .orElse("No Profile");
+    
+                    clientProfiles.put(clientName, mostFrequentProfile);
                 }
             }
-
+    
+            // Process profile analytics
+            try (PreparedStatement statement = connection.prepareStatement(profileAnalyticsQuery);
+                 ResultSet resultSet = statement.executeQuery()) {
+    
+                System.out.println("Profil Analytics:");
+                while (resultSet.next()) {
+                    String nomProfil = resultSet.getString("nomProfil");
+                    int nombreClients = resultSet.getInt("nombreClients");
+                    int nombreCommandes = resultSet.getInt("nombreCommandes");
+                    String categoriesAchats = resultSet.getString("categoriesAchats");
+    
+                    System.out.println("Profil: " + nomProfil);
+                    System.out.println("Nombre de clients: " + nombreClients);
+                    System.out.println("Nombre de commandes: " + nombreCommandes);
+                    System.out.println("Catégories d'achats: " + categoriesAchats);
+                    System.out.println("------------");
+                }
+            }
+    
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("Erreur lors de la récupération des profils clients : " + e.getMessage());
+            System.out.println("Erreur lors de la détermination des profils des clients : " + e.getMessage());
         }
-
+    
         return clientProfiles;
     }
+    
+    
 
     
 }
