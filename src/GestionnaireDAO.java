@@ -387,7 +387,6 @@ public class GestionnaireDAO {
         return 0;
     }
     // Méthode pour calculer le temps moyen de préparation des commandes
-    // Méthode pour calculer le temps moyen de préparation des commandes
 public double calculerTempsMoyenPreparation() {
     double tempsMoyen = 0;
 

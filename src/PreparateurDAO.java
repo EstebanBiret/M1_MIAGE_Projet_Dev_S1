@@ -7,11 +7,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 public class PreparateurDAO {
-//classe pour les US 4, Adam - préparer
-
-
-//Consulter la liste des commandes à preparer par ordre de priorité
-public static void afficherCommandesEnAttente() {
+ //classe pour les US 4, Adam - préparer
+ //US 4.1 Consulter la liste des commandes à preparer par ordre de priorité
+ public void afficherCommandesEnAttente() {
  // Requête SQL pour récupérer les commandes avec statut "en attente" triées par dateReception (la plus ancienne en premier)
             
             String query = """
@@ -87,5 +85,37 @@ public static void afficherCommandesEnAttente() {
             }
         }
         
-    
+    //US 4.2
+    public void commencerAPreparer(int idCommande) {
+        try (Connection connection = DBConnection.getConnection()) {
+            String query = "SELECT statutCommande FROM commande WHERE idCommande = ? AND datePreparation IS NULL";
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+                pstmt.setInt(1, idCommande);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {  // Vérifie si la commande existe
+                        String statutCommande = rs.getString("statutCommande");
+                        if ("en attente".equalsIgnoreCase(statutCommande)) {
+                            String update = "UPDATE commande SET statutCommande = 'Préparation',datePreparation = now() WHERE idCommande = ?";
+                            try (PreparedStatement pstmtUpdate = connection.prepareStatement(update)) {
+                                pstmtUpdate.setInt(1, idCommande);
+                                int rowsAffected = pstmtUpdate.executeUpdate();
+                                if (rowsAffected > 0) {
+                                    System.out.println("Statut de la commande mis à jour avec succès.");
+                                } else {
+                                    System.out.println("Aucune commande mise à jour.");
+                                }
+                            }
+                        } else {
+                            System.out.println("La commande n'est pas en attente. Statut actuel : " + statutCommande);
+                        }
+                    } else {
+                        System.out.println("Commande introuvable pour l'ID : " + idCommande);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur SQL : " + e.getMessage());
+        }
+    }
+
 }
