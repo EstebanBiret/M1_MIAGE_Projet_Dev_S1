@@ -412,4 +412,38 @@ public double calculerTempsMoyenPreparation() {
 
     return tempsMoyen;
 }
+
+    //-----US 3.5-----//
+    public List<String> getClientProfiles() {
+        List<String> clientProfiles = new ArrayList<>();
+
+        String query = """
+            SELECT c.nomClient, c.prenomClient, p.nomProfil
+            FROM client c
+            JOIN client_profil cp ON c.idClient = cp.idClient
+            JOIN profil p ON cp.idProfil = p.idProfil
+        """;
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+        
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String nomClient = resultSet.getString("nomClient");
+                    String prenomClient = resultSet.getString("prenomClient");
+                    String nomProfil = resultSet.getString("nomProfil");
+                    clientProfiles.add(nomClient + " " + prenomClient + " - Profil: " + nomProfil);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors de la récupération des profils clients : " + e.getMessage());
+        }
+
+        return clientProfiles;
+    }
+
+    
 }

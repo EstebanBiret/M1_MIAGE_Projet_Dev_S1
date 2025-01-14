@@ -66,6 +66,8 @@ public class MainGestion {
             System.out.println(client);
         }
 
-
+        /* ----- US 3.5 ----- */
+        System.out.println("----- US 3.5 -----");
+        System.out.println(Marc.getClientProfiles());
     }
 }

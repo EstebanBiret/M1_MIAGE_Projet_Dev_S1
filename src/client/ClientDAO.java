@@ -227,4 +227,7 @@ public class ClientDAO {
         }
         return magasinFavori;
     }
+
+    
+
 }
