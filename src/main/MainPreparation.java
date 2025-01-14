@@ -2,13 +2,16 @@ package src.main;
 
 import java.util.Scanner;
 
-import src.commande.CommandeDAO;
+import src.PreparateurDAO;
+
+
 
 public class MainPreparation {
     
     public static void main(String[] args) {
         
-     CommandeDAO.afficherCommandesEnAttente();
+        PreparateurDAO pdao = new PreparateurDAO();
+    PreparateurDAO.afficherCommandesEnAttente();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -22,6 +25,6 @@ public class MainPreparation {
     String typeCommande = scanner.nextLine();
 
     // Marquer la commande en préparation
-    CommandeDAO.marquerEnPreparation(idCommande, typeCommande);
+   // CommandeDAO.marquerEnPreparation(idCommande, typeCommande);
     }
 }
