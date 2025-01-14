@@ -50,4 +50,84 @@ public class CommandeDAO {
         }
         return commande;
     }
+
+    //Consulter la liste des commandes à preparer par ordre de priorité
+    public static void afficherCommandesParPriorite() {
+        // Requête SQL pour trier les commandes selon statutCommande et dateReception
+        String query = """
+            SELECT idCommande, idPanier,statutCommande,dateReception, typeCommande,   datePreparation, dateFinalisation
+            FROM commande
+            ORDER BY 
+                CASE 
+                    WHEN statutCommande = 'en attente' THEN 1
+                    WHEN statutCommande = 'preparaion' THEN 2
+                    WHEN statutCommande = 'retrait' THEN 3
+                    WHEN statutCommande = 'en envoi' THEN 4
+                    ELSE 5
+                END,
+                dateReception ASC;
+            """;
+    
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+    
+            System.out.println("Liste des commandes par ordre de priorité :");
+            while (rs.next()) {
+                int idCommande = rs.getInt("idCommande");
+                int idPanier = rs.getInt("idPanier");
+                String typeCommande = rs.getString("typeCommande");
+                String statutCommande = rs.getString("statutCommande");
+                Timestamp dateReception = rs.getTimestamp("dateReception");
+                Timestamp datePreparation = rs.getTimestamp("datePreparation");
+                Timestamp dateFinalisation = rs.getTimestamp("dateFinalisation");
+    
+                // Affichage de chaque commande
+                System.out.println(new Commande(
+                    idCommande, idPanier, typeCommande, statutCommande, 
+                    dateReception, datePreparation, dateFinalisation
+                ).toString());
+            }
+    
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la récupération des commandes : " + e.getMessage());
+        }
+
+    }
+    
+    public static void marquerEnPreparation(int idCommande, String typeCommande) {
+        // Validation du type de commande
+        if (!typeCommande.equalsIgnoreCase("retrait") && !typeCommande.equalsIgnoreCase("livraison") && !typeCommande.equalsIgnoreCase("mixte")) {
+            System.out.println("Type de commande invalide. Veuillez choisir entre 'retrait' ou 'livraison' ou 'mixte'.");
+            return;
+        }
+    
+        String query = """
+            UPDATE commande
+            SET statutCommande = ?, typeCommande = ?, datePreparation = ?
+            WHERE idCommande = ?
+        """;
+    
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query)) {
+    
+            // Paramétrer la requête
+            pstmt.setString(1, "preparation");
+            pstmt.setString(2, typeCommande.toLowerCase());
+            pstmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            pstmt.setInt(4, idCommande);
+    
+            // Exécuter la mise à jour
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Commande " + idCommande + " mise à jour avec succès : statut = 'préparation', type = '" + typeCommande + "'.");
+            } else {
+                System.out.println("Aucune commande trouvée avec l'ID : " + idCommande);
+            }
+    
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la mise à jour de la commande : " + e.getMessage());
+        }
+    }
+    
 }

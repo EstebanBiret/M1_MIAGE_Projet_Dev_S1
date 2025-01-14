@@ -1,6 +1,8 @@
 package src.commande;
 import java.sql.*;
 
+import src.DBConnection;
+
 public class Commande {
     
     //propriétés
@@ -33,6 +35,7 @@ public class Commande {
         this.dateFinalisation = null;
     }
 
+    
     //getters & setters
     public int getIdCommande() {return idCommande;}
     public void setIdCommande(int idCommande) {this.idCommande = idCommande;}
