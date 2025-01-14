@@ -1,5 +1,7 @@
 package src.main;
 
+import java.util.Scanner;
+
 import src.client.Client;
 import src.client.ClientDAO;
 import src.panier.Panier;
@@ -7,25 +9,107 @@ import src.panier.PanierDAO;
 
 public class MainAchat {
     
+    static ClientDAO clientDAO = new ClientDAO();
+    static PanierDAO panierDAO = new PanierDAO();
+    
+    public static void menuAchat(int idClient) {
+
+        String magasinFavori = clientDAO.getMagasinFavori(idClient);
+        String prenomClient = clientDAO.getPrenomClient(idClient);
+        String nomClient = clientDAO.getNomClient(idClient);
+
+        // Menu principal pour l'achat
+        System.out.println("------------------------------------------");
+        System.out.println("| Bonjour " + prenomClient + " " + nomClient + " !");
+        System.out.println("|                                        |");
+        System.out.println("| Votre magasin favori : " + magasinFavori);
+        System.out.println("|                                        |");
+        System.out.println("| [1] Ajouter un produit au panier       |");
+        System.out.println("| [2] Afficher le panier                 |");
+        System.out.println("| [3] Valider le panier                  |");
+        System.out.println("| [4] Annuler le panier                  |");
+        System.out.println("| [0] Quitter                            |");
+        System.out.println("|                                        |");
+        System.out.println("------------------------------------------");
+    }
+    
     public static void main(String[] args) {
-     
-        //création des instances de DAO
-        ClientDAO clientDAO = new ClientDAO();
-        PanierDAO panierDAO = new PanierDAO();
+    
+        Scanner scanner = new Scanner(System.in);
+        int choix = -1;
 
-        // On récupère le premier client de la BD (par exemple avec l'ID 1)
+        //on récupère le premier client de la BD (par exemple avec l'ID 1) pour cet exemple
         Client client1 = clientDAO.getClientById(1);
-
 
         if (client1 == null) {
             System.out.println("Client introuvable !");
-            return;  // Si le client n'est pas trouvé, on arrête l'exécution.
+            scanner.close();
+            return;
         }
 
         //on récupère le panier en cours du client 1
         Panier panierClient1 = clientDAO.getPanierEnCours(client1.getIdClient());          
         //si le client n'a pas de panier en cours, on en crée un
         if(panierClient1 == null) panierClient1 = client1.creerPanier();
+
+        //boucle pour interagir avec le menu tant que l'utilisateur ne quitte pas
+        while (choix != 0) {
+            menuAchat(client1.getIdClient());
+            System.out.print("Veuillez choisir une option : ");
+            while (!scanner.hasNextInt()) {
+                System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                scanner.next();
+            }
+            choix = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choix) {
+                case 1: // Ajouter un produit au panier
+                    System.out.print("Entrez l'ID du produit à ajouter : ");
+                    //tant que l'utilisateur ne renseigne pas un chiffre
+                    while (!scanner.hasNextInt()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                        scanner.next();
+                    }
+                    int idProduit = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("Entrez la quantité : ");
+                    while (!scanner.hasNextInt()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                        scanner.next();
+                    }
+                    int quantite = scanner.nextInt();
+                    scanner.nextLine();
+
+                    panierDAO.ajouterProduitPanier(panierClient1.getIdPanier(), panierClient1.getIdClient(), idProduit, quantite);
+                    break;
+
+                case 2: // Afficher le panier
+                    System.out.println("Contenu du panier :");
+                    System.out.println(panierDAO.afficherPanier(panierClient1.getIdPanier()));
+                    break;
+
+                case 3: // Valider le panier
+                    panierDAO.validerPanier(panierClient1);
+                    System.out.println("Le panier a été validé.");
+                    break;
+
+                case 4: // Annuler le panier
+                    panierDAO.annulerPanier(panierClient1);
+                    System.out.println("Le panier a été annulé.");
+                    break;
+
+                case 0: // Quitter
+                    System.out.println("Fermeture du menu ...");
+                    break;
+
+                default:
+                    System.out.println("Option invalide. Veuillez réessayer.");
+            }
+
+            System.out.println("\n");
+        }
+        scanner.close();
 
         /* ----- US 1.1 ----- */
         System.out.println("----- US 1.1 -----");

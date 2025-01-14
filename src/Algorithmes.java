@@ -147,6 +147,7 @@ public class Algorithmes {
             );
 
             produitChoisi.setQuantiteChoisie(quantiteRetournee);
+            scanner.close();
             return produitChoisi;
         }
     }
