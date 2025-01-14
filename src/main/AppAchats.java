@@ -1,7 +1,6 @@
 package src.main;
 
 import java.util.Scanner;
-
 import src.client.Client;
 import src.client.ClientDAO;
 import src.panier.Panier;
@@ -91,7 +90,16 @@ public class AppAchats {
                     break;
 
                 case 3: //valider le panier
-                    panierDAO.validerPanier(panierClient1);
+                 System.out.println("Choisissez le mode de livraison pour votre panier:");
+                 System.out.println("1. Envoi  2. Retrait");
+                 System.out.println("Tapez le numéro, s'il vous plait. Ex: Si vous voulez la livraison par envoi, tapez 1: ");
+                 while (!scanner.hasNextInt()) {
+                    System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                    scanner.next();
+                 }
+                 int typeCommande = scanner.nextInt();
+                 scanner.nextLine();
+                    panierDAO.validerPanier(panierClient1,typeCommande);
                     break;
 
                 case 4: //annuler le panier

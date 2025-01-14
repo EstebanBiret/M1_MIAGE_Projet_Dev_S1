@@ -2,7 +2,6 @@ package src.panier;
 
 import java.sql.*;
 import java.util.Scanner;
-
 import src.Algorithmes;
 import src.DBConnection;
 import src.client.Client;
@@ -345,7 +344,7 @@ public class PanierDAO {
     }    
 
     //US 1.3
-    public void validerPanier(Panier panier) {
+    public void validerPanier(Panier panier,int choix) {
         int idPanier = panier.getIdPanier();
         if (panier.isPanierTermine()) {
             System.out.println("Votre panier a déjà été annulé/validé.");
@@ -354,6 +353,16 @@ public class PanierDAO {
         if(estVide(idPanier)){
             System.out.println("Votre panier est vide.");
             return;
+        }
+
+        String typeCommande;
+        if (choix == 1) {
+          typeCommande = "envoi";
+        } else if (choix == 2) {
+          typeCommande = "retrait";
+        } else {
+          System.out.println("Choix invalide. Opération annulée.");
+          return;
         }
     
         try (Connection connection = DBConnection.getConnection()) {
@@ -400,7 +409,7 @@ public class PanierDAO {
             String insertCommandeQuery = "INSERT INTO commande (idPanier, typeCommande, statutCommande, dateReception) VALUES (?, ?, ?, ?)";
             try (PreparedStatement pstmtInsertCommande = connection.prepareStatement(insertCommandeQuery, Statement.RETURN_GENERATED_KEYS)) {
                 pstmtInsertCommande.setInt(1, idPanier);
-                pstmtInsertCommande.setString(2, null);
+                pstmtInsertCommande.setString(2, typeCommande);
                 pstmtInsertCommande.setString(3, "en attente");
                 pstmtInsertCommande.setTimestamp(4, now);
     
