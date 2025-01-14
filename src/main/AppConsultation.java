@@ -77,6 +77,7 @@ public class AppConsultation {
                     } else {
                         System.out.println("Produit introuvable avec l'ID : " + idProduit);
                     }
+
                     break;
 
                 case 2:

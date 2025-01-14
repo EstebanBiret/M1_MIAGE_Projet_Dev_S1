@@ -283,17 +283,8 @@ public class PanierDAO {
 
             // Exécuter première requête
             try (ResultSet rs1 = pstmt1.executeQuery()) {
-                if (rs1.next()) {
-                    /*details += "Détails du panier " + idPanier + "\n";
-                    details += "Client : " + rs1.getString("nomClient") + " " + rs1.getString("prenomClient") + "\n";
-                    Timestamp dateDebutPanier = rs1.getTimestamp("dateDebutPanier");
-                    if (dateDebutPanier != null) {
-                        details += "Date Debut : " + dateDebutPanier.toLocalDateTime() + "\n";
-                    } else {
-                        System.out.println("La date de début du panier est nulle.");
-                    }*/
-                } else {
-                    System.out.println("Aucun panier trouvé pour l'ID " + idPanier);
+                if (!rs1.next()) {
+                    System.out.println("Aucn panier trouvé pour l'ID " + idPanier);
                 }
             } catch (SQLException e) {
                 System.out.println("Erreur lors de l'affichage du panier : " + e.getMessage());
@@ -346,6 +337,9 @@ public class PanierDAO {
     //US 1.3
     public void validerPanier(Panier panier,int choix) {
         int idPanier = panier.getIdPanier();
+
+        String deleteProduitPanier = "DELETE FROM panier_produit_magasin WHERE idPanier = ? AND idProduit = ? AND idMagasin = ?;";
+
         if (panier.isPanierTermine()) {
             System.out.println("Votre panier a déjà été annulé/validé.");
             return;
@@ -383,9 +377,38 @@ public class PanierDAO {
                         int idProduit = rs.getInt("idProduit");
                         int idMagasin = rs.getInt("idMagasin");
                         if (quantiteVoulue > quantiteEnStock) {
-                            System.out.println("Echec de la Validation du panier en raison de stock insuffisant du produit ID : " + idProduit+" dans le magasin "+idMagasin);                            
-                            connection.rollback();
-                            //des truc de remplacement.
+                            System.out.println("Echec de la validation du panier en raison de stock insuffisant du produit ID : " + idProduit + " dans le magasin " + idMagasin);                            
+                            
+                            //supprimer le produit en question du panier, et proposer un produit de remplacement
+                            try (PreparedStatement pstmtDeleteProduit = connection.prepareStatement(deleteProduitPanier)) {
+                                pstmtDeleteProduit.setInt(1, idPanier);
+                                pstmtDeleteProduit.setInt(2, idProduit);
+                                pstmtDeleteProduit.setInt(3, idMagasin);
+                                pstmtDeleteProduit.executeUpdate();
+
+                                //proposer un nouveau produit
+                                Scanner scanner = new Scanner(System.in);
+                                ProduitRemplacement produitRemplacement = Algorithmes.remplacementProduit(idProduit, idMagasin, quantiteVoulue, scanner);
+                                idProduit = produitRemplacement.getIdProduit();
+                                idMagasin = produitRemplacement.getIdMagasin();
+                                quantiteVoulue = produitRemplacement.getQuantiteChoisie();
+
+                                if(checkProduitMagasinDejaPanier(idPanier, idProduit, idMagasin)) {
+
+                                    //récupérer la quantité déjà en stock dans le panier pour ce produit
+                                    int qtePanier = getQteProduitPanier(idPanier, idProduit, idMagasin);
+                        
+                                    //qte bien en stock en prenant en compte la quantité déjà dans le panier pour ce produit
+                                    if(checkQteStockMagasin(idProduit, idMagasin, qtePanier + quantiteVoulue)) {
+                                        //ajout du produit au panier
+                                        updateProduitPanier(idPanier, idProduit, idMagasin, quantiteVoulue);
+                                    }
+                                }
+                                else {
+                                    //ajout du produit au panier
+                                    insertProduitPanier(idPanier, idProduit, idMagasin, quantiteVoulue);
+                                }
+                            }
                             return;
                         }
                     }

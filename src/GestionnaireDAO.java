@@ -97,8 +97,6 @@ public class GestionnaireDAO {
                     System.out.println("Aucun produit modifié.");
                 }
 
-                //connection.commit();
-
             } catch (SQLException e) {
                 //rollback si erreur
                 connection.rollback();
@@ -145,7 +143,12 @@ public class GestionnaireDAO {
     }
 
     //maj le stock d'un produit dans les magasins spécifiés
-    public void majStockProduit(int idProduit, int quantite, List<Integer> idsMagasins, boolean augmenter) {
+    public void majStockProduit(int idProduit, int quantite, int idMagasin, boolean augmenter) {
+
+        if(quantite <= 0) {
+            System.out.println("La quantité doit être supérieure à 0 !");
+            return;
+        }
         String selectQuery = """
             SELECT quantiteEnStock
             FROM stocker
@@ -163,47 +166,69 @@ public class GestionnaireDAO {
             VALUES (?, ?, ?)
         """;
 
+        String testProduit = "SELECT * FROM produit WHERE idProduit = ?;";
+
+        String testMagasin = "SELECT * FROM magasin WHERE idMagasin = ?;";
+
         try (Connection connection = DBConnection.getConnection()) {
             PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
             PreparedStatement updateStatement = connection.prepareStatement(updateQuery);
             PreparedStatement insertStatement = connection.prepareStatement(insertQuery);
+            PreparedStatement testProduitStatement = connection.prepareStatement(testProduit);
+            PreparedStatement testMagasinStatement = connection.prepareStatement(testMagasin);
 
-            for (int idMagasin : idsMagasins) {
-                // Récupérer la quantité actuelle en stock
-                selectStatement.setInt(1, idProduit);
-                selectStatement.setInt(2, idMagasin);
-                ResultSet resultSet = selectStatement.executeQuery();
+            //test si le produit existe
+            testProduitStatement.setInt(1, idProduit);
+            ResultSet resultSetTestProduit = testProduitStatement.executeQuery();
+            if (!resultSetTestProduit.next()) {
+                System.out.println("Le produit " + idProduit + " n'existe pas.");
+                return;
+            }
 
-                if (resultSet.next()) {
-                    int quantiteActuelle = resultSet.getInt("quantiteEnStock");
-                    int nouvelleQuantite = augmenter ? quantiteActuelle + quantite : Math.max(quantiteActuelle - quantite, 0); //pas en dessous de 0
+            //test si le magasin existe
+            testMagasinStatement.setInt(1, idMagasin);
+            ResultSet resultSetTestMagasin = testMagasinStatement.executeQuery();
+            if (!resultSetTestMagasin.next()) {
+                System.out.println("Le magasin " + idMagasin + " n'existe pas.");
+                return;
+            }
 
-                    updateStatement.setInt(1, nouvelleQuantite);
-                    updateStatement.setInt(2, idProduit);
-                    updateStatement.setInt(3, idMagasin);
-                    updateStatement.executeUpdate();
+            // Récupérer la quantité actuelle en stock
+            selectStatement.setInt(1, idProduit);
+            selectStatement.setInt(2, idMagasin);
+            ResultSet resultSet = selectStatement.executeQuery();
+
+            if (resultSet.next()) {
+                int quantiteActuelle = resultSet.getInt("quantiteEnStock");
+                int nouvelleQuantite = augmenter ? quantiteActuelle + quantite : Math.max(quantiteActuelle - quantite, 0); //pas en dessous de 0
+
+                updateStatement.setInt(1, nouvelleQuantite);
+                updateStatement.setInt(2, idProduit);
+                updateStatement.setInt(3, idMagasin);
+                updateStatement.executeUpdate();
+                System.out.println("Stock mis à jour pour le produit " + idProduit + " dans le magasin " + idMagasin + " : " + nouvelleQuantite);
+            } else {
+                //produit inexistant -> insérer une nouvelle ligne si augmenter
+                if (augmenter) {
+                    insertStatement.setInt(1, idMagasin);
+                    insertStatement.setInt(2, idProduit);
+                    insertStatement.setInt(3, quantite);
+                    insertStatement.executeUpdate();
+                    System.out.println("Stock ajouté pour le produit " + idProduit + " dans le magasin " + idMagasin + " : " + quantite);
                 } else {
-                    //produit inexistant -> insérer une nouvelle ligne si augmenter
-                    if (augmenter) {
-                        insertStatement.setInt(1, idMagasin);
-                        insertStatement.setInt(2, idProduit);
-                        insertStatement.setInt(3, quantite);
-                        insertStatement.executeUpdate();
-                    } else {
-                        System.out.println("Impossible de réduire le stock : produit " + idProduit + " introuvable dans le magasin " + idMagasin);
-                    }
+                    System.out.println("Impossible de réduire le stock : produit " + idProduit + " introuvable dans le magasin " + idMagasin);
                 }
             }
-            System.out.println("Stock mis à jour avec succès pour le produit " + idProduit + ".");
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("Erreur lors de la mise à jour des stocks.");
         }
     }
 
-    public String getProduitPlusCommande() {
-        String res = "Aucun produit commandé.";
-    
+    //permet de récupérer les 5 produits les + commandés
+    public String getProduitPlusCommandes() {
+        StringBuilder res = new StringBuilder("Top 5 des produits les plus commandés :\n");
+
         String query = """
             SELECT ppm.idProduit, SUM(ppm.quantiteVoulue) AS totalQuantite
             FROM panier_produit_magasin ppm, panier p, commande c
@@ -211,37 +236,47 @@ public class GestionnaireDAO {
             AND p.idPanier = c.idPanier
             GROUP BY ppm.idProduit
             ORDER BY totalQuantite DESC
-            LIMIT 1
+            LIMIT 5
         """;
     
+        int rank = 1;
+
         try (Connection connection = DBConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
     
             // Exécute la requête pour récupérer le produit le plus commandé
             try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
+                while (resultSet.next()) {
                     int idProduit = resultSet.getInt("idProduit");
                     int totalQuantite = resultSet.getInt("totalQuantite");
-    
+        
                     // Récupérer les détails du produit correspondant
-                    Produit produitPlusCommande = produitDAO.getProduitById(idProduit);
-    
-                    if (produitPlusCommande != null) {
-                        res = produitPlusCommande.toString() + 
-                        " (Commandé " + totalQuantite + " fois)";
+                    Produit produit = produitDAO.getProduitById(idProduit);
+        
+                    if (produit != null) {
+                        res.append(rank).append(". ")
+                           .append(produit.toString())
+                           .append(" (Commandé ").append(totalQuantite).append(" fois)\n");
+                    } else {
+                        res.append(rank).append(". Produit inconnu (ID: ")
+                           .append(idProduit).append(") - ")
+                           .append(totalQuantite).append(" fois commandé\n");
                     }
+        
+                    rank++;
                 }
             }
     
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return res;
+        return res.toString();
     }
 
-    public List<String> getTopCategories() {
-        List<String> topCategories = new ArrayList<>();
-
+    //permet de récupérer les 3 catégories les + commandées
+    public String getTopsCategories() {
+        StringBuilder res = new StringBuilder("Aucune catégorie commandée.");
+    
         String query = """
             SELECT ca.nomCategorie, SUM(ppm.quantiteVoulue) AS totalQuantite
             FROM panier_produit_magasin ppm, panier p, commande c, produit prod, categorie ca, appartenir a
@@ -252,35 +287,41 @@ public class GestionnaireDAO {
             AND a.idCategorie = ca.idCategorie
             GROUP BY ca.nomCategorie
             ORDER BY totalQuantite DESC
-            LIMIT 5;        
+            LIMIT 3;        
             """;
-
-        try (Connection connection = DBConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
-
-            // Exécuter la requête pour récupérer les catégories les plus commandées
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    String categorie = resultSet.getString("nomCategorie");
-                    int totalQuantite = resultSet.getInt("totalQuantite");
-
-                    // Ajouter les détails au résultat
-                    topCategories.add(categorie + " (Commandé " + totalQuantite + " fois)");
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return topCategories;
+    
+            try (Connection connection = DBConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery()) {
+   
+           if (resultSet.next()) {
+               res = new StringBuilder("Top 3 des catégories les plus commandées :\n");
+               int rank = 1;
+   
+               // Parcourir les résultats
+               do {
+                   String categorie = resultSet.getString("nomCategorie");
+                   int totalQuantite = resultSet.getInt("totalQuantite");
+   
+                   // Ajouter les détails de la catégorie avec un classement
+                   res.append(rank++).append(". ").append(categorie)
+                      .append(" (Commandé ").append(totalQuantite).append(" fois)\n");
+               } while (resultSet.next());
+           }
+   
+       } catch (SQLException e) {
+           e.printStackTrace();
+       }
+   
+       return res.toString();
     }
+    
 
     /*
-     * Permet de récupérer le client qui a le plus commandé
+     * Permet de récupérer les clients qui ont le plus commandés
      */
-    public List<String> getTopClientsNbCommandes() {
-        List<String> topClients = new ArrayList<>();
+    public String getTopClientsNbCommandes() {
+        StringBuilder res = new StringBuilder("Aucun client trouvé.");
     
         String query = """
             SELECT idClient, COUNT(*) AS nbCommandes
@@ -303,13 +344,21 @@ public class GestionnaireDAO {
     
             // Exécute la requête pour récupérer les clients ayant le plus commandé
             try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    int idClient = resultSet.getInt("idClient");
-                    int nbCommandes = resultSet.getInt("nbCommandes");
-    
-                    // Charger les informations sur le client
-                    Client client = clientDAO.getClientById(idClient);
-                    topClients.add(client.toString() + " (Commandes: " + nbCommandes + ")");
+                if (resultSet.next()) {
+                    res = new StringBuilder("Top 5 des clients ayant passé le plus de commandes :\n");
+                    int rank = 1;
+        
+                    do {
+                        int idClient = resultSet.getInt("idClient");
+                        int nbCommandes = resultSet.getInt("nbCommandes");
+        
+                        // Charger les informations du client
+                        Client client = clientDAO.getClientById(idClient);
+        
+                        // Ajouter les détails au résultat
+                        res.append(rank++).append(". ").append(client.toString())
+                           .append(" (Commandes: ").append(nbCommandes).append(")\n");
+                    } while (resultSet.next());
                 }
             }
     
@@ -317,11 +366,14 @@ public class GestionnaireDAO {
             e.printStackTrace();
         }
     
-        return topClients;
+        return res.toString();
     }
 
-    public List<String> getTopClientsChiffreAffaires() {
-        List<String> topClients = new ArrayList<>();
+    /*
+     * Permet de récupérer les clients qui ont le plus généré le plus de chiffre d'affaires
+     */
+    public String getTopsClientsChiffreAffaires() {
+        StringBuilder res = new StringBuilder("Aucun client trouvé.");
     
         String query = """
         SELECT p.idClient, SUM(ppm.quantiteVoulue * pr.prixUnitaire) AS totalCA
@@ -351,13 +403,21 @@ public class GestionnaireDAO {
     
             // Exécute la requête pour récupérer les clients ayant généré le plus de chiffre d'affaires
             try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    int idClient = resultSet.getInt("idClient");
-                    double totalCA = resultSet.getDouble("totalCA");
-    
-                    // Charger les informations sur le client
-                    Client client = clientDAO.getClientById(idClient);
-                    topClients.add(client.toString() + " (Chiffre d'Affaires: " + totalCA + " euros)");
+                if (resultSet.next()) {
+                    res = new StringBuilder("Top 5 des clients ayant généré le plus de chiffre d'affaires :\n");
+                    int rank = 1;
+        
+                    do {
+                        int idClient = resultSet.getInt("idClient");
+                        double totalCA = resultSet.getDouble("totalCA");
+        
+                        // Charger les informations du client
+                        Client client = clientDAO.getClientById(idClient);
+        
+                        // Ajouter les détails au résultat
+                        res.append(rank++).append(". ").append(client.toString())
+                           .append(" (Chiffre d'affaires: ").append(totalCA).append(" euros)\n");
+                    } while (resultSet.next());
                 }
             }
     
@@ -365,11 +425,11 @@ public class GestionnaireDAO {
             e.printStackTrace();
         }
     
-        return topClients;
+        return res.toString();
     }
     
     //US 3.2
-    // Méthode pour calculer le temps moyen de réalisation des paniers terminés
+    // Méthode pour calculer le temps moyen de réalisation des paniers terminés (en heure)
     public double calculerTempsMoyenRealisation() {
         try (Connection connection = DBConnection.getConnection()){
         String queryTempsMoyen = "SELECT AVG(TIMESTAMPDIFF(HOUR, dateDebutPanier, dateFinPanier)) AS tempsMoyen " +
@@ -379,7 +439,6 @@ public class GestionnaireDAO {
             try (ResultSet rs = pstmtTempsMoyen.executeQuery()) {
                 if (rs.next()) {
                     double tempsMoyenHeures = rs.getDouble("tempsMoyen");
-                    System.out.println("Temps moyen de réalisation des paniers (en heures) : ");
                     return tempsMoyenHeures;
                 }
             }
@@ -388,31 +447,30 @@ public class GestionnaireDAO {
         }
         return 0;
     }
-    // Méthode pour calculer le temps moyen de préparation des commandes
-public double calculerTempsMoyenPreparation() {
-    double tempsMoyen = 0;
+    // Méthode pour calculer le temps moyen de préparation des commandes (en heures)
+    public double calculerTempsMoyenPreparation() {
+        double tempsMoyen = 0;
 
-    String query = "SELECT AVG(TIMESTAMPDIFF(HOUR, datePreparation, dateFinalisation)) AS temps_moyen_preparation " +
-                   "FROM commande WHERE datePreparation IS NOT NULL " +
-                   "AND dateFinalisation IS NOT NULL";
-    
-    try (Connection connection = DBConnection.getConnection();
-         PreparedStatement pstmt = connection.prepareStatement(query);
-         ResultSet rs = pstmt.executeQuery()) {
+        String query = "SELECT AVG(TIMESTAMPDIFF(HOUR, datePreparation, dateFinalisation)) AS temps_moyen_preparation " +
+                    "FROM commande WHERE datePreparation IS NOT NULL " +
+                    "AND dateFinalisation IS NOT NULL";
         
-        if (rs.next()) {
-            tempsMoyen = rs.getDouble("temps_moyen_preparation");
-            System.out.println("Temps moyen de préparation des commandes (en heures) : ");
-            System.out.println(tempsMoyen);
-        } else {
-            System.out.println("Aucune commande préparée trouvée.");
+        try (Connection connection = DBConnection.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery()) {
+            
+            if (rs.next()) {
+                tempsMoyen = rs.getDouble("temps_moyen_preparation");
+                System.out.println(tempsMoyen);
+            } else {
+                System.out.println("Aucune commande préparée trouvée.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors du calcul du temps moyen de préparation : " + e.getMessage());
         }
-    } catch (SQLException e) {
-        System.out.println("Erreur lors du calcul du temps moyen de préparation : " + e.getMessage());
-    }
 
-    return tempsMoyen;
-}
+        return tempsMoyen;
+    }
 
     //-----US 3.5-----//
     public Map<String, String> determineClientProfiles() {

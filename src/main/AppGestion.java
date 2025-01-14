@@ -1,83 +1,214 @@
 package src.main;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Scanner;
+
 import src.GestionnaireDAO;
 import src.produit.Produit;
 
 public class AppGestion {
-    
+
+    public static void menuGestion() {
+        // Création du menu de gestion
+        System.out.println("------------------------------------------");
+        System.out.println("| ~ Menu de gestion ~                    |");
+        System.out.println("|                                        |");
+        System.out.println("| [1] Ajouter un produit au catalogue    |");
+        System.out.println("| [2] Augmenter la quantité d'un produit |");
+        System.out.println("| [3] Baisser la quantité d'un produit   |");
+        System.out.println("| [4] Voir les statistiques              |");
+        System.out.println("| [0] Quitter                            |");
+        System.out.println("|                                        |");
+        System.out.println("------------------------------------------");
+    }
+
+    public static void menuStats() {
+        // Création du menu de stats
+        System.out.println("-----------------------------------------------");
+        System.out.println("| ~ Menu de stats ~                            |");
+        System.out.println("|                                              |");
+        System.out.println("| [1] Produits les plus commandés              |");
+        System.out.println("| [2] Catégories les plus commandées           |");
+        System.out.println("| [3] Clients ayant le plus commandés          |");
+        System.out.println("| [4] Clients ayant le plus haut CA            |");
+        System.out.println("| [5] Temps moyen de réalisation des paniers   |");
+        System.out.println("| [6] Temps moyen de préparation des commandes |");
+        System.out.println("| [0] Retour au menu principal                 |");
+        System.out.println("|                                              |");
+        System.out.println("-----------------------------------------------");
+    }
+
     public static void main(String[] args) {
+        GestionnaireDAO marc = new GestionnaireDAO();
+        Scanner scanner = new Scanner(System.in);
+        int choix = -1;
 
-        //création du gestionnaire
-        GestionnaireDAO Marc = new GestionnaireDAO();
+        while (choix != 0) {
+            menuGestion();
+            System.out.print("Veuillez choisir une option : ");
+            while (!scanner.hasNextInt()) {
+                System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                scanner.next();
+            }
+            choix = scanner.nextInt();
+            scanner.nextLine();
 
-        /* ----- US 3.1 ----- */
-        System.out.println("\n");
-        System.out.println("----- US 3.1 -----");
+            switch (choix) {
+                case 1:
+                    System.out.println("Ajouter un produit au catalogue.");
 
-        //création d'un produit et sauvegarde en BD
-        Produit newProduit = new Produit("Poulet", 10, 10, 'A', 0.0, "1kg", "Carrefour");
-        Marc.ajouterProduitCatalogue(newProduit);
- 
-        //modification d'un produit en BD
-        newProduit.setLibelleProduit("Poulet modifié");
-        newProduit.setMarqueProduit("Poulet modifié");
-        Marc.majProduitCatalogue(newProduit);
- 
-        //suppression d'un produit par son libellé et son ID (TODO supprimer les références dans les tables associées)
-        /*Produit supprProduitLibelle = new Produit("Test3", true);
-        if(supprProduitLibelle.exists()) supprProduitLibelle.supprProduitCatalogue();
-        
-        Produit supprProduitId = new Produit(3);
-        if(supprProduitId.exists()) supprProduitId.supprProduitCatalogue();*/
+                    System.out.print("Entrez le nom du produit : ");
+                    String libelleProduit = scanner.nextLine();
+                    while (libelleProduit.isEmpty() || libelleProduit.length() > 128) {
+                        System.out.print("Nom invalide (1-128 caractères). Réessayez : ");
+                        libelleProduit = scanner.nextLine();
+                    }
 
-        //augmenter les stocks d'un produit
-        List<Integer> magasins = List.of(1, 2, 3);
-        Marc.majStockProduit(1, 5, magasins, true);
-        //baisser les stocks d'un produit
-        Marc.majStockProduit(1, 2, magasins, false);
-        System.out.println("\n");
+                    System.out.print("Entrez le prix unitaire : ");
+                    while (!scanner.hasNextDouble()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un nombre : ");
+                        scanner.next();
+                    }
+                    double prixUnitaire = scanner.nextDouble();
 
-        /* ----- US 3.2 ----- */
-        System.out.println("----- US 3.2 -----");
-        System.out.println(Marc.calculerTempsMoyenRealisation());
-        Marc.calculerTempsMoyenPreparation();
+                    System.out.print("Entrez le prix au kilo (optionnel, ou 0 si non applicable) : ");
+                    while (!scanner.hasNextDouble()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un nombre : ");
+                        scanner.next();
+                    }
+                    double prixKilo = scanner.nextDouble();
+                    if (prixKilo == 0) prixKilo = -1; // Indique un prix non applicable
 
-        /* ----- US 3.3 ----- */
-        System.out.println("----- US 3.3 -----");
-        System.out.println("Produit les plus commandé :");
-        System.out.println(Marc.getProduitPlusCommande());
+                    System.out.print("Entrez le nutriscore (A, B, C, D, E) : ");
+                    String nutriscore = scanner.next().toUpperCase();
+                    while (!nutriscore.matches("[A-E]")) {
+                        System.out.print("Nutriscore invalide, veuillez recommencer : ");
+                        nutriscore = scanner.next().toUpperCase();
+                    }
 
-        System.out.println("\n");
-        System.out.println("Catégories les plus commandées :");
-        System.out.println(Marc.getTopCategories());
+                    System.out.print("Entrez le poids du produit (en kg) : ");
+                    while (!scanner.hasNextDouble()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un nombre : ");
+                        scanner.next();
+                    }
+                    double poidsProduit = scanner.nextDouble();
 
-        System.out.println("\n");
-        System.out.println("Clients ayant effectués le plus de commandes :");
-        List<String> topClients = Marc.getTopClientsNbCommandes();
-        for (String client : topClients) {
-            System.out.println(client);
+                    System.out.print("Entrez le conditionnement du produit : ");
+                    scanner.nextLine(); // Consomme la nouvelle ligne restante
+                    String conditionnementProduit = scanner.nextLine();
+                    while (conditionnementProduit.isEmpty() || conditionnementProduit.length() > 128) {
+                        System.out.print("Conditionnement invalide (1-128 caractères). Réessayez : ");
+                        conditionnementProduit = scanner.nextLine();
+                    }
+
+                    System.out.print("Entrez la marque du produit : ");
+                    String marqueProduit = scanner.nextLine();
+                    while (marqueProduit.isEmpty() || marqueProduit.length() > 128) {
+                        System.out.print("Marque invalide (1-128 caractères). Réessayez : ");
+                        marqueProduit = scanner.nextLine();
+                    }
+
+                    Produit produit = new Produit(libelleProduit, prixUnitaire, prixKilo, nutriscore.charAt(0), poidsProduit, conditionnementProduit, marqueProduit);
+                    marc.ajouterProduitCatalogue(produit);
+                    break;
+
+                case 2:
+                    System.out.print("Entrez l'ID du produit à augmenter : ");
+                    while (!scanner.hasNextInt()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                        scanner.next();
+                    }
+                    int idProduitAug = scanner.nextInt();
+
+                    System.out.print("Entrez le magasin concerné : ");
+                    while (!scanner.hasNextInt()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                        scanner.next();
+                    }
+                    int magasin = scanner.nextInt();
+
+                    System.out.print("Entrez la quantité à ajouter : ");
+                    while (!scanner.hasNextInt()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                        scanner.next();
+                    }
+                    int quantiteAug = scanner.nextInt();
+
+                    marc.majStockProduit(idProduitAug, quantiteAug, magasin, true);
+                    break;
+
+                case 3:
+                    System.out.print("Entrez l'ID du produit à diminuer : ");
+                    while (!scanner.hasNextInt()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                        scanner.next();
+                    }
+                    int idProduitDim = scanner.nextInt();
+
+                    System.out.print("Entrez le magasin concerné : ");
+                    while (!scanner.hasNextInt()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                        scanner.next();
+                    }
+                    int magasin2 = scanner.nextInt();
+
+                    System.out.print("Entrez la quantité à retirer : ");
+                    while (!scanner.hasNextInt()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                        scanner.next();
+                    }
+                    int quantiteDim = scanner.nextInt();
+
+                    marc.majStockProduit(idProduitDim, quantiteDim, magasin2, false);
+                    break;
+
+                case 4:
+                    int choixStats = -1;
+                    while (choixStats != 0) {
+                        menuStats();
+                        System.out.print("Veuillez choisir une option de statistiques : ");
+                        choixStats = scanner.nextInt();
+                        scanner.nextLine();
+
+                        switch (choixStats) {
+                            case 1:
+                                System.out.println(marc.getProduitPlusCommandes());
+                                break;
+                            case 2:
+                                System.out.println(marc.getTopsCategories());
+                                break;
+                            case 3:
+                                System.out.println(marc.getTopClientsNbCommandes());
+                                break;
+                            case 4:
+                                System.out.println(marc.getTopsClientsChiffreAffaires());
+                                break;
+                            case 5:
+                                System.out.println("Temps moyen de réalisation des paniers : " + marc.calculerTempsMoyenRealisation() + " heures.");
+                                break;
+            
+                            case 6:
+                                System.out.println("Temps moyen de préparation des commandes : " + marc.calculerTempsMoyenPreparation() + " heures.");
+                                break;
+                            case 0:
+                                System.out.println("Retour au menu principal.");
+                                break;
+                            default:
+                                System.out.println("Option invalide. Veuillez réessayer.");
+                        }
+                        System.out.println("\n");
+                    }
+                    break;
+
+                case 0:
+                    System.out.println("Fermeture du menu ...");
+                    break;
+                default:
+                    System.out.println("Option invalide. Veuillez réessayer.");
+            }
+
+            System.out.println("\n");
         }
 
-        System.out.println("\n");
-        System.out.println("Clients ayant générés le plus d'argent :");
-        List<String> topClients2 = Marc.getTopClientsChiffreAffaires();
-        for (String client : topClients2) {
-            System.out.println(client);
-        }
-
-        /* ----- US 3.5 ----- */
-
-        System.out.println("----- US 3.5 -----");
-
-        Map<String, String> clientProfiles = Marc.determineClientProfiles();
-    
-        // Display individual client profiles
-        System.out.println("Profils des clients :");
-        for (Map.Entry<String, String> entry : clientProfiles.entrySet()) {
-            System.out.println(entry.getKey() + " - Profil dominant : " + entry.getValue());
-        }
-    
-}
+        scanner.close();
+    }
 }

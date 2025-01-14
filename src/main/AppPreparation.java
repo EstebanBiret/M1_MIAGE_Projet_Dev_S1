@@ -1,6 +1,5 @@
 package src.main;
 
-import java.util.Scanner;
 import src.PreparateurDAO;
 
 public class AppPreparation {

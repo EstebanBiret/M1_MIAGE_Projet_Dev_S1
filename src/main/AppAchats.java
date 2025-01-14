@@ -1,15 +1,19 @@
 package src.main;
 
+import java.util.List;
 import java.util.Scanner;
 import src.client.Client;
 import src.client.ClientDAO;
 import src.panier.Panier;
 import src.panier.PanierDAO;
+import src.produit.Produit;
+import src.produit.ProduitDAO;
 
 public class AppAchats {
     
     static ClientDAO clientDAO = new ClientDAO();
     static PanierDAO panierDAO = new PanierDAO();
+    static ProduitDAO produitDAO = new ProduitDAO();
     
     public static void menuAchat(int idClient) {
 
@@ -64,8 +68,14 @@ public class AppAchats {
             choix = scanner.nextInt();
             scanner.nextLine();
 
+            //TODO rajouter choix liste des produits avec système de page (5 par 5)
             switch (choix) {
                 case 1: //ajouter un produit au panier
+
+                    System.out.println("Notre catalogue (naviguez à travers les pages avec les flèches directionelles) : \n");
+                    List<Produit> produits = produitDAO.getAllProduits();
+                    produits.forEach(System.out::println);
+
                     System.out.print("Entrez l'ID du produit à ajouter : ");
                     //tant que l'utilisateur ne renseigne pas un chiffre
                     while (!scanner.hasNextInt()) {
