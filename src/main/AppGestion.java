@@ -1,6 +1,7 @@
 package src.main;
 
 import java.util.List;
+import java.util.Map;
 import src.GestionnaireDAO;
 import src.produit.Produit;
 
@@ -67,7 +68,16 @@ public class AppGestion {
         }
 
         /* ----- US 3.5 ----- */
+
         System.out.println("----- US 3.5 -----");
-        System.out.println(Marc.getClientProfiles());
-    }
+
+        Map<String, String> clientProfiles = Marc.determineClientProfiles();
+    
+        // Display individual client profiles
+        System.out.println("Profils des clients :");
+        for (Map.Entry<String, String> entry : clientProfiles.entrySet()) {
+            System.out.println(entry.getKey() + " - Profil dominant : " + entry.getValue());
+        }
+    
+}
 }
