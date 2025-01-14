@@ -8,8 +8,8 @@ public class AppPreparation {
         
         PreparateurDAO Adam = new PreparateurDAO();
 
-    //US 4.2
-    System.out.println("------US 4.3------");
+    //US 4.1
+    System.out.println("------US 4.1------");
     Adam.afficherCommandesEnAttente();
 
 
