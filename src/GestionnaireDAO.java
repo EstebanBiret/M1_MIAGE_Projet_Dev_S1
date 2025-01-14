@@ -3,7 +3,6 @@ package src;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
 import src.client.Client;
 import src.client.ClientDAO;
 import src.produit.Produit;
@@ -386,5 +385,29 @@ public class GestionnaireDAO {
             System.err.println("Erreur lors du calcul du temps moyen de réalisation des paniers : " + e.getMessage());
         }
         return 0;
+    }
+    // Méthode pour calculer le temps moyen de préparation des commandes
+    public double calculerTempsMoyenPreparation() {
+     double tempsMoyen = 0;
+
+     String query = "SELECT AVG(TIMESTAMPDIFF(HOUR, datePreparation, dateFinalisation)) AS temps_moyen_preparation " +
+                   "FROM commande WHERE datePreparation IS NOT NULL"+
+                   "AND dateFinalisation IS NOT NULL";
+    
+     try (Connection connection = DBConnection.getConnection();
+         PreparedStatement pstmt = connection.prepareStatement(query);
+         ResultSet rs = pstmt.executeQuery()) {
+        
+        if (rs.next()) {
+            tempsMoyen = rs.getDouble("temps_moyen_preparation");
+            System.out.println("Temps moyen de préparation des commandes (en heures) : ");
+        } else {
+            System.out.println("Aucune commande préparée trouvée.");
+        }
+     } catch (SQLException e) {
+        System.out.println("Erreur lors du calcul du temps moyen de préparation : " + e.getMessage());
+     }
+
+     return tempsMoyen;
     }
 }
