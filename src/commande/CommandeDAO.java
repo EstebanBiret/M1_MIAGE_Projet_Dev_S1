@@ -62,8 +62,8 @@ public class CommandeDAO {
             ORDER BY dateReception ASC;
         """;
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query);
-             ResultSet rs = pstmt.executeQuery()) {
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery()) {
     
             System.out.println("Liste des commandes en attente (par date de réception la plus ancienne) :");
             boolean hasResults = false; // Pour vérifier si des résultats existent

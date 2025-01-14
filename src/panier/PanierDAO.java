@@ -45,7 +45,6 @@ public class PanierDAO {
                     try (ResultSet rs = pstmt.getGeneratedKeys()) {
                         if (rs.next()) {
                             panier.setIdPanier(rs.getInt(1));
-                            System.out.println("Panier créé avec succès : " + panier.toString());
                         }
                     }
                 } else {
@@ -64,6 +63,10 @@ public class PanierDAO {
     //US 1.1
     public void ajouterProduitPanier(int idPanier, int idClient, int idProduit, int qteVoulue) {
 
+        if(idPanier == 0) {
+            System.out.println("Le panier n'existe pas.");
+            return;
+        }
         if(qteVoulue < 1) {
             System.out.println("La quantité doit être supérieure à 0.");
             return;
@@ -218,7 +221,7 @@ public class PanierDAO {
 
                 int rowsAffected = pstmtInsert.executeUpdate();
                 if (rowsAffected > 0) {
-                    System.out.println("Produit " + idProduit + " ajouté au panier avec succès (" + qte + " exemplaire.s).");
+                    System.out.println("Produit " + idProduit + " ajouté au panier (" + qte + " exemplaire.s).");
                 } else {
                     System.out.println("Échec de l'ajout du produit au panier.");
                 }
@@ -254,68 +257,70 @@ public class PanierDAO {
     //US 1.2
     public String afficherPanier(int idPanier) {
 
-        String details = "";
+        String details = "Contenu du panier :";
 
-        String query1 = """
+        String panier = """
             SELECT p.idPanier, c.nomClient, c.prenomClient, p.dateDebutPanier
-            FROM panier p
-            INNER JOIN client c ON p.idClient = c.idClient
-            WHERE p.idPanier = ?;
+            FROM panier p, client c
+            WHERE p.idPanier = ?
+            AND c.idClient = p.idClient;
         """;
         
-        String query2 = """
-            SELECT pr.idProduit, m.nomMagasin, pr.libelleProduit, pr.prixUnitaire, ppm.quantiteVoulue
-            FROM panier_produit_magasin ppm
-            INNER JOIN produit pr ON ppm.idProduit = pr.idProduit
-            INNER JOIN magasin m ON ppm.idMagasin = m.idMagasin
-            WHERE ppm.idPanier = ?;
+        String produitsPanier = """
+            SELECT p.idProduit, m.nomMagasin, p.libelleProduit, p.prixUnitaire, ppm.quantiteVoulue
+            FROM panier_produit_magasin ppm, produit p, magasin m
+            WHERE ppm.idPanier = ?
+            AND p.idProduit = ppm.idProduit
+            AND m.idMagasin = ppm.idMagasin;
         """;
     
         try (Connection connection = DBConnection.getConnection();
-                PreparedStatement pstmt1 = connection.prepareStatement(query1);
-                PreparedStatement pstmt2 = connection.prepareStatement(query2)) {
+            PreparedStatement pstmt1 = connection.prepareStatement(panier);
+            PreparedStatement pstmt2 = connection.prepareStatement(produitsPanier)) {
 
             pstmt1.setInt(1, idPanier);
-    
+            pstmt2.setInt(1, idPanier);
+
             // Exécuter première requête
             try (ResultSet rs1 = pstmt1.executeQuery()) {
                 if (rs1.next()) {
-                    details += "Détails du panier " + idPanier + "\n";
+                    /*details += "Détails du panier " + idPanier + "\n";
                     details += "Client : " + rs1.getString("nomClient") + " " + rs1.getString("prenomClient") + "\n";
                     Timestamp dateDebutPanier = rs1.getTimestamp("dateDebutPanier");
                     if (dateDebutPanier != null) {
                         details += "Date Debut : " + dateDebutPanier.toLocalDateTime() + "\n";
                     } else {
                         System.out.println("La date de début du panier est nulle.");
-                    }
+                    }*/
                 } else {
                     System.out.println("Aucun panier trouvé pour l'ID " + idPanier);
                 }
             } catch (SQLException e) {
                 System.out.println("Erreur lors de l'affichage du panier : " + e.getMessage());
             }
-            
-
-            pstmt2.setInt(1, idPanier);
-    
+        
             // Exécuter deuxième requête
             try (ResultSet rs2 = pstmt2.executeQuery()) {
-                if (!rs2.next()) {
-                    details +="Le panier ID " + idPanier + " est vide.";
-                } else {
-                    details += "Produits dans le panier : ";
-                    while (rs2.next()) {
-                        int idProduit = rs2.getInt("idProduit");
-                        String nomMagasin = rs2.getString("nomMagasin");
-                        String libelleProduit = rs2.getString("libelleProduit");
-                        double prixUnitaire = rs2.getDouble("prixUnitaire");
-                        int quantite = rs2.getInt("quantiteVoulue");
-    
-                        details += "\nID : " + idProduit + ", Magasin : " + nomMagasin + ", Libellé : " + libelleProduit + ", Prix : " + prixUnitaire + ", Quantité : " + 
-                        quantite;
-                    }
+                boolean hasResults = false; // Pour vérifier si des résultats existent
+
+                while (rs2.next()) {
+                    hasResults = true;
+                    int idProduit = rs2.getInt("idProduit");
+                    String nomMagasin = rs2.getString("nomMagasin");
+                    String libelleProduit = rs2.getString("libelleProduit");
+                    double prixUnitaire = rs2.getDouble("prixUnitaire");
+                    int quantite = rs2.getInt("quantiteVoulue");
+
+                    details += "\nID : " + idProduit + ", Magasin : " + nomMagasin + ", Libellé : " + libelleProduit + ", Prix : " + prixUnitaire + ", Quantité : " + 
+                    quantite;
                 }
+
+                if (!hasResults) {
+                    System.out.println("Aucun produit dans le panier.");
+                }
+
             }
+            
         } catch (SQLException e) {
             System.out.println("Erreur lors de l'affichage du panier : " + e.getMessage());
         }
@@ -337,20 +342,20 @@ public class PanierDAO {
             return true;  // Par défaut, on considère le panier vide en cas d'erreur
         }
     }    
+
     //US 1.3
     public void validerPanier(Panier panier) {
         int idPanier = panier.getIdPanier();
         if (panier.isPanierTermine()) {
-            System.out.println("Le panier a déjà été annulé/validé.");
+            System.out.println("Votre panier a déjà été annulé/validé.");
             return;
         }
         if(estVide(idPanier)){
-            System.out.println("Le panier est vide.");
+            System.out.println("Votre panier est vide.");
             return;
         }
     
         try (Connection connection = DBConnection.getConnection()) {
-            connection.setAutoCommit(false); // Démarrer la transaction
             
             // Vérification des quantités pour chaque produit du panier
             String queryCheckStock = "SELECT ppm.idMagasin,ppm.idProduit, ppm.quantiteVoulue, s.quantiteEnStock " +
@@ -425,7 +430,6 @@ public class PanierDAO {
                 System.out.println("Le panier a été validé et transformé en commande.");
             }
     
-            connection.commit();
         } catch (SQLException e) {
             System.out.println("Erreur lors de la validation du panier : " + e.getMessage());
         }
@@ -443,6 +447,11 @@ public class PanierDAO {
             return;
         }
 
+        if(estVide(idPanier)) {
+            System.out.println("Votre panier est vide.");
+            return;
+        }
+
         //supprimer dans la BD le panier en cours du client
         try (Connection connection = DBConnection.getConnection()){
 
@@ -457,7 +466,7 @@ public class PanierDAO {
                 if (rowsAffected > 0) {
                     System.out.println("Les produits du panier ont bien été supprimés.");
                 } else {
-                    System.out.println("Ce client n'a pas de panier en cours, ou aucun produit dans ce panier.");
+                    System.out.println("Ce client n'a pas de panier en cours.");
                 }
             } catch (SQLException e) {
                 System.out.println("Erreur lors de la suppression : " + e.getMessage());
@@ -473,9 +482,9 @@ public class PanierDAO {
                 int rowsAffected = pstmt.executeUpdate();
 
                 if (rowsAffected > 0) {
-                    System.out.println("Le panier en cours du client a bien été annulé.");
+                    System.out.println("Le panier en cours a bien été annulé.");
                 } else {
-                    System.out.println("Ce client n'a pas de panier en cours.");
+                    System.out.println("Vous n'a pas de panier en cours.");
                 }
                 //connection.commit();
             } catch (SQLException e) {

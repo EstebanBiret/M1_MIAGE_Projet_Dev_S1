@@ -45,16 +45,18 @@ public class MainAchat {
             System.out.println("Client introuvable !");
             scanner.close();
             return;
-        }
-
-        //on récupère le panier en cours du client 1
-        Panier panierClient1 = clientDAO.getPanierEnCours(client1.getIdClient());          
-        //si le client n'a pas de panier en cours, on en crée un
-        if(panierClient1 == null) panierClient1 = client1.creerPanier();
+        }    
 
         //boucle pour interagir avec le menu tant que l'utilisateur ne quitte pas
         while (choix != 0) {
             menuAchat(client1.getIdClient());
+
+            //on récupère le panier en cours du client 1
+            Panier panierClient1 = clientDAO.getPanierEnCours(client1.getIdClient());     
+
+            //si le client n'a pas de panier en cours, on en crée un
+            if(panierClient1 == null) panierClient1 = client1.creerPanier();
+
             System.out.print("Veuillez choisir une option : ");
             while (!scanner.hasNextInt()) {
                 System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
@@ -85,18 +87,15 @@ public class MainAchat {
                     break;
 
                 case 2: // Afficher le panier
-                    System.out.println("Contenu du panier :");
                     System.out.println(panierDAO.afficherPanier(panierClient1.getIdPanier()));
                     break;
 
                 case 3: // Valider le panier
                     panierDAO.validerPanier(panierClient1);
-                    System.out.println("Le panier a été validé.");
                     break;
 
                 case 4: // Annuler le panier
                     panierDAO.annulerPanier(panierClient1);
-                    System.out.println("Le panier a été annulé.");
                     break;
 
                 case 0: // Quitter
@@ -111,29 +110,25 @@ public class MainAchat {
         }
         scanner.close();
 
-        /* ----- US 1.1 ----- */
-        System.out.println("----- US 1.1 -----");
+        
+        /*System.out.println("----- US 1.1 -----");
         //Cas d'un produit qui n'est pas disponible dans le magasin favori du client
         panierDAO.ajouterProduitPanier(panierClient1.getIdPanier(), panierClient1.getIdClient(), 6, 45);
         
-        /* ----- US 1.2 ----- */
         System.out.println("----- US 1.2 -----");        
         System.out.println(panierDAO.afficherPanier(panierClient1.getIdPanier()));
 
-        /* ----- US 1.3 ----- */
         System.out.println("----- US 1.3 -----");
         System.out.println("Validation du panier en cours du client1.");
         panierDAO.validerPanier(panierClient1);
 
-        /* ----- US 1.4 ----- */
         System.out.println("----- US 1.4 -----");
         System.out.println("Annulation du panier en cours du client 1 ...");
         panierDAO.annulerPanier(panierClient1);
 
-        /* ----- US 1.5 ----- */
         System.out.println("----- US 1.5 -----");
         System.out.println("Récupération du panier en cours du client 1 ...");
-        panierClient1 = clientDAO.getPanierEnCours(client1.getIdClient());
+        panierClient1 = clientDAO.getPanierEnCours(client1.getIdClient());*/
 
         //test algo de remplacement
         /*int idNewProduit = Algorithmes.remplacementProduit(1, 1, 1, 1000);  
