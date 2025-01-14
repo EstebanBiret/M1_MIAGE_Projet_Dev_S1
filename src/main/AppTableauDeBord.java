@@ -1,7 +1,6 @@
 package src.main;
 
 import java.util.List;
-import java.util.Map;
 import src.client.Client;
 import src.client.ClientDAO;
 
@@ -20,15 +19,15 @@ public class AppTableauDeBord {
             System.out.println(produit);
         }
 
-        //-----US 2.2-------//
-    
-       // Tester le calcul des habitudes de consommation pour le client
-       Map<String, Integer> habitudes = clientDAO.calculerHabitudesConsommation(client.getIdClient());
-
-       // Afficher les habitudes
-       for (Map.Entry<String, Integer> habitude : habitudes.entrySet()) {
-           System.out.println(habitude.getKey() + " : " + habitude.getValue());
-        
-       }
+        // ----- US 2.2 : Habitudes de consommation ----- //
+        System.out.println("\nHabitudes de consommation du client :");
+        List<String> habitudes = clientDAO.getHabitudesCommandes(client.getIdClient());
+        if (habitudes.isEmpty()) {
+            System.out.println("Aucune habitude de consommation trouvée.");
+        } else {
+            for (String habitude : habitudes) {
+                System.out.println(habitude);
+            }
+        }
     }
 }

@@ -228,6 +228,105 @@ public class ClientDAO {
         return magasinFavori;
     }
 
+
+    /*
+ * Retourne une liste des produits les plus commandés du client actuel
+ * avec des détails regroupés par marque et catégorie.
+ */
+
+    public List<String> getHabitudesCommandes(int idClient) {
+        List<String> habitudes = new ArrayList<>();
+    
+        // Récupérer les commandes de ce client
+        List<Commande> commandes = getCommandes(idClient);
+    
+        if (commandes.isEmpty()) {
+            System.out.println("Aucune commande trouvée pour ce client.");
+            return habitudes;
+        }
+    
+        // Map pour compter les occurrences des produits, regroupés par marque, catégorie, bio et nutriscore
+        Map<String, Integer> groupCounts = new HashMap<>();
+    
+        // Query updated to include bio, nutriscore, and other relevant details
+        String query = """
+        SELECT p.idProduit, p.libelleProduit, p.marqueProduit, cat.nomCategorie, p.nutriscore, ppm.quantiteVoulue
+        FROM panier_produit_magasin ppm
+        JOIN produit p ON ppm.idProduit = p.idProduit
+        JOIN Appartenir a ON p.idProduit = a.idProduit
+        JOIN categorie cat ON a.idCategorie = cat.idCategorie
+        JOIN panier pa ON ppm.idPanier = pa.idPanier
+        JOIN client c ON pa.idClient = c.idClient
+        JOIN client_profil cp ON c.idClient = cp.idClient
+        JOIN profil pr ON cp.idProfil = pr.idProfil
+        WHERE ppm.idPanier = ? AND pr.nomProfil = ?
+        """;
+    
+        // Get the client's profile
+        String clientProfile = getClientProfile(idClient);  // Fetch the profile name for the client
+    
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+    
+            // Parcourir chaque commande pour récupérer ses produits
+            for (Commande commande : commandes) {
+                statement.setInt(1, commande.getIdPanier()); // Set the first parameter (idPanier)
+                statement.setString(2, clientProfile); // Set the second parameter (nomProfil)
+    
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String marque = resultSet.getString("marqueProduit");
+                        String categorie = resultSet.getString("nomCategorie");
+                        String nutriscore = resultSet.getString("nutriscore");
+                        int quantite = resultSet.getInt("quantiteVoulue");
+    
+                        // Creating a key with brand, category, bio, and Nutriscore
+                        String key = String.format("Marque: %s, Catégorie: %s, Nutriscore: %s", 
+                            marque, categorie, nutriscore);
+    
+                        // Add or update the count for this combination
+                        groupCounts.put(key, groupCounts.getOrDefault(key, 0) + quantite);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        // Sort by the number of times ordered in descending order
+        groupCounts.entrySet().stream()
+            .sorted((entry1, entry2) -> Integer.compare(entry2.getValue(), entry1.getValue()))
+            .forEach(entry -> habitudes.add(entry.getKey() + " - Commandé " + entry.getValue() + " fois"));
+    
+        return habitudes;
+    }
+    
+
+public String getClientProfile(int idClient) {
+    String profileName = null;
+    String query = """
+        SELECT pr.nomProfil
+        FROM client_profil cp
+        JOIN profil pr ON cp.idProfil = pr.idProfil
+        WHERE cp.idClient = ?
+    """;
+
+    try (Connection connection = DBConnection.getConnection();
+         PreparedStatement statement = connection.prepareStatement(query)) {
+        statement.setInt(1, idClient);
+        try (ResultSet resultSet = statement.executeQuery()) {
+            if (resultSet.next()) {
+                profileName = resultSet.getString("nomProfil");
+            }
+        }
+    } catch (SQLException e) {
+        System.out.println("Erreur lors de la récupération du profil du client : " + e.getMessage());
+    }
+
+    return profileName;
+}
+
+    
     
 
 }
