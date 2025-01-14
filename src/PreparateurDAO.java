@@ -118,4 +118,31 @@ public class PreparateurDAO {
         }
     }
 
+    // US 4.3 finaliser la préparation d'une commande
+    public void finaliserCommande(int idCommande) {
+        try (Connection connection = DBConnection.getConnection()) {
+            // Requête pour mettre à jour le statut de la commande et la date de finalisation,
+            // uniquement si le statut actuel est 'preparation'
+            String queryUpdateCommande = "UPDATE commande " +
+                                         "SET statutCommande = 'terminee',dateFinalisation = NOW()"+
+                                         "WHERE idCommande = ? AND statutCommande = 'preparation' AND dateFinalisation IS NULL";
+            try (PreparedStatement pstmtUpdate = connection.prepareStatement(queryUpdateCommande)) {
+                pstmtUpdate.setInt(1, idCommande);
+               
+                
+                int rowsUpdated = pstmtUpdate.executeUpdate();
+    
+                if (rowsUpdated > 0) {
+                    System.out.println("La commande #" + idCommande + " a été finalisée avec succès.");
+                } else {
+                    System.out.println("La commande #" + idCommande + " ne peut pas être finalisée. Vérifiez que son statut est bien 'preparation'.");
+                }
+            } catch (SQLException e) {
+                System.err.println("Erreur lors de la finalisation de la commande #" + idCommande + " : " + e.getMessage());
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur de connexion à la base de données : " + e.getMessage());
+        }
+    }
+
 }
