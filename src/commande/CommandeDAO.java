@@ -52,47 +52,43 @@ public class CommandeDAO {
     }
 
     //Consulter la liste des commandes à preparer par ordre de priorité
-    public static void afficherCommandesParPriorite() {
-        // Requête SQL pour trier les commandes selon statutCommande et dateReception
+    public static void afficherCommandesEnAttente() {
+        // Requête SQL pour récupérer les commandes avec statut "en attente" triées par dateReception (la plus ancienne en premier)
+        
         String query = """
-            SELECT idCommande, idPanier,statutCommande,dateReception, typeCommande,   datePreparation, dateFinalisation
+            SELECT idCommande, statutCommande, dateReception
             FROM commande
-            ORDER BY 
-                CASE 
-                    WHEN statutCommande = 'en attente' THEN 1
-                    WHEN statutCommande = 'preparaion' THEN 2
-                    WHEN statutCommande = 'retrait' THEN 3
-                    WHEN statutCommande = 'en envoi' THEN 4
-                    ELSE 5
-                END,
-                dateReception ASC;
-            """;
-    
+            WHERE statutCommande = 'en attente'
+            ORDER BY dateReception ASC;
+        """;
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query);
              ResultSet rs = pstmt.executeQuery()) {
     
-            System.out.println("Liste des commandes par ordre de priorité :");
+            System.out.println("Liste des commandes en attente (par date de réception la plus ancienne) :");
+            boolean hasResults = false; // Pour vérifier si des résultats existent
             while (rs.next()) {
+                hasResults = true;
                 int idCommande = rs.getInt("idCommande");
-                int idPanier = rs.getInt("idPanier");
-                String typeCommande = rs.getString("typeCommande");
                 String statutCommande = rs.getString("statutCommande");
                 Timestamp dateReception = rs.getTimestamp("dateReception");
-                Timestamp datePreparation = rs.getTimestamp("datePreparation");
-                Timestamp dateFinalisation = rs.getTimestamp("dateFinalisation");
     
-                // Affichage de chaque commande
-                System.out.println(new Commande(
-                    idCommande, idPanier, typeCommande, statutCommande, 
-                    dateReception, datePreparation, dateFinalisation
-                ).toString());
+                // Affichage des propriétés demandées
+                System.out.printf(
+                    "ID Commande: %d | Statut: %s | Date Réception: %s%n",
+                    idCommande,
+                    statutCommande,
+                    dateReception != null ? dateReception.toString() : "N/A"
+                );
+            }
+    
+            if (!hasResults) {
+                System.out.println("Aucune commande en attente trouvée.");
             }
     
         } catch (SQLException e) {
             System.out.println("Erreur lors de la récupération des commandes : " + e.getMessage());
         }
-
     }
     
     public static void marquerEnPreparation(int idCommande, String typeCommande) {
