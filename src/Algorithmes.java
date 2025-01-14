@@ -16,9 +16,8 @@ public class Algorithmes {
         //en se basant sur les habitudes de conso du client et le produit désiré, on propose une liste de produits de remplacement, et on laisse le client choisir
     }*/
 
-    //remplacement d'un produit avec gestion des alternatives, retourne l'ID du produit de remplacement
-
-    public static ProduitRemplacement remplacementProduit(int idProduit, int idMagasin, int quantiteDemandee) {
+    //remplacement d'un produit avec gestion des alternatives
+    public static ProduitRemplacement remplacementProduit(int idProduit, int idMagasin, int quantiteDemandee, Scanner scanner) {
         List<ProduitRemplacement> produitsAlternatifs = new ArrayList<>();
         int nbIterations = 0;
     
@@ -84,9 +83,7 @@ public class Algorithmes {
                         resultSet.getInt("quantiteEnStock"),
                         resultSet.getInt("idMagasin"),
                         resultSet.getString("nomMagasin")
-                    );
-
-                        //System.out.println("test : " + produit.toString() + nbIterations);
+                        );
 
                         //on regarde grâce à un stream si un produit dans la liste a déjà le même id que le produit que l'on veut ajouter à celle-ci
                         boolean produitExistant = produitsAlternatifs.stream().anyMatch(p -> p.getIdProduit() == produit.getIdProduit());
@@ -104,14 +101,13 @@ public class Algorithmes {
             nbIterations++;
         }
     
-        // Si aucun produit n'a été trouvé
+        //si aucun produit n'a été trouvé
         if (produitsAlternatifs.isEmpty()) {
             System.out.println("Aucun produit alternatif trouvé.");
             return null;
         }
     
-        // Proposition des produits à l'utilisateur
-
+        //proposition des produits à l'utilisateur
         System.out.println("Produits disponibles en remplacement :");
         for (int i = 0; i < produitsAlternatifs.size(); i++) {
             ProduitRemplacement produit = produitsAlternatifs.get(i);
@@ -126,30 +122,27 @@ public class Algorithmes {
         }
     
         // Choix de l'utilisateur
-        try (Scanner scanner = new Scanner(System.in)) {
-            int choix;
-            do {
-                System.out.print("Veuillez entrer le numéro du produit souhaité : ");
-                while (!scanner.hasNextInt()) {
-                    System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
-                    scanner.next();
-                }
-                choix = scanner.nextInt();
-            } while (choix < 1 || choix > produitsAlternatifs.size());  
+        int choix;
+        do {
+            System.out.print("Veuillez entrer le numéro du produit souhaité : ");
+            while (!scanner.hasNextInt()) {
+                System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                scanner.next();
+            }
+            choix = scanner.nextInt();
+        } while (choix < 1 || choix > produitsAlternatifs.size());  
     
-            ProduitRemplacement produitChoisi = produitsAlternatifs.get(choix - 1);
+        ProduitRemplacement produitChoisi = produitsAlternatifs.get(choix - 1);
 
-            // Gestion de la quantité à retourner
-            int quantiteRetournee = Math.min(quantiteDemandee, produitChoisi.getQuantiteDisponible());
-            System.out.printf(
-                "Produit choisi : %s (Quantité demandée : %d, Quantité retournée : %d)%n",
-                produitChoisi.getLibelleProduit(), quantiteDemandee, quantiteRetournee
-            );
+        // Gestion de la quantité à retourner
+        int quantiteRetournee = Math.min(quantiteDemandee, produitChoisi.getQuantiteDisponible());
+        System.out.printf(
+            "Produit choisi : %s (Quantité demandée : %d, Quantité retournée : %d)%n",
+            produitChoisi.getLibelleProduit(), quantiteDemandee, quantiteRetournee
+        );
 
-            produitChoisi.setQuantiteChoisie(quantiteRetournee);
-            scanner.close();
-            return produitChoisi;
-        }
+        produitChoisi.setQuantiteChoisie(quantiteRetournee);
+        return produitChoisi;
     }
     
     private static String construireQuery(int nbIterations, int idProduit) {

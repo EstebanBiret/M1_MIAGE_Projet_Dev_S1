@@ -66,7 +66,7 @@ public class MainAchat {
             scanner.nextLine();
 
             switch (choix) {
-                case 1: // Ajouter un produit au panier
+                case 1: //ajouter un produit au panier
                     System.out.print("Entrez l'ID du produit à ajouter : ");
                     //tant que l'utilisateur ne renseigne pas un chiffre
                     while (!scanner.hasNextInt()) {
@@ -83,22 +83,22 @@ public class MainAchat {
                     int quantite = scanner.nextInt();
                     scanner.nextLine();
 
-                    panierDAO.ajouterProduitPanier(panierClient1.getIdPanier(), panierClient1.getIdClient(), idProduit, quantite);
+                    panierDAO.ajouterProduitPanier(panierClient1.getIdPanier(), panierClient1.getIdClient(), idProduit, quantite, scanner);
                     break;
 
-                case 2: // Afficher le panier
+                case 2: //afficher le panier
                     System.out.println(panierDAO.afficherPanier(panierClient1.getIdPanier()));
                     break;
 
-                case 3: // Valider le panier
+                case 3: //valider le panier
                     panierDAO.validerPanier(panierClient1);
                     break;
 
-                case 4: // Annuler le panier
+                case 4: //annuler le panier
                     panierDAO.annulerPanier(panierClient1);
                     break;
 
-                case 0: // Quitter
+                case 0: //quitter
                     System.out.println("Fermeture du menu ...");
                     break;
 

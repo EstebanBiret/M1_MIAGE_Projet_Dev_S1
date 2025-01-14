@@ -28,7 +28,6 @@ public class Client {
 
     public Panier creerPanier() {
         //on gère dans la classe PanierDAO le cas où le client a déjà un panier en cours
-        System.out.println("Création du panier en cours ...");
         PanierDAO panierDAO = new PanierDAO(); 
         return panierDAO.creerPanier(idClient);
     }

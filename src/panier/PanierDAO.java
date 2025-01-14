@@ -1,6 +1,7 @@
 package src.panier;
 
 import java.sql.*;
+import java.util.Scanner;
 
 import src.Algorithmes;
 import src.DBConnection;
@@ -61,7 +62,7 @@ public class PanierDAO {
     }
 
     //US 1.1
-    public void ajouterProduitPanier(int idPanier, int idClient, int idProduit, int qteVoulue) {
+    public void ajouterProduitPanier(int idPanier, int idClient, int idProduit, int qteVoulue, Scanner scanner) {
 
         if(idPanier == 0) {
             System.out.println("Le panier n'existe pas.");
@@ -91,14 +92,14 @@ public class PanierDAO {
             else { //qte insuffisante, proposer produit de remplacement
 
                 //on fait appel à l'algorithme de remplacement de produit
-                ProduitRemplacement produitRemplacement = Algorithmes.remplacementProduit(idProduit, idMagasin, qteVoulue);
+                ProduitRemplacement produitRemplacement = Algorithmes.remplacementProduit(idProduit, idMagasin, qteVoulue, scanner);
                 idProduit = produitRemplacement.getIdProduit();
                 idMagasin = produitRemplacement.getIdMagasin();
                 qteVoulue = produitRemplacement.getQuantiteChoisie();
 
                 if(checkProduitMagasinDejaPanier(idPanier, idProduit, idMagasin)) {
                     System.out.println("Pas assez de stock pour ce produit de remplacement !");
-                    ProduitRemplacement produitRemplacement2 = Algorithmes.remplacementProduit(idProduit, idMagasin, qteVoulue);
+                    ProduitRemplacement produitRemplacement2 = Algorithmes.remplacementProduit(idProduit, idMagasin, qteVoulue, scanner);
                     idProduit = produitRemplacement2.getIdProduit();
                     idMagasin = produitRemplacement2.getIdMagasin();
                     qteVoulue = produitRemplacement2.getQuantiteChoisie();
@@ -115,7 +116,7 @@ public class PanierDAO {
             }
             else { //qte insuffisante, proposer produit de remplacement
                 //on fait appel à l'algorithme de remplacement de produit
-                ProduitRemplacement produitRemplacement = Algorithmes.remplacementProduit(idProduit, idMagasin, qteVoulue);
+                ProduitRemplacement produitRemplacement = Algorithmes.remplacementProduit(idProduit, idMagasin, qteVoulue, scanner);
                 idProduit = produitRemplacement.getIdProduit();
                 idMagasin = produitRemplacement.getIdMagasin();
                 qteVoulue = produitRemplacement.getQuantiteChoisie();
@@ -316,7 +317,7 @@ public class PanierDAO {
                 }
 
                 if (!hasResults) {
-                    System.out.println("Aucun produit dans le panier.");
+                    details = "Votre panier est vide.";
                 }
 
             }
@@ -392,7 +393,6 @@ public class PanierDAO {
             try (PreparedStatement pstmtStockUpdate = connection.prepareStatement(queryStockUpdate)) {
                 pstmtStockUpdate.setInt(1, idPanier);
                 pstmtStockUpdate.executeUpdate();
-                System.out.println("Les quantités en stock ont été mises à jour avec succès.");
             }
     
             // Insertion de la commande dans la base de données
@@ -409,7 +409,6 @@ public class PanierDAO {
                     try (ResultSet rs = pstmtInsertCommande.getGeneratedKeys()) {
                         if (rs.next()) {
                             int idCommande = rs.getInt(1);
-                            System.out.println("Commande créée avec succès. ID : " + idCommande);
                         }
                     }
                 } else {
@@ -427,7 +426,7 @@ public class PanierDAO {
                 pstmtUpdatePanier.executeUpdate();
                 panier.setPanierTermine(true);
                 panier.setDateFinPanier(now);
-                System.out.println("Le panier a été validé et transformé en commande.");
+                System.out.println("Le panier a été validé !");
             }
     
         } catch (SQLException e) {
