@@ -1,7 +1,6 @@
 package src.main;
 
 import java.util.List;
-
 import src.GestionnaireDAO;
 import src.produit.Produit;
 
@@ -42,6 +41,7 @@ public class MainGestion {
         /* ----- US 3.2 ----- */
         System.out.println("----- US 3.2 -----");
         System.out.println(Marc.calculerTempsMoyenRealisation());
+        Marc.calculerTempsMoyenPreparation();
 
         /* ----- US 3.3 ----- */
         System.out.println("----- US 3.3 -----");

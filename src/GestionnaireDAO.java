@@ -387,27 +387,29 @@ public class GestionnaireDAO {
         return 0;
     }
     // Méthode pour calculer le temps moyen de préparation des commandes
-    public double calculerTempsMoyenPreparation() {
-     double tempsMoyen = 0;
+    // Méthode pour calculer le temps moyen de préparation des commandes
+public double calculerTempsMoyenPreparation() {
+    double tempsMoyen = 0;
 
-     String query = "SELECT AVG(TIMESTAMPDIFF(HOUR, datePreparation, dateFinalisation)) AS temps_moyen_preparation " +
-                   "FROM commande WHERE datePreparation IS NOT NULL"+
+    String query = "SELECT AVG(TIMESTAMPDIFF(HOUR, datePreparation, dateFinalisation)) AS temps_moyen_preparation " +
+                   "FROM commande WHERE datePreparation IS NOT NULL " +
                    "AND dateFinalisation IS NOT NULL";
     
-     try (Connection connection = DBConnection.getConnection();
+    try (Connection connection = DBConnection.getConnection();
          PreparedStatement pstmt = connection.prepareStatement(query);
          ResultSet rs = pstmt.executeQuery()) {
         
         if (rs.next()) {
             tempsMoyen = rs.getDouble("temps_moyen_preparation");
             System.out.println("Temps moyen de préparation des commandes (en heures) : ");
+            System.out.println(tempsMoyen);
         } else {
             System.out.println("Aucune commande préparée trouvée.");
         }
-     } catch (SQLException e) {
+    } catch (SQLException e) {
         System.out.println("Erreur lors du calcul du temps moyen de préparation : " + e.getMessage());
-     }
-
-     return tempsMoyen;
     }
+
+    return tempsMoyen;
+}
 }
