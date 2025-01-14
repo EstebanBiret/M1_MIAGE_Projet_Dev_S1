@@ -95,7 +95,7 @@ CREATE TABLE `commande` (
   `idCommande` int(11) NOT NULL AUTO_INCREMENT,
   `idPanier` int(11) NOT NULL,
   `typeCommande` enum('livraison', 'retrait', 'mixte'),
-  `statutCommande` enum('en attente', 'preparation', 'retrait', 'envoi', 'terminee') NOT NULL,
+  `statutCommande` enum('en attente', 'preparation', 'terminee') NOT NULL,
   `dateReception` datetime NOT NULL,
   `datePreparation` datetime,
   `dateFinalisation` datetime,
@@ -225,8 +225,8 @@ INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VAL
 INSERT INTO commande (idPanier, typeCommande, statutCommande, dateReception, datePreparation, dateFinalisation) VALUES
 (2, 'livraison', 'en attente', '2025-01-01 10:30:00', NULL, NULL),
 (3, 'retrait', 'preparation', '2025-01-02 11:00:00', '2025-01-02 12:00:00', NULL),
-(5, 'mixte', 'retrait', '2025-01-03 09:00:00', '2025-01-03 10:30:00', '2025-01-03 13:00:00'),
-(7, 'livraison', 'envoi', '2025-01-04 08:45:00', '2025-01-04 10:00:00', NULL);
+(5, 'mixte', 'terminee', '2025-01-03 09:00:00', '2025-01-03 10:30:00', '2025-01-03 13:00:00'),
+(7, 'livraison', 'preparation', '2025-01-04 08:45:00', '2025-01-04 10:00:00', NULL);
 
 INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue) VALUES
 -- Panier client 1 (en cours)
