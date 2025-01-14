@@ -4,10 +4,10 @@ public class Main {
 
     public static void main(String[] args) {     
         
-        MainConsultation.main(args);
-        MainAchat.main(args);
-        MainTableauDeBord.main(args);
-        MainGestion.main(args);
-        MainPreparation.main(args);
+        AppConsultation.main(args);
+        AppAchats.main(args);
+        AppTableauDeBord.main(args);
+        AppGestion.main(args);
+        AppPreparation.main(args);
     }
 }

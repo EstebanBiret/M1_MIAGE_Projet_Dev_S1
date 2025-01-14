@@ -10,7 +10,7 @@ import src.produit.ProduitDAO;
 
 import java.util.Scanner;
 
-public class MainConsultation {
+public class AppConsultation {
 
     public static void menuConsultation() {
         //Création du menu de consultation

@@ -4,7 +4,7 @@ import java.util.List;
 import src.GestionnaireDAO;
 import src.produit.Produit;
 
-public class MainGestion {
+public class AppGestion {
     
     public static void main(String[] args) {
 

@@ -5,7 +5,7 @@ import java.util.Map;
 import src.client.Client;
 import src.client.ClientDAO;
 
-public class MainTableauDeBord {
+public class AppTableauDeBord {
     
     public static void main(String[] args) {
         

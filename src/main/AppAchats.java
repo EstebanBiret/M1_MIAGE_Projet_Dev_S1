@@ -7,7 +7,7 @@ import src.client.ClientDAO;
 import src.panier.Panier;
 import src.panier.PanierDAO;
 
-public class MainAchat {
+public class AppAchats {
     
     static ClientDAO clientDAO = new ClientDAO();
     static PanierDAO panierDAO = new PanierDAO();
