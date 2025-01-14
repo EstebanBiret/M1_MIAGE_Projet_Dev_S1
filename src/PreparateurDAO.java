@@ -48,43 +48,6 @@ public class PreparateurDAO {
             }
         }
         
-        
-        
-        public static void marquerEnPreparation(int idCommande, String typeCommande) {
-            // Validation du type de commande
-            if (!typeCommande.equalsIgnoreCase("retrait") && !typeCommande.equalsIgnoreCase("livraison") && !typeCommande.equalsIgnoreCase("mixte")) {
-                System.out.println("Type de commande invalide. Veuillez choisir entre 'retrait' ou 'livraison' ou 'mixte'.");
-                return;
-            }
-        
-            String query = """
-                UPDATE commande
-                SET statutCommande = ?, typeCommande = ?, datePreparation = ?
-                WHERE idCommande = ?
-            """;
-        
-            try (Connection connection = DBConnection.getConnection();
-                 PreparedStatement pstmt = connection.prepareStatement(query)) {
-        
-                // Paramétrer la requête
-                pstmt.setString(1, "preparation");
-                pstmt.setString(2, typeCommande.toLowerCase());
-                pstmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-                pstmt.setInt(4, idCommande);
-        
-                // Exécuter la mise à jour
-                int rowsAffected = pstmt.executeUpdate();
-                if (rowsAffected > 0) {
-                    System.out.println("Commande " + idCommande + " mise à jour avec succès : statut = 'préparation', type = '" + typeCommande + "'.");
-                } else {
-                    System.out.println("Aucune commande trouvée avec l'ID : " + idCommande);
-                }
-        
-            } catch (SQLException e) {
-                System.out.println("Erreur lors de la mise à jour de la commande : " + e.getMessage());
-            }
-        }
-        
     //US 4.2
     public void commencerAPreparer(int idCommande) {
         try (Connection connection = DBConnection.getConnection()) {
