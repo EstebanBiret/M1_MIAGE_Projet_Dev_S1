@@ -36,6 +36,43 @@ public class ProduitDAO {
         return produit;
     }
 
+    public List<Produit> getAllProduits() {
+        List<Produit> produits = new ArrayList<>();
+
+        try (Connection connection = DBConnection.getConnection()) {
+            String selectQuery = "SELECT * FROM produit";
+
+            try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
+                try (ResultSet rs = pstmt.executeQuery()) {
+
+                    //tant qu'il y a des produits, on les ajoute à la liste
+                    while (rs.next()) {
+                        Produit produit = new Produit(
+                            rs.getString("libelleProduit"),
+                            rs.getDouble("prixUnitaire"),
+                            rs.getDouble("prixKilo"),
+                            rs.getString("nutriscore").charAt(0),
+                            rs.getDouble("poidsProduit"),
+                            rs.getString("conditionnementProduit"),
+                            rs.getString("marqueProduit")
+                        );
+                        produit.setIdProduit(rs.getInt("idProduit"));
+                        produits.add(produit);
+                    } 
+                }
+            }
+            connection.close();
+
+        } catch (SQLException e) {
+            System.out.println("Erreur : " + e.getMessage());
+        }
+
+        if (produits.isEmpty()) {
+            System.out.println("Aucun produit trouvé");
+        }
+        return produits;
+    }
+
     //fonction qui retourne la liste des produits de la catégorie fournie en paramètre
     public List<Produit> produitsParCategorie(String categorie) {
         List<Produit> produits = new ArrayList<>();
@@ -115,13 +152,55 @@ public class ProduitDAO {
             System.out.println("Erreur : " + e.getMessage());
         }
 
-        if(produits.isEmpty()){
+        /*if(produits.isEmpty()){
             if(nomExact) {
                 System.out.println("Produit introuvable (" + libelleProduit + ")");
             } else {
                 System.out.println("Aucun produit trouvé avec le mot clé " + "'"  + libelleProduit + "'.");
             }
+        }*/
+        return produits;
+    }
+
+    public List<Produit> getProduitsByMarque(String marque) {
+        List<Produit> produits = new ArrayList<>();
+
+        try (Connection connection = DBConnection.getConnection()) {
+            String selectQuery = "SELECT * FROM produit WHERE marqueProduit LIKE ?";
+            marque = "%" + marque + "%";
+            
+            try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
+                pstmt.setString(1, marque);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        Produit produit = new Produit(
+                            rs.getString("libelleProduit"),
+                            rs.getDouble("prixUnitaire"),
+                            rs.getDouble("prixKilo"),
+                            rs.getString("nutriscore").charAt(0),
+                            rs.getDouble("poidsProduit"),
+                            rs.getString("conditionnementProduit"),
+                            rs.getString("marqueProduit")
+                        );
+                        produit.setIdProduit(rs.getInt("idProduit"));
+                        produits.add(produit);
+                    } 
+                }
+            }
+            connection.close();
+
+        } 
+        catch (SQLException e) {
+            System.out.println("Erreur : " + e.getMessage());
         }
+
+        /*if(produits.isEmpty()){
+            if(nomExact) {
+                System.out.println("Produit introuvable (" + libelleProduit + ")");
+            } else {
+                System.out.println("Aucun produit trouvé avec le mot clé " + "'"  + libelleProduit + "'.");
+            }
+        }*/
         return produits;
     }
 }

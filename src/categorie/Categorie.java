@@ -1,6 +1,7 @@
-package src;
+package src.categorie;
 import java.sql.*;
 
+import src.DBConnection;
 
 public class Categorie {
     private int idCategorie;

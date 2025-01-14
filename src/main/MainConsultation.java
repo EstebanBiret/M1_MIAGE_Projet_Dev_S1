@@ -1,7 +1,10 @@
 package src.main;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import src.categorie.CategorieDAO;
 import src.produit.Produit;
 import src.produit.ProduitDAO;
 
@@ -9,93 +12,140 @@ import java.util.Scanner;
 
 public class MainConsultation {
 
+    public static void menuConsultation() {
+        //Création du menu de consultation
+        System.out.println("------------------------------------------");
+        System.out.println("| ~ Menu de consultation ~               |");
+        System.out.println("|                                        |");
+        System.out.println("| [1] Détails d'un produit               |");
+        System.out.println("| [2] Recherche d'un produit             |");
+        System.out.println("| [3] Produits par catégorie             |");
+        System.out.println("| [4] Trier les produits                 |");
+        System.out.println("| [0] Quitter                            |");
+        System.out.println("|                                        |");
+        System.out.println("------------------------------------------");
+    }
+
+    public static void menuCritères() {
+        //Création du menu des critères
+        System.out.println("------------------------------------------");
+        System.out.println("| ~ Menu des critères ~                  |");
+        System.out.println("|                                        |");
+        System.out.println("| [1] Prix unitaire croissant            |");
+        System.out.println("| [2] Ordre alphabétique                 |");
+        System.out.println("| [3] Nutriscore                         |");
+        System.out.println("| [4] Poids croissant                    |");
+        System.out.println("| [0] Retour au menu principal           |");
+        System.out.println("|                                        |");
+        System.out.println("------------------------------------------");
+    }
+
     public static void main(String[] args) {
 
-        /* ----- US 0.1 ----- */
-        System.out.println("\n");
-        System.out.println("----- US 0.1 -----");
-        System.out.println("Visualiser les détails d'un produit par son ID");
-
-        //recherche et affichage d'un produit par son ID
-        //scanner pour choisir l'id du produit
-        int idProduit;
-        Produit produitId = null;
+        //variables
         ProduitDAO produitDAO = new ProduitDAO();
+        CategorieDAO categorieDAO = new CategorieDAO();
+        Scanner scanner = new Scanner(System.in);
+        int choix = -1;
 
-        //tant que le produit voulu n'existe pas
-        try (Scanner scanner = new Scanner(System.in)) {
-            while (produitId == null) {
-                System.out.print("Veuillez entrer le numéro du produit souhaité : ");
-                while (!scanner.hasNextInt()) {
-                    System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
-                    scanner.next();
-                }
-                idProduit = scanner.nextInt();
-
-                // Recherche du produit via le DAO
-                produitId = produitDAO.getProduitById(idProduit);
-
-                if (produitId == null) {
-                    System.out.println("Produit introuvable avec l'ID : " + idProduit);
-                }
+        //boucle pour interagir avec le menu tant que l'utilisateur ne quitte pas
+        while (choix != 0) {
+            menuConsultation();
+            System.out.print("Veuillez choisir une option : ");
+            while (!scanner.hasNextInt()) {
+                System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                scanner.next();
             }
+            choix = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choix) {
+                case 1:
+                    System.out.print("Entrez l'ID du produit : ");
+
+                    //tant que l'utilisateur ne renseigne pas un chiffre
+                    while (!scanner.hasNextInt()) {
+                        System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                        scanner.next();
+                    }
+                    int idProduit = scanner.nextInt();
+                    scanner.nextLine();
+                    Produit produit = produitDAO.getProduitById(idProduit);
+
+                    if (produit != null) {
+                        System.out.println(produit.toString());
+                    } else {
+                        System.out.println("Produit introuvable avec l'ID : " + idProduit);
+                    }
+                    break;
+
+                case 2:
+                    System.out.print("Entrez un mot-clé pour rechercher des produits : ");
+                    String motCle = scanner.nextLine();
+
+                    //recherche sur libellé et marque
+                    List<Produit> produitsMotCleNom = produitDAO.getProduitsByLibelle(motCle, false);
+                    List<Produit> produitsMotCleMarque = produitDAO.getProduitsByMarque(motCle);
+
+                    //on fusionne les 2 listes en supprimant les doublons
+                    List<Produit> produitsResultats = new ArrayList<>(produitsMotCleNom);
+                    for (Produit produitMotCleMarque : produitsMotCleMarque) {
+                        if (!produitsResultats.contains(produitMotCleMarque)) {
+                            produitsResultats.add(produitMotCleMarque);
+                        }
+                    }
+
+                    if (produitsResultats.isEmpty()) {
+                        System.out.println("Aucun produit trouvé avec le mot-clé : " + motCle);
+                    } else {
+                        produitsResultats.forEach(System.out::println);
+                    }
+                    break;
+
+                case 3:
+                    categorieDAO.gererMenuCategorie(produitDAO);
+                    break;
+
+                case 4:
+                    List<Produit> produitsATrier = produitDAO.getAllProduits();
+                    menuCritères();
+                    int critere = scanner.nextInt();
+                    scanner.nextLine();
+
+                    switch (critere) {
+                        case 1:
+                            produitsATrier.sort(Comparator.comparingDouble(Produit::getPrixUnitaire));
+                            break;
+                        case 2:
+                            produitsATrier.sort(Comparator.comparing(Produit::getLibelleProduit));
+                            break;
+                        case 3:
+                            produitsATrier.sort(Comparator.comparing(Produit::getNutriscore));
+                            break;
+                        case 4:
+                            produitsATrier.sort(Comparator.comparingDouble(Produit::getPoidsProduit));
+                            break;
+                        case 0:
+                            System.out.println("Retour au menu principal.");
+                            break;
+                        default:
+                            System.out.println("Option invalide. Veuillez réessayer.");
+                            continue;
+                    }
+                    if(critere != 0) produitsATrier.forEach(System.out::println);
+                    break;
+
+                case 0:
+                    System.out.println("Fermeture du menu ...");
+                    break;
+
+                default:
+                    System.out.println("Option invalide. Veuillez réessayer.");
+            }
+
+            System.out.println("\n");
         }
 
-        // Affichage des détails du produit
-        System.out.println(produitId.toString());
-        System.out.println("\n");
-
-        //recherche et affichage de produit.s par son libellé exact
-        String libelle = "Jus d'orange";
-        System.out.println("Visualiser les détails des " + libelle);
-        List<Produit> produitsLibelle = produitDAO.getProduitsByLibelle(libelle, true);
-        for (Produit produit : produitsLibelle) {
-            System.out.println(produit.toString());
-        }
-        System.out.println("\n");
-
-        /* ----- US 0.2 ----- */
-        System.out.println("----- US 0.2 -----");
-
-        //recherche de produits par mot clé
-        String motCle = "Jus d'o";
-        System.out.println("Recherche par mot clé : " + motCle);
-        List<Produit> produitsMotCle = produitDAO.getProduitsByLibelle(libelle, false);
-        for (Produit produit : produitsMotCle) {
-            System.out.println(produit.toString());
-        }
-        System.out.println("\n");
-
-        /* ----- US 0.3 ----- */
-        System.out.println("----- US 0.3 -----");
-        //consulter la liste des produits par catégorie
-        String categorie = "Boissons";
-        System.out.println("Recherche par catégorie : " + categorie);
-        List<Produit> produitsBoissons = produitDAO.produitsParCategorie(categorie);
-        for (Produit produit : produitsBoissons) {
-            System.out.println(produit.toString());
-        }
-
-        /* ----- 0.4 ----- */
-        System.out.println("\n");
-        System.out.println("----- US 0.4 -----");
-
-        //tri de la liste des produits par prix, ordre alphabétique, nutriscore et poids
-        produitsBoissons.sort(Comparator.comparingDouble(Produit::getPrixUnitaire));
-        System.out.println("Tri par prix unitaire croissant :");
-        produitsBoissons.forEach(System.out::println);
-
-        produitsBoissons.sort(Comparator.comparing(Produit::getLibelleProduit));
-        System.out.println("\nTri alphabétique par libellé :");
-        produitsBoissons.forEach(System.out::println);
-
-        produitsBoissons.sort(Comparator.comparing(Produit::getNutriscore));
-        System.out.println("\nTri par nutriscore :");
-        produitsBoissons.forEach(System.out::println);
-
-        produitsBoissons.sort(Comparator.comparingDouble(Produit::getPoidsProduit));
-        System.out.println("\nTri par poids croissant :");
-        produitsBoissons.forEach(System.out::println);
-        System.out.println("\n");
+        scanner.close();
     }
 }

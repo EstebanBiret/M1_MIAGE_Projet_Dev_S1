@@ -44,7 +44,7 @@ public class MainAchat {
         /* ----- US 1.4 ----- */
         System.out.println("----- US 1.4 -----");
         System.out.println("Annulation du panier en cours du client 1 ...");
-        //panierDAO.annulerPanier(panierClient1);
+        panierDAO.annulerPanier(panierClient1);
 
         /* ----- US 1.5 ----- */
         System.out.println("----- US 1.5 -----");
