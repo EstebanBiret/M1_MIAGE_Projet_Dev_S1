@@ -331,137 +331,144 @@ public class PanierDAO {
         }
     }    
 
-    //US 1.3
-    public void validerPanier(Panier panier,int choix) {
-        int idPanier = panier.getIdPanier();
+//US 1.3
+public void validerPanier(Panier panier,int choix) {
+    int idPanier = panier.getIdPanier();
 
-        String deleteProduitPanier = "DELETE FROM panier_produit_magasin WHERE idPanier = ? AND idProduit = ? AND idMagasin = ?;";
 
-        if (panier.isPanierTermine()) {
-            System.out.println("Votre panier a déjà été annulé/validé.");
-            return;
-        }
-        if(estVide(idPanier)){
-            System.out.println("Votre panier est vide.");
-            return;
-        }
+    String deleteProduitPanier = "DELETE FROM panier_produit_magasin WHERE idPanier = ? AND idProduit = ? AND idMagasin = ?;";
 
-        String typeCommande;
-        if (choix == 1) {
-          typeCommande = "envoi";
-        } else if (choix == 2) {
-          typeCommande = "retrait";
-        } else {
-          System.out.println("Choix invalide. Opération annulée.");
-          return;
-        }
-    
-        try (Connection connection = DBConnection.getConnection()) {
-            
-            // Vérification des quantités pour chaque produit du panier
-            String queryCheckStock = "SELECT ppm.idMagasin,ppm.idProduit, ppm.quantiteVoulue, s.quantiteEnStock " +
-                                     "FROM panier_produit_magasin ppm " +
-                                     "JOIN stocker s ON ppm.idProduit = s.idProduit AND ppm.idMagasin = s.idMagasin " +
-                                     "WHERE ppm.idPanier = ?";
-    
-            try (PreparedStatement pstmtCheckStock = connection.prepareStatement(queryCheckStock)) {
-                pstmtCheckStock.setInt(1, idPanier);
-                try (ResultSet rs = pstmtCheckStock.executeQuery()) {
-                    
-                    while (rs.next()) {
-                        int quantiteVoulue = rs.getInt("quantiteVoulue");
-                        int quantiteEnStock = rs.getInt("quantiteEnStock");
-                        int idProduit = rs.getInt("idProduit");
-                        int idMagasin = rs.getInt("idMagasin");
-                        if (quantiteVoulue > quantiteEnStock) {
-                            System.out.println("Echec de la validation du panier en raison de stock insuffisant du produit ID : " + idProduit + " dans le magasin " + idMagasin);                            
-                            
-                            //supprimer le produit en question du panier, et proposer un produit de remplacement
-                            try (PreparedStatement pstmtDeleteProduit = connection.prepareStatement(deleteProduitPanier)) {
-                                pstmtDeleteProduit.setInt(1, idPanier);
-                                pstmtDeleteProduit.setInt(2, idProduit);
-                                pstmtDeleteProduit.setInt(3, idMagasin);
-                                pstmtDeleteProduit.executeUpdate();
 
-                                //proposer un nouveau produit
-                                Scanner scanner = new Scanner(System.in);
-                                ProduitRemplacement produitRemplacement = Algorithmes.remplacementProduit(idProduit, idMagasin, quantiteVoulue, scanner);
-                                idProduit = produitRemplacement.getIdProduit();
-                                idMagasin = produitRemplacement.getIdMagasin();
-                                quantiteVoulue = produitRemplacement.getQuantiteChoisie();
+    if (panier.isPanierTermine()) {
+        System.out.println("Votre panier a déjà été annulé/validé.");
+        return;
+    }
+    if(estVide(idPanier)){
+        System.out.println("Votre panier est vide.");
+        return;
+    }
 
-                                if(checkProduitMagasinDejaPanier(idPanier, idProduit, idMagasin)) {
 
-                                    //récupérer la quantité déjà en stock dans le panier pour ce produit
-                                    int qtePanier = getQteProduitPanier(idPanier, idProduit, idMagasin);
-                        
-                                    //qte bien en stock en prenant en compte la quantité déjà dans le panier pour ce produit
-                                    if(checkQteStockMagasin(idProduit, idMagasin, qtePanier + quantiteVoulue)) {
-                                        //ajout du produit au panier
-                                        updateProduitPanier(idPanier, idProduit, idMagasin, quantiteVoulue);
-                                    }
-                                }
-                                else {
+    String typeCommande;
+    if (choix == 1) {
+      typeCommande = "livraison";
+    } else if (choix == 2) {
+      typeCommande = "retrait";
+    } else {
+      System.out.println("Choix invalide. Opération annulée.");
+      return;
+    }
+
+    try (Connection connection = DBConnection.getConnection()) {
+       
+        // Vérification des quantités pour chaque produit du panier
+        String queryCheckStock = "SELECT ppm.idMagasin,ppm.idProduit, ppm.quantiteVoulue, s.quantiteEnStock " +
+                                 "FROM panier_produit_magasin ppm " +
+                                 "JOIN stocker s ON ppm.idProduit = s.idProduit AND ppm.idMagasin = s.idMagasin " +
+                                 "WHERE ppm.idPanier = ?";
+
+        try (PreparedStatement pstmtCheckStock = connection.prepareStatement(queryCheckStock)) {
+            pstmtCheckStock.setInt(1, idPanier);
+            try (ResultSet rs = pstmtCheckStock.executeQuery()) {
+               
+                while (rs.next()) {
+                    int quantiteVoulue = rs.getInt("quantiteVoulue");
+                    int quantiteEnStock = rs.getInt("quantiteEnStock");
+                    int idProduit = rs.getInt("idProduit");
+                    int idMagasin = rs.getInt("idMagasin");
+                    if (quantiteVoulue > quantiteEnStock) {
+                        System.out.println("Echec de la validation du panier en raison de stock insuffisant du produit ID : " + idProduit + " dans le magasin " + idMagasin);                            
+                       
+                        //supprimer le produit en question du panier, et proposer un produit de remplacement
+                        try (PreparedStatement pstmtDeleteProduit = connection.prepareStatement(deleteProduitPanier)) {
+                            pstmtDeleteProduit.setInt(1, idPanier);
+                            pstmtDeleteProduit.setInt(2, idProduit);
+                            pstmtDeleteProduit.setInt(3, idMagasin);
+                            pstmtDeleteProduit.executeUpdate();
+
+
+                            //proposer un nouveau produit
+                            Scanner scanner = new Scanner(System.in);
+                            ProduitRemplacement produitRemplacement = Algorithmes.remplacementProduit(idProduit, idMagasin, quantiteVoulue, scanner);
+                            idProduit = produitRemplacement.getIdProduit();
+                            idMagasin = produitRemplacement.getIdMagasin();
+                            quantiteVoulue = produitRemplacement.getQuantiteChoisie();
+
+
+                            if(checkProduitMagasinDejaPanier(idPanier, idProduit, idMagasin)) {
+
+
+                                //récupérer la quantité déjà en stock dans le panier pour ce produit
+                                int qtePanier = getQteProduitPanier(idPanier, idProduit, idMagasin);
+                   
+                                //qte bien en stock en prenant en compte la quantité déjà dans le panier pour ce produit
+                                if(checkQteStockMagasin(idProduit, idMagasin, qtePanier + quantiteVoulue)) {
                                     //ajout du produit au panier
-                                    insertProduitPanier(idPanier, idProduit, idMagasin, quantiteVoulue);
+                                    updateProduitPanier(idPanier, idProduit, idMagasin, quantiteVoulue);
                                 }
                             }
-                            return;
+                            else {
+                                //ajout du produit au panier
+                                insertProduitPanier(idPanier, idProduit, idMagasin, quantiteVoulue);
+                            }
                         }
+                        return;
                     }
-                    
                 }
+               
             }
-    
-            // Mise à jour des quantités en stock
-            String queryStockUpdate = "UPDATE stocker s " +
-                                       "JOIN panier_produit_magasin ppm ON s.idProduit = ppm.idProduit AND s.idMagasin = ppm.idMagasin " +
-                                       "SET s.quantiteEnStock = s.quantiteEnStock - ppm.quantiteVoulue " +
-                                       "WHERE ppm.idPanier = ?";
-    
-            try (PreparedStatement pstmtStockUpdate = connection.prepareStatement(queryStockUpdate)) {
-                pstmtStockUpdate.setInt(1, idPanier);
-                pstmtStockUpdate.executeUpdate();
-            }
-    
-            // Insertion de la commande dans la base de données
-            Timestamp now = new Timestamp(System.currentTimeMillis());
-            String insertCommandeQuery = "INSERT INTO commande (idPanier, typeCommande, statutCommande, dateReception) VALUES (?, ?, ?, ?)";
-            try (PreparedStatement pstmtInsertCommande = connection.prepareStatement(insertCommandeQuery, Statement.RETURN_GENERATED_KEYS)) {
-                pstmtInsertCommande.setInt(1, idPanier);
-                pstmtInsertCommande.setString(2, typeCommande);
-                pstmtInsertCommande.setString(3, "en attente");
-                pstmtInsertCommande.setTimestamp(4, now);
-    
-                int rowsInserted = pstmtInsertCommande.executeUpdate();
-                if (rowsInserted > 0) {
-                    try (ResultSet rs = pstmtInsertCommande.getGeneratedKeys()) {
-                        if (rs.next()) {
-                            int idCommande = rs.getInt(1);
-                        }
-                    }
-                } else {
-                    System.out.println("Échec de la création de la commande.");
-                    connection.rollback();
-                    return;
-                }
-            }
-    
-            // Marquer le panier comme terminé
-            String queryUpdatePanier = "UPDATE panier SET panierTermine = true, dateFinPanier = ? WHERE idPanier = ?";
-            try (PreparedStatement pstmtUpdatePanier = connection.prepareStatement(queryUpdatePanier)) {
-                pstmtUpdatePanier.setTimestamp(1, now);
-                pstmtUpdatePanier.setInt(2, idPanier);
-                pstmtUpdatePanier.executeUpdate();
-                panier.setPanierTermine(true);
-                panier.setDateFinPanier(now);
-                System.out.println("Le panier a été validé !");
-            }
-    
-        } catch (SQLException e) {
-            System.out.println("Erreur lors de la validation du panier : " + e.getMessage());
         }
+
+        // Mise à jour des quantités en stock
+        String queryStockUpdate = "UPDATE stocker s " +
+                                   "JOIN panier_produit_magasin ppm ON s.idProduit = ppm.idProduit AND s.idMagasin = ppm.idMagasin " +
+                                   "SET s.quantiteEnStock = s.quantiteEnStock - ppm.quantiteVoulue " +
+                                   "WHERE ppm.idPanier = ?";
+
+        try (PreparedStatement pstmtStockUpdate = connection.prepareStatement(queryStockUpdate)) {
+            pstmtStockUpdate.setInt(1, idPanier);
+            pstmtStockUpdate.executeUpdate();
+        }
+
+        // Insertion de la commande dans la base de données
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        String insertCommandeQuery = "INSERT INTO commande (idPanier, typeCommande, statutCommande, dateReception) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement pstmtInsertCommande = connection.prepareStatement(insertCommandeQuery, Statement.RETURN_GENERATED_KEYS)) {
+            pstmtInsertCommande.setInt(1, idPanier);
+            pstmtInsertCommande.setString(2, typeCommande);
+            pstmtInsertCommande.setString(3, "en attente");
+            pstmtInsertCommande.setTimestamp(4, now);
+
+            int rowsInserted = pstmtInsertCommande.executeUpdate();
+            if (rowsInserted > 0) {
+                try (ResultSet rs = pstmtInsertCommande.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int idCommande = rs.getInt(1);
+                    }
+                }
+            } else {
+                System.out.println("Échec de la création de la commande.");
+                connection.rollback();
+                return;
+            }
+        }
+
+        // Marquer le panier comme terminé
+        String queryUpdatePanier = "UPDATE panier SET panierTermine = true, dateFinPanier = ? WHERE idPanier = ?";
+        try (PreparedStatement pstmtUpdatePanier = connection.prepareStatement(queryUpdatePanier)) {
+            pstmtUpdatePanier.setTimestamp(1, now);
+            pstmtUpdatePanier.setInt(2, idPanier);
+            pstmtUpdatePanier.executeUpdate();
+            panier.setPanierTermine(true);
+            panier.setDateFinPanier(now);
+            System.out.println("Le panier a été validé ! en mode de livraison : "+ typeCommande);
+        }
+
+    } catch (SQLException e) {
+        System.out.println("Erreur lors de la validation du panier : " + e.getMessage());
     }
+}
+
     
     
 
@@ -527,5 +534,48 @@ public class PanierDAO {
         }
         //enfin, on marque le panier actuel comme terminé
         panier.setPanierTermine(true);
+    }
+
+    //US 1.7 
+    public int choisirModeRapide(int idPanier) {
+        String modePlusRapide = null;
+        int mode = 0;
+    
+       try (Connection connection = DBConnection.getConnection()) {
+           // Requête pour compter le nombre de magasins associés au panier
+           String queryNombreMagasins = "SELECT COUNT(DISTINCT idMagasin) AS nombreMagasins " +
+                                        "FROM panier_produit_magasin " +
+                                        "WHERE idPanier = ?";
+           try (PreparedStatement pstmtMagasins = connection.prepareStatement(queryNombreMagasins)) {
+               pstmtMagasins.setInt(1, idPanier);
+    
+               try (ResultSet rs = pstmtMagasins.executeQuery()) {
+                   if (rs.next()) {
+                       int nombreMagasins = rs.getInt("nombreMagasins");
+    
+                       // Logique pour déterminer le mode de réception le plus rapide
+                       if (nombreMagasins == 1) {
+                           modePlusRapide = "Retrait en magasin";
+                           mode = 2;
+                       } else if (nombreMagasins > 1) {
+                           modePlusRapide = "Livraison";
+                           mode = 1;
+                       } else {
+                           System.out.println("Le panier ID " + idPanier + " ne contient aucun produit.");
+                           
+                       }
+                   }
+               }
+           }
+       } catch (SQLException e) {
+           System.err.println("Erreur lors de la sélection du mode rapide pour le panier #" + idPanier + " : " + e.getMessage());
+       }
+    
+       // Affichage du mode choisi
+       if (modePlusRapide != null) {
+           System.out.println("Pour le panier #" + idPanier + ", le mode le plus rapide est : " + modePlusRapide);
+       }
+    
+       return mode;
     }
 }

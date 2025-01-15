@@ -192,18 +192,41 @@ public class AppAchats {
                     System.out.println(panierDAO.afficherPanier(panierClient1.getIdPanier()));
                     break;
 
-                case 3: //valider le panier
-                 System.out.println("Choisissez le mode de livraison pour votre panier:");
-                 System.out.println("1. Envoi  2. Retrait");
-                 System.out.println("Tapez le numéro, s'il vous plait. Ex: Si vous voulez la livraison par envoi, tapez 1: ");
-                 while (!scanner.hasNextInt()) {
-                    System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
-                    scanner.next();
-                 }
-                 int typeCommande = scanner.nextInt();
-                 scanner.nextLine();
-                    panierDAO.validerPanier(panierClient1,typeCommande);
-                    break;
+                    case 3: //valider le panier
+                    int typeCommande = 0;
+                    typeCommande = panierDAO.choisirModeRapide(panierClient1.getIdPanier());
+                    if(typeCommande != 0){
+                    System.out.println("Voulez-vous choisir le mode de livraison le plus rapide possible?");
+                    System.out.println("1. OUI  2. NON");
+                    while (!scanner.hasNextInt()) {
+                       System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                       scanner.next();
+                    }
+                       int choixRapide  = scanner.nextInt();
+                       scanner.nextLine();
+                      
+                       if(choixRapide == 1){                        
+                           panierDAO.validerPanier(panierClient1, typeCommande);
+                       }
+                       else if(choixRapide == 2){
+                           int choixInverse = 0;
+                           if(typeCommande == 1){
+                               choixInverse =2;
+                           }else if(choixRapide == 2){
+                               choixInverse = 1;
+                           }  
+                           panierDAO.validerPanier(panierClient1, choixInverse);                                        
+                       }else{
+                           System.out.println("Choix invalide. Opération annulée.");
+                          
+                       }
+                   }
+                       else{
+                           System.out.println("Echec de validation.");
+   
+   
+                       }          
+                       break;   
 
                 case 4: //annuler le panier
                     panierDAO.annulerPanier(panierClient1);
