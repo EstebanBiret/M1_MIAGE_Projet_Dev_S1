@@ -87,7 +87,6 @@ public class Algorithmes {
 
                         //on regarde grâce à un stream si un produit dans la liste a déjà le même id que le produit que l'on veut ajouter à celle-ci
                         boolean produitExistant = produitsAlternatifs.stream().anyMatch(p -> p.getIdProduit() == produit.getIdProduit());
-                        //System.out.println("test : " + produitExistant);
 
                         if (!produitExistant) {
                             produitsAlternatifs.add(produit);
@@ -97,7 +96,6 @@ public class Algorithmes {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-    
             nbIterations++;
         }
     

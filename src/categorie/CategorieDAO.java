@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import src.DBConnection;
+import src.main.AppClient;
+import src.panier.Panier;
 import src.produit.Produit;
 import src.produit.ProduitDAO;
 
@@ -48,8 +50,7 @@ public class CategorieDAO {
         System.out.println("------------------------------------------");
     }
 
-    public void gererMenuCategorie(ProduitDAO produitDAO) {
-        Scanner scanner = new Scanner(System.in);
+    public void gererMenuCategorie(ProduitDAO produitDAO, Scanner scanner, Panier panierClient) {
         int choix = -1;
 
         while (choix != 0) {
@@ -65,20 +66,19 @@ public class CategorieDAO {
             if (choix > 0 && choix <= categoriesDisponibles.size()) {
                 String categorieChoisie = categoriesDisponibles.get(choix - 1);
                 System.out.println("Vous avez choisi la catégorie : " + categorieChoisie);
-                afficherProduitsParCategorie(produitDAO, categorieChoisie);
+
+                List<Produit> produitsCategorie = produitDAO.produitsParCategorie(categorieChoisie);
+
+                if (produitsCategorie.isEmpty()) {
+                    System.out.println("Aucun produit trouvé dans la catégorie : " + categorieChoisie);
+                } else {
+                    // Appel à la méthode de pagination
+                    AppClient.afficherProduitsAvecPagination(produitsCategorie, scanner, panierClient);
+                }
             } else if (choix != 0) {
                 System.out.println("Choix invalide. Veuillez réessayer.");
             }
         }
         System.out.println("Retour au menu principal.");
-    }
-
-    private void afficherProduitsParCategorie(ProduitDAO produitDAO, String categorie) {
-        List<Produit> produitsCategorie = produitDAO.produitsParCategorie(categorie);
-        if (produitsCategorie.isEmpty()) {
-            System.out.println("Aucun produit trouvé dans la catégorie : " + categorie);
-        } else {
-            produitsCategorie.forEach(System.out::println);
-        }
     }
 }

@@ -26,7 +26,7 @@ public class AppPreparation {
         int choix = -1;
 
         while (choix != 0) {
-            menuGestion();
+            menuPreparation();
             System.out.print("Veuillez choisir une option : ");
             while (!scanner.hasNextInt()) {
                 System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");

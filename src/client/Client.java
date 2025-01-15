@@ -23,6 +23,14 @@ public class Client {
 
     //getters & setters
     public int getIdClient() {return idClient;}
+    public String getNomClient() {return nomClient;}
+    public void setNomClient(String nom) {this.nomClient = nom;}
+    public String getPrenomClient() {return prenomClient;}
+    public void setPrenomClient(String prenom) {this.prenomClient = prenom;}
+    public String getAdresseClient() {return adresseClient;}
+    public void setAdresseClient(String adresse) {this.adresseClient = adresse;}
+    public String getTelClient() {return telClient;}
+    public void setTelClient(String tel) {this.telClient = tel;}
     public int getIdMagasinFavori() {return idMagasinFavori;}
     public void setIdMagasinFavori(int idMagasin) {this.idMagasinFavori = idMagasin;}
 

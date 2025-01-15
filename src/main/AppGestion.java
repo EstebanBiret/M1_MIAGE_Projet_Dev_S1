@@ -9,16 +9,17 @@ public class AppGestion {
 
     public static void menuGestion() {
         // Création du menu de gestion
-        System.out.println("------------------------------------------");
-        System.out.println("| ~ Menu de gestion ~                    |");
-        System.out.println("|                                        |");
-        System.out.println("| [1] Ajouter un produit au catalogue    |");
-        System.out.println("| [2] Augmenter la quantité d'un produit |");
-        System.out.println("| [3] Baisser la quantité d'un produit   |");
-        System.out.println("| [4] Voir les statistiques              |");
-        System.out.println("| [0] Quitter                            |");
-        System.out.println("|                                        |");
-        System.out.println("------------------------------------------");
+        System.out.println("------------------------------------------------");
+        System.out.println("| ~ Menu de gestion ~                          |");
+        System.out.println("|                                              |");
+        System.out.println("| [1] Ajouter un produit au catalogue (saisie) |");
+        System.out.println("| [2] Ajouter un produit au catalogue (auto)   |");
+        System.out.println("| [3] Augmenter la quantité d'un produit       |");
+        System.out.println("| [4] Baisser la quantité d'un produit         |");
+        System.out.println("| [5] Voir les statistiques                    |");
+        System.out.println("| [0] Quitter                                  |");
+        System.out.println("|                                              |");
+        System.out.println("------------------------------------------------");
     }
 
     public static void menuStats() {
@@ -112,6 +113,10 @@ public class AppGestion {
                     break;
 
                 case 2:
+                    //TODO
+                    break;
+
+                case 3:
                     System.out.print("Entrez l'ID du produit à augmenter : ");
                     while (!scanner.hasNextInt()) {
                         System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
@@ -136,7 +141,7 @@ public class AppGestion {
                     marc.majStockProduit(idProduitAug, quantiteAug, magasin, true);
                     break;
 
-                case 3:
+                case 4:
                     System.out.print("Entrez l'ID du produit à diminuer : ");
                     while (!scanner.hasNextInt()) {
                         System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
@@ -161,7 +166,7 @@ public class AppGestion {
                     marc.majStockProduit(idProduitDim, quantiteDim, magasin2, false);
                     break;
 
-                case 4:
+                case 5:
                     int choixStats = -1;
                     while (choixStats != 0) {
                         menuStats();

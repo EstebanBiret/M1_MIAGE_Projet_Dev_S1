@@ -10,7 +10,8 @@ import src.commande.Commande;
 import src.panier.Panier;
 import src.produit.Produit;
 import src.produit.ProduitDAO;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ClientDAO {
     
@@ -63,109 +64,6 @@ public class ClientDAO {
             System.out.println("Erreur : " + e.getMessage());
         }
         return p;
-    }
-
-    /*
-     * Retourne une liste des produits les plus commandés du client actuel
-     */
-    public List<String> getProduitsPlusCommandes(int idClient) {
-        List<String> produits = new ArrayList<>();
-
-        //récupérer les commandes de ce client
-        List<Commande> commandes = getCommandes(idClient);
-
-        if (commandes.isEmpty()) {
-            System.out.println("Aucune commande trouvée pour ce client.");
-            return produits;
-        }
-        
-        // Map pour compter les occurrences des produits
-        Map<Integer, Integer> produitCounts = new HashMap<>();
-
-        String query = """
-            SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
-                p.poidsProduit, p.conditionnementProduit, p.marqueProduit, ppm.quantiteVoulue
-            FROM panier_produit_magasin ppm, produit p
-            WHERE ppm.idProduit = p.idProduit
-            AND ppm.idPanier = ?
-        """;
-
-        try (Connection connection = DBConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
-
-            // Parcourir chaque commande pour récupérer ses produits
-            for (Commande commande : commandes) {
-                statement.setInt(1, commande.getIdPanier());
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    while (resultSet.next()) {
-                        int idProduit = resultSet.getInt("idProduit");
-                        int quantiteVoulue = resultSet.getInt("quantiteVoulue");
-
-                        // Ajouter au compteur ou incrémenter
-                        produitCounts.put(idProduit, produitCounts.getOrDefault(idProduit, 0) + quantiteVoulue);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        // Trier les produits par nombre de commandes décroissant
-        produitCounts.entrySet().stream()
-            .sorted((entry1, entry2) -> Integer.compare(entry2.getValue(), entry1.getValue()))
-            .forEach(entry -> {
-                int idProduit = entry.getKey();
-                int quantite = entry.getValue();
-
-                // Récupérer les informations du produit
-                ProduitDAO produitDAO = new ProduitDAO();
-                Produit produit = produitDAO.getProduitById(idProduit);
-                if (produit != null) {
-                    String description = produit + " (Commandé " + quantite + " fois)";
-                    produits.add(description);
-                }
-            });
-
-        return produits;
-    }
-
-    /*
-     * Retourne une liste des commandes du client actuel
-     */
-    public List<Commande> getCommandes(int idClient) {
-        List<Commande> commandes = new ArrayList<>();
-
-        //récupérer en BD les commandes de ce client
-        try (Connection connection = DBConnection.getConnection()) {
-
-            String commandesQuery = "SELECT * FROM commande c, panier p WHERE c.idPanier = p.idPanier AND p.idClient = ?";
-            try (PreparedStatement pstmt = connection.prepareStatement(commandesQuery)) {
-                pstmt.setInt(1, idClient);
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    while (rs.next()) {
-                        Commande commande = new Commande(
-                            rs.getInt("idCommande"),
-                            rs.getInt("idPanier"),
-                            rs.getString("typeCommande"),
-                            rs.getString("statutCommande"),
-                            rs.getTimestamp("dateReception"),
-                            rs.getTimestamp("datePreparation"),
-                            rs.getTimestamp("dateFinalisation")
-                        );
-                        commandes.add(commande);
-                    } 
-                }
-            }
-            connection.close();
-    
-            } catch (SQLException e) {
-                System.out.println("Erreur : " + e.getMessage());
-            }
-
-        if(commandes.isEmpty()) {
-            System.out.println("Ce client n'a pas de commandes.");
-        }
-        return commandes;
     }
 
     public String getNomClient(int idClient) {
@@ -228,64 +126,45 @@ public class ClientDAO {
         return magasinFavori;
     }
 
-
-    /*
- * Retourne une liste des produits les plus commandés du client actuel
- * avec des détails regroupés par marque et catégorie.
- */
-
-    public List<String> getHabitudesCommandes(int idClient) {
+    // Méthode pour récupérer les habitudes de consommation
+    public List<String> getHabitudesConsos(int idClient) {
         List<String> habitudes = new ArrayList<>();
-    
-        // Récupérer les commandes de ce client
         List<Commande> commandes = getCommandes(idClient);
     
         if (commandes.isEmpty()) {
-            System.out.println("Aucune commande trouvée pour ce client.");
+            habitudes.add("Aucune commande trouvée pour ce client.");
             return habitudes;
         }
     
-        // Map pour compter les occurrences des produits, regroupés par marque, catégorie, bio et nutriscore
-        Map<String, Integer> groupCounts = new HashMap<>();
+        Map<String, Integer> categorieCounts = new HashMap<>();
+        Map<String, Integer> marqueCounts = new HashMap<>();
+        Map<String, Integer> nutriscoreCounts = new HashMap<>();
     
-        // Query updated to include bio, nutriscore, and other relevant details
         String query = """
-        SELECT p.idProduit, p.libelleProduit, p.marqueProduit, cat.nomCategorie, p.nutriscore, ppm.quantiteVoulue
-        FROM panier_produit_magasin ppm
-        JOIN produit p ON ppm.idProduit = p.idProduit
-        JOIN Appartenir a ON p.idProduit = a.idProduit
-        JOIN categorie cat ON a.idCategorie = cat.idCategorie
-        JOIN panier pa ON ppm.idPanier = pa.idPanier
-        JOIN client c ON pa.idClient = c.idClient
-        JOIN client_profil cp ON c.idClient = cp.idClient
-        JOIN profil pr ON cp.idProfil = pr.idProfil
-        WHERE ppm.idPanier = ? AND pr.nomProfil = ?
+            SELECT p.marqueProduit, cat.nomCategorie, p.nutriscore, ppm.quantiteVoulue
+            FROM panier_produit_magasin ppm
+            JOIN produit p ON ppm.idProduit = p.idProduit
+            JOIN Appartenir a ON p.idProduit = a.idProduit
+            JOIN categorie cat ON a.idCategorie = cat.idCategorie
+            WHERE ppm.idPanier = ?
         """;
-    
-        // Get the client's profile
-        String clientProfile = getClientProfile(idClient);  // Fetch the profile name for the client
     
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
     
-            // Parcourir chaque commande pour récupérer ses produits
             for (Commande commande : commandes) {
-                statement.setInt(1, commande.getIdPanier()); // Set the first parameter (idPanier)
-                statement.setString(2, clientProfile); // Set the second parameter (nomProfil)
+                statement.setInt(1, commande.getIdPanier());
     
                 try (ResultSet resultSet = statement.executeQuery()) {
                     while (resultSet.next()) {
-                        String marque = resultSet.getString("marqueProduit");
                         String categorie = resultSet.getString("nomCategorie");
+                        String marque = resultSet.getString("marqueProduit");
                         String nutriscore = resultSet.getString("nutriscore");
                         int quantite = resultSet.getInt("quantiteVoulue");
     
-                        // Creating a key with brand, category, bio, and Nutriscore
-                        String key = String.format("Marque: %s, Catégorie: %s, Nutriscore: %s", 
-                            marque, categorie, nutriscore);
-    
-                        // Add or update the count for this combination
-                        groupCounts.put(key, groupCounts.getOrDefault(key, 0) + quantite);
+                        categorieCounts.put(categorie, categorieCounts.getOrDefault(categorie, 0) + quantite);
+                        marqueCounts.put(marque, marqueCounts.getOrDefault(marque, 0) + quantite);
+                        nutriscoreCounts.put(nutriscore, nutriscoreCounts.getOrDefault(nutriscore, 0) + quantite);
                     }
                 }
             }
@@ -293,40 +172,167 @@ public class ClientDAO {
             e.printStackTrace();
         }
     
-        // Sort by the number of times ordered in descending order
-        groupCounts.entrySet().stream()
-            .sorted((entry1, entry2) -> Integer.compare(entry2.getValue(), entry1.getValue()))
+        habitudes.add("\nCatégories les plus commandées :");
+        categorieCounts.entrySet().stream()
+            .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
+            .forEach(entry -> habitudes.add(entry.getKey() + " - Commandé " + entry.getValue() + " fois"));
+    
+        habitudes.add("\nMarques les plus commandées :");
+        marqueCounts.entrySet().stream()
+            .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
+            .forEach(entry -> habitudes.add(entry.getKey() + " - Commandé " + entry.getValue() + " fois"));
+    
+        habitudes.add("\nNutriscores les plus commandés :");
+        nutriscoreCounts.entrySet().stream()
+            .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
             .forEach(entry -> habitudes.add(entry.getKey() + " - Commandé " + entry.getValue() + " fois"));
     
         return habitudes;
     }
-    
 
-public String getClientProfile(int idClient) {
-    String profileName = null;
-    String query = """
-        SELECT pr.nomProfil
-        FROM client_profil cp
-        JOIN profil pr ON cp.idProfil = pr.idProfil
-        WHERE cp.idClient = ?
-    """;
-
-    try (Connection connection = DBConnection.getConnection();
-         PreparedStatement statement = connection.prepareStatement(query)) {
-        statement.setInt(1, idClient);
-        try (ResultSet resultSet = statement.executeQuery()) {
-            if (resultSet.next()) {
-                profileName = resultSet.getString("nomProfil");
-            }
+    public void afficherCommandes(List<Commande> commandes) {
+        if (commandes.isEmpty()) {
+            System.out.println("Aucune commande trouvée.");
+            return;
         }
-    } catch (SQLException e) {
-        System.out.println("Erreur lors de la récupération du profil du client : " + e.getMessage());
+    
+        for (Commande commande : commandes) {
+            String dateStr = "Non disponible";
+            if (commande.getDateReception() != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
+                dateStr = sdf.format(new Date(commande.getDateReception().getTime()));
+            }
+    
+            String commandeString = String.format(
+                "ID: %d | Statut: %s | Mode: %s | Date de la commande: %s",
+                commande.getIdCommande(),
+                commande.getStatutCommande(),
+                commande.getTypeCommande(),
+                dateStr
+            );
+    
+            System.out.println(commandeString);
+        }
+    }
+    
+    public List<Commande> getCommandes(int idClient) {
+        List<Commande> commandes = new ArrayList<>();
+    
+        String query = """
+            SELECT c.idCommande, c.idPanier, c.typeCommande, c.statutCommande, c.dateReception, c.datePreparation, c.dateFinalisation,
+                SUM(ppm.quantiteVoulue) AS nbProduits
+            FROM commande c
+            JOIN panier p ON c.idPanier = p.idPanier
+            LEFT JOIN panier_produit_magasin ppm ON p.idPanier = ppm.idPanier
+            WHERE p.idClient = ?
+            GROUP BY c.idCommande, c.typeCommande, c.statutCommande, c.dateReception, c.datePreparation, c.dateFinalisation
+        """; 
+    
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query)) {
+    
+            pstmt.setInt(1, idClient);
+    
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Commande commande = new Commande(
+                        rs.getInt("idCommande"),
+                        rs.getInt("idPanier"),
+                        rs.getString("typeCommande"),
+                        rs.getString("statutCommande"),
+                        rs.getTimestamp("dateReception"),
+                        rs.getTimestamp("datePreparation"),
+                        rs.getTimestamp("dateFinalisation")
+                    );
+                    commandes.add(commande);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la récupération des commandes : " + e.getMessage());
+        }
+    
+        return commandes;
     }
 
-    return profileName;
-}
+    // Méthode pour récupérer les 5 produits les plus commandés avec classement numéroté
+    public List<String> getProduitsPlusCommandes(int idClient) {
+        List<String> produits = new ArrayList<>();
+        List<Commande> commandes = getCommandes(idClient);
+    
+        if (commandes.isEmpty()) {
+            produits.add("Aucune commande trouvée pour ce client.");
+            return produits;
+        }
+    
+        Map<Integer, Integer> produitCounts = new HashMap<>();
+        String query = """
+            SELECT p.idProduit, ppm.quantiteVoulue
+            FROM panier_produit_magasin ppm
+            JOIN produit p ON ppm.idProduit = p.idProduit
+            WHERE ppm.idPanier = ?
+        """;
+    
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+    
+            for (Commande commande : commandes) {
+                statement.setInt(1, commande.getIdPanier());
+    
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        int idProduit = resultSet.getInt("idProduit");
+                        int quantiteVoulue = resultSet.getInt("quantiteVoulue");
+    
+                        produitCounts.put(idProduit, produitCounts.getOrDefault(idProduit, 0) + quantiteVoulue);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        final int[] rank = {1};
+        produitCounts.entrySet().stream()
+            .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
+            .limit(5)
+            .forEach(entry -> {
+                int idProduit = entry.getKey();
+                int quantite = entry.getValue();
+    
+                ProduitDAO produitDAO = new ProduitDAO();
+                Produit produit = produitDAO.getProduitById(idProduit);
+                if (produit != null) {
+                    produits.add(rank[0] + ". " + produit.getLibelleProduit() + " - " + produit.getMarqueProduit() + " (Commandé " + quantite + " fois)");
+                    rank[0]++;
+                }
+            });
+    
+        return produits;
+    }
+    
 
-    
-    
+    public String getClientProfile(int idClient) {
+        String profileName = null;
+        String query = """
+            SELECT pr.nomProfil
+            FROM client_profil cp
+            JOIN profil pr ON cp.idProfil = pr.idProfil
+            WHERE cp.idClient = ?
+        """;
+
+        try (Connection connection = DBConnection.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, idClient);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    profileName = resultSet.getString("nomProfil");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la récupération du profil du client : " + e.getMessage());
+        }
+
+        return profileName;
+    }
 
 }
