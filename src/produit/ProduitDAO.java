@@ -151,14 +151,6 @@ public class ProduitDAO {
         catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
-
-        /*if(produits.isEmpty()){
-            if(nomExact) {
-                System.out.println("Produit introuvable (" + libelleProduit + ")");
-            } else {
-                System.out.println("Aucun produit trouvé avec le mot clé " + "'"  + libelleProduit + "'.");
-            }
-        }*/
         return produits;
     }
 
@@ -193,14 +185,6 @@ public class ProduitDAO {
         catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
-
-        /*if(produits.isEmpty()){
-            if(nomExact) {
-                System.out.println("Produit introuvable (" + libelleProduit + ")");
-            } else {
-                System.out.println("Aucun produit trouvé avec le mot clé " + "'"  + libelleProduit + "'.");
-            }
-        }*/
         return produits;
     }
 }

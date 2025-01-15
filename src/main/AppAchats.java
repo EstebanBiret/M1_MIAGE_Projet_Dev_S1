@@ -72,11 +72,14 @@ public class AppAchats {
             switch (choix) {
                 case 1: //ajouter un produit au panier
 
-                    System.out.println("Notre catalogue (naviguez à travers les pages avec les flèches directionelles) : \n");
+                    System.out.println("Notre catalogue (naviguez à travers les pages et visualisez les détails des produits) : \n");
                     List<Produit> produits = produitDAO.getAllProduits();
-                    produits.forEach(System.out::println);
+                    boolean continuer = true;
+                    int pageIndex = 0;
+                    int produitsParPage = 5;
+                    int totalPages = (int) Math.ceil((double) produits.size() / produitsParPage);
 
-                    System.out.print("Entrez l'ID du produit à ajouter : ");
+                    /*System.out.print("Entrez l'ID du produit à ajouter : ");
                     //tant que l'utilisateur ne renseigne pas un chiffre
                     while (!scanner.hasNextInt()) {
                         System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
@@ -93,6 +96,96 @@ public class AppAchats {
                     scanner.nextLine();
 
                     panierDAO.ajouterProduitPanier(panierClient1.getIdPanier(), panierClient1.getIdClient(), idProduit, quantite, scanner);
+                    break;*/
+
+                    while (continuer) {
+                        // Affichage des produits de la page actuelle
+                        System.out.println("\n--- Page " + (pageIndex + 1) + "/" + totalPages + " ---");
+                        int start = pageIndex * produitsParPage;
+                        int end = Math.min(start + produitsParPage, produits.size());
+                        for (int i = start; i < end; i++) {
+                            Produit produit = produits.get(i);
+                            System.out.println((i + 1) + ". " + produit.getLibelleProduit() + " - " + produit.getMarqueProduit() + " - Nutriscore " + produit.getNutriscore() + " - " + produit.getPrixUnitaire() + " euros");
+                        }
+                
+                        System.out.println("\nOptions :");
+                        System.out.println("[s] Page suivante");
+                        System.out.println("[p] Page précédente");
+                        System.out.println("[v <numéroProduit>] Voir les détails d'un produit");
+                        System.out.println("[r] Retour");
+                        System.out.print("Votre choix : ");
+                        String choixUtilisateur = scanner.nextLine();
+                
+                        switch (choixUtilisateur) {
+                            case "s": // Page suivante
+                                if (pageIndex < totalPages - 1) {
+                                    pageIndex++;
+                                } else {
+                                    System.out.println("Vous êtes déjà sur la dernière page.");
+                                }
+                                break;
+                
+                            case "p": // Page précédente
+                                if (pageIndex > 0) {
+                                    pageIndex--;
+                                } else {
+                                    System.out.println("Vous êtes déjà sur la première page.");
+                                }
+                                break;
+                
+                            case "r": // Retour
+                                continuer = false;
+                                break;
+                
+                            default:
+                                if (choixUtilisateur.startsWith("v")) {
+                                    try {
+                                        // Extraction du numéro du produit
+                                        int numeroProduit = Integer.parseInt(choixUtilisateur.substring(2).trim()) - 1;
+                
+                                        if (numeroProduit >= start && numeroProduit < end) {
+                                            Produit produitSelectionne = produits.get(numeroProduit);
+                
+                                            // Affichage des détails du produit
+                                            System.out.println("\nDétails du produit :");
+                                            System.out.println(produitSelectionne.toString());
+                
+                                            // Options pour ajouter le produit au panier
+                                            System.out.println("\nOptions :");
+                                            System.out.println("[a] Ajouter au panier");
+                                            System.out.println("[r] Retour");
+                                            System.out.print("Votre choix : ");
+                                            String choixProduit = scanner.nextLine();
+                
+                                            if (choixProduit.equals("a")) {
+                                                System.out.print("Entrez la quantité : ");
+                                                while (!scanner.hasNextInt()) {
+                                                    System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                                                    scanner.next();
+                                                }
+                                                int quantite = scanner.nextInt();
+                                                scanner.nextLine();
+                
+                                                panierDAO.ajouterProduitPanier(
+                                                    panierClient1.getIdPanier(),
+                                                    panierClient1.getIdClient(),
+                                                    produitSelectionne.getIdProduit(),
+                                                    quantite,
+                                                    scanner
+                                                );
+                                            }
+                                        } else {
+                                            System.out.println("Numéro de produit invalide.");
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        System.out.println("Format invalide. Utilisez 'v <numéro>'.");
+                                    }
+                                } else {
+                                    System.out.println("Choix invalide.");
+                                }
+                                break;
+                        }
+                    }
                     break;
 
                 case 2: //afficher le panier

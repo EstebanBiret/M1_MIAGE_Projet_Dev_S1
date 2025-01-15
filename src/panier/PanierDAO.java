@@ -267,7 +267,7 @@ public class PanierDAO {
         """;
         
         String produitsPanier = """
-            SELECT p.idProduit, m.nomMagasin, p.libelleProduit, p.prixUnitaire, ppm.quantiteVoulue
+            SELECT p.idProduit, m.nomMagasin, p.libelleProduit, p.prixUnitaire, ppm.quantiteVoulue, p.marqueProduit
             FROM panier_produit_magasin ppm, produit p, magasin m
             WHERE ppm.idPanier = ?
             AND p.idProduit = ppm.idProduit
@@ -281,7 +281,6 @@ public class PanierDAO {
             pstmt1.setInt(1, idPanier);
             pstmt2.setInt(1, idPanier);
 
-            // Exécuter première requête
             try (ResultSet rs1 = pstmt1.executeQuery()) {
                 if (!rs1.next()) {
                     System.out.println("Aucn panier trouvé pour l'ID " + idPanier);
@@ -290,20 +289,18 @@ public class PanierDAO {
                 System.out.println("Erreur lors de l'affichage du panier : " + e.getMessage());
             }
         
-            // Exécuter deuxième requête
             try (ResultSet rs2 = pstmt2.executeQuery()) {
                 boolean hasResults = false; // Pour vérifier si des résultats existent
 
                 while (rs2.next()) {
                     hasResults = true;
-                    int idProduit = rs2.getInt("idProduit");
                     String nomMagasin = rs2.getString("nomMagasin");
                     String libelleProduit = rs2.getString("libelleProduit");
                     double prixUnitaire = rs2.getDouble("prixUnitaire");
                     int quantite = rs2.getInt("quantiteVoulue");
+                    String marqueProduit = rs2.getString("marqueProduit");
 
-                    details += "\nID : " + idProduit + ", Magasin : " + nomMagasin + ", Libellé : " + libelleProduit + ", Prix : " + prixUnitaire + ", Quantité : " + 
-                    quantite;
+                    details += "\n" + libelleProduit + ", " + marqueProduit + ", " + nomMagasin + ", " + prixUnitaire + " euros, quantité : " + quantite;
                 }
 
                 if (!hasResults) {

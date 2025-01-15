@@ -58,7 +58,7 @@ public class PreparateurDAO {
                     if (rs.next()) {  // Vérifie si la commande existe
                         String statutCommande = rs.getString("statutCommande");
                         if ("en attente".equalsIgnoreCase(statutCommande)) {
-                            String update = "UPDATE commande SET statutCommande = 'Préparation',datePreparation = now() WHERE idCommande = ?";
+                            String update = "UPDATE commande SET statutCommande = 'Préparation', datePreparation = now() WHERE idCommande = ?";
                             try (PreparedStatement pstmtUpdate = connection.prepareStatement(update)) {
                                 pstmtUpdate.setInt(1, idCommande);
                                 int rowsAffected = pstmtUpdate.executeUpdate();
