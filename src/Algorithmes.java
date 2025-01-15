@@ -120,18 +120,22 @@ public class Algorithmes {
             produit.getMarqueProduit(), produit.getQuantiteDisponible(),
             produit.getNomMagasin()
             );
-        }
-    
-        // Choix de l'utilisateur
-        int choix;
-        do {
-            System.out.print("Veuillez entrer le numéro du produit souhaité : ");
-            while (!scanner.hasNextInt()) {
+        }    
+
+        System.out.print("Veuillez entrer le numéro du produit souhaité : ");
+        int choix = -1; // Initialisation avec une valeur invalide
+        while (choix < 1 || choix > produitsAlternatifs.size()) {
+            if (scanner.hasNextInt()) {
+                choix = scanner.nextInt();
+                if (choix < 1 || choix > produitsAlternatifs.size()) {
+                    System.out.print("Numéro invalide. Veuillez entrer un chiffre entre 1 et " + produitsAlternatifs.size() + " : ");
+                }
+            } else {
                 System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
-                scanner.next();
+                scanner.next(); // Consommer l'entrée incorrecte
             }
-            choix = scanner.nextInt();
-        } while (choix < 1 || choix > produitsAlternatifs.size());  
+        }
+
     
         ProduitRemplacement produitChoisi = produitsAlternatifs.get(choix - 1);
 

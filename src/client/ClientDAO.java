@@ -311,30 +311,4 @@ public class ClientDAO {
     
         return produits;
     }
-    
-
-    public String getClientProfile(int idClient) {
-        String profileName = null;
-        String query = """
-            SELECT pr.nomProfil
-            FROM client_profil cp, profil pr
-            WHERE cp.idClient = ? 
-            AND cp.idProfil = pr.idProfil
-        """;
-
-        try (Connection connection = DBConnection.getConnection();
-            PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, idClient);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    profileName = resultSet.getString("nomProfil");
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Erreur lors de la récupération du profil du client : " + e.getMessage());
-        }
-
-        return profileName;
-    }
-
 }

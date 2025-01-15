@@ -1,8 +1,10 @@
 package src.main;
 
+import java.util.List;
 import java.util.Scanner;
 
 import src.GestionnaireDAO;
+import src.categorie.CategorieDAO;
 import src.produit.Produit;
 
 public class AppGestion {
@@ -40,6 +42,8 @@ public class AppGestion {
 
     public static void main(String[] args) {
         GestionnaireDAO marc = new GestionnaireDAO();
+        CategorieDAO categorieDAO = new CategorieDAO();
+
         Scanner scanner = new Scanner(System.in);
         int choix = -1;
 
@@ -70,14 +74,18 @@ public class AppGestion {
                         scanner.next();
                     }
                     double prixUnitaire = scanner.nextDouble();
+                    scanner.nextLine(); // Consommer la fin de ligne restante
 
                     System.out.print("Entrez le prix au kilo (optionnel, ou 0 si non applicable) : ");
                     while (!scanner.hasNextDouble()) {
-                        System.out.print("Entrée invalide. Veuillez entrer un nombre : ");
+                        System.out.print("Entrée invalide. Veuillez entrer un nombre positif ou 0 : ");
                         scanner.next();
                     }
+
                     double prixKilo = scanner.nextDouble();
-                    if (prixKilo == 0) prixKilo = -1; // Indique un prix non applicable
+                    scanner.nextLine(); // Consommer la fin de ligne restante
+
+                    if (prixKilo < 0) prixKilo = 0; // Prix non applicable
 
                     System.out.print("Entrez le nutriscore (A, B, C, D, E) : ");
                     String nutriscore = scanner.next().toUpperCase();
@@ -92,9 +100,9 @@ public class AppGestion {
                         scanner.next();
                     }
                     double poidsProduit = scanner.nextDouble();
+                    scanner.nextLine(); // Consommer la fin de ligne restante
 
                     System.out.print("Entrez le conditionnement du produit : ");
-                    scanner.nextLine(); // Consomme la nouvelle ligne restante
                     String conditionnementProduit = scanner.nextLine();
                     while (conditionnementProduit.isEmpty() || conditionnementProduit.length() > 128) {
                         System.out.print("Conditionnement invalide (1-128 caractères). Réessayez : ");
@@ -109,7 +117,40 @@ public class AppGestion {
                     }
 
                     Produit produit = new Produit(libelleProduit, prixUnitaire, prixKilo, nutriscore.charAt(0), poidsProduit, conditionnementProduit, marqueProduit);
-                    marc.ajouterProduitCatalogue(produit);
+
+                    //affichage des catégories disponibles
+                    List<String> categories = categorieDAO.getCategoriesDisponibles();
+                    System.out.println("Catégories disponibles :");
+                    for (int i = 0; i < categories.size(); i++) {
+                        System.out.printf("%d. %s%n", i + 1, categories.get(i));
+                    }
+
+                    //ajouter la catégorie au produit
+                    System.out.print("Entrez l'ID de la catégorie de ce produit : ");
+                    
+                    int idCategorie = -1;
+                    boolean categorieValide = false;
+
+                    while (!categorieValide) {
+                        if (scanner.hasNextInt()) {
+                            idCategorie = scanner.nextInt();
+                            scanner.nextLine(); // Consommer la fin de ligne restante
+
+                            // Vérification que l'ID est dans les limites valides
+                            if (idCategorie >= 1 && idCategorie <= categories.size()) {
+                                categorieValide = true;
+                            } else {
+                                System.out.print("ID de catégorie invalide. Réessayez : ");
+                            }
+                        } else {
+                            // Si l'utilisateur ne tape pas un entier
+                            System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
+                            scanner.nextLine(); // Consommer la fin de ligne restante
+                        }
+                    }
+
+                    scanner.nextLine(); // Consommer la fin de ligne restante
+                    marc.ajouterProduitCatalogue(produit, idCategorie);
                     break;
 
                 case 2:

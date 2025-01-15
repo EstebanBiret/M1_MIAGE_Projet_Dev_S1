@@ -1,8 +1,6 @@
 package src;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
 import src.client.Client;
 import src.client.ClientDAO;
 import src.produit.Produit;
@@ -17,16 +15,27 @@ public class GestionnaireDAO {
     /*
      * Permet de sauvegarder en BD un nouveau produit
      */
-    public void ajouterProduitCatalogue(Produit p) {
+    public void ajouterProduitCatalogue(Produit p, int idCategorie) {
         try (Connection connection = DBConnection.getConnection()) {
 
-            //vérifier qu'un produit n'existe pas déjà avec ce libellé
-            String selectQuery = "SELECT * FROM produit WHERE libelleProduit = ?";
+            //vérifier qu'un produit n'existe pas déjà avec ces paramètres exacts
+            String selectQuery = """
+            SELECT * FROM produit WHERE libelleProduit = ?
+            AND prixUnitaire = ? AND prixKilo = ? AND nutriscore = ? AND poidsProduit = ? AND conditionnementProduit = ? AND marqueProduit = ?
+            """;
+
             try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
                 pstmt.setString(1, p.getLibelleProduit());
+                pstmt.setDouble(2, p.getPrixUnitaire());
+                pstmt.setDouble(3, p.getPrixKilo());
+                pstmt.setString(4, String.valueOf(p.getNutriscore()));
+                pstmt.setDouble(5, p.getPoidsProduit());
+                pstmt.setString(6, p.getConditionnementProduit());
+                pstmt.setString(7, p.getMarqueProduit());
+
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
-                        System.out.println("Un produit existe déjà avec ce libellé (" + p.getLibelleProduit() + ").");
+                        System.out.println("Un produit avec ces paramètres existe déjà en base de données." + p.toString());
                         return;
                     }
                 }
@@ -63,6 +72,25 @@ public class GestionnaireDAO {
                 connection.rollback();
                 System.out.println("Erreur lors de l'ajout : " + e.getMessage());
             }
+
+            //liaison du produit à la catégorie
+            String insertCategorie = "INSERT INTO appartenir (idCategorie, idProduit) VALUES (?, ?)";
+            try (PreparedStatement pstmt = connection.prepareStatement(insertCategorie)) {
+                pstmt.setInt(1, idCategorie); 
+                pstmt.setInt(2, p.getIdProduit());
+
+                //exécution de la requête
+                int rowsAffected = pstmt.executeUpdate();
+                if (rowsAffected <= 0) { 
+                    System.out.println("Aucune liaison produit - catégorie ajoutée.");
+                } 
+
+            } catch (SQLException e) {
+                //rollback si erreur
+                connection.rollback();
+                System.out.println("Erreur lors de l'ajout : " + e.getMessage());
+            }
+
             connection.close();
 
         } catch (SQLException e) {
@@ -292,20 +320,18 @@ public class GestionnaireDAO {
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet resultSet = statement.executeQuery()) {
    
-           if (resultSet.next()) {
-               res = new StringBuilder("Top 3 des catégories les plus commandées :\n");
-               int rank = 1;
+           
+                res = new StringBuilder("Top 3 des catégories les plus commandées :\n");
+                int rank = 1;
    
-               // Parcourir les résultats
-               do {
-                   String categorie = resultSet.getString("nomCategorie");
-                   int totalQuantite = resultSet.getInt("totalQuantite");
-   
-                   // Ajouter les détails de la catégorie avec un classement
-                   res.append(rank++).append(". ").append(categorie)
-                      .append(" (Commandé ").append(totalQuantite).append(" fois)\n");
-               } while (resultSet.next());
-           }
+                while (resultSet.next()) {
+                    String categorie = resultSet.getString("nomCategorie");
+                    int totalQuantite = resultSet.getInt("totalQuantite");
+                
+                    // Ajouter les détails de la catégorie avec un classement
+                    res.append(rank++).append(". ").append(categorie)
+                    .append(" (Commandé ").append(totalQuantite).append(" fois)\n");
+                }
    
        } catch (SQLException e) {
            e.printStackTrace();
@@ -326,15 +352,8 @@ public class GestionnaireDAO {
             FROM panier
             WHERE dateFinPanier IS NOT NULL
             GROUP BY idClient
-            HAVING COUNT(*) = (
-                SELECT MAX(nbCommandes) 
-                FROM (
-                    SELECT COUNT(*) AS nbCommandes
-                    FROM panier 
-                    WHERE dateFinPanier IS NOT NULL
-                    GROUP BY idClient
-                ) AS commandesParClient
-            )
+            ORDER BY nbCommandes DESC
+            LIMIT 5
         """;
     
         try (Connection connection = DBConnection.getConnection();
@@ -342,21 +361,19 @@ public class GestionnaireDAO {
     
             // Exécute la requête pour récupérer les clients ayant le plus commandé
             try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    res = new StringBuilder("Top 5 des clients ayant passé le plus de commandes :\n");
-                    int rank = 1;
-        
-                    do {
-                        int idClient = resultSet.getInt("idClient");
-                        int nbCommandes = resultSet.getInt("nbCommandes");
-        
-                        // Charger les informations du client
-                        Client client = clientDAO.getClientById(idClient);
-        
-                        // Ajouter les détails au résultat
-                        res.append(rank++).append(". ").append(client.toString())
-                           .append(" (Commandes: ").append(nbCommandes).append(")\n");
-                    } while (resultSet.next());
+                res = new StringBuilder("Top 5 des clients ayant passé le plus de commandes :\n");
+                int rank = 1;
+    
+                while (resultSet.next()) {
+                    int idClient = resultSet.getInt("idClient");
+                    int nbCommandes = resultSet.getInt("nbCommandes");
+    
+                    // Charger les informations du client
+                    Client client = clientDAO.getClientById(idClient);
+    
+                    // Ajouter les détails au résultat
+                    res.append(rank++).append(". ").append(client.toString())
+                        .append(" (Commandes: ").append(nbCommandes).append(")\n");
                 }
             }
     
@@ -374,26 +391,16 @@ public class GestionnaireDAO {
         StringBuilder res = new StringBuilder("Aucun client trouvé.");
     
         String query = """
-        SELECT p.idClient, SUM(ppm.quantiteVoulue * pr.prixUnitaire) AS totalCA
-        FROM panier p, panier_produit_magasin ppm, produit pr, commande c
-        WHERE p.idPanier = ppm.idPanier
-        AND ppm.idProduit = pr.idProduit
-        AND p.idPanier = c.idPanier
-        AND p.dateFinPanier IS NOT NULL
-        GROUP BY p.idClient
-        HAVING SUM(ppm.quantiteVoulue * pr.prixUnitaire) = (
-            SELECT MAX(totalCA)
-            FROM (
-                SELECT SUM(ppm.quantiteVoulue * pr.prixUnitaire) AS totalCA
-                FROM panier p, panier_produit_magasin ppm, produit pr, commande c
-                WHERE p.idPanier = ppm.idPanier
-                AND ppm.idProduit = pr.idProduit
-                AND p.idPanier = c.idPanier
-                AND p.dateFinPanier IS NOT NULL
-                GROUP BY p.idClient
-            ) AS caParClient
-        )
-    """;
+            SELECT p.idClient, SUM(ppm.quantiteVoulue * pr.prixUnitaire) AS totalCA
+            FROM panier p, panier_produit_magasin ppm, produit pr, commande c
+            WHERE p.idPanier = ppm.idPanier
+            AND ppm.idProduit = pr.idProduit
+            AND p.idPanier = c.idPanier
+            AND p.dateFinPanier IS NOT NULL
+            GROUP BY p.idClient
+            ORDER BY totalCA DESC
+            LIMIT 5
+        """;
 
     
         try (Connection connection = DBConnection.getConnection();
@@ -401,22 +408,21 @@ public class GestionnaireDAO {
     
             // Exécute la requête pour récupérer les clients ayant généré le plus de chiffre d'affaires
             try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    res = new StringBuilder("Top 5 des clients ayant généré le plus de chiffre d'affaires :\n");
-                    int rank = 1;
-        
-                    do {
-                        int idClient = resultSet.getInt("idClient");
-                        double totalCA = resultSet.getDouble("totalCA");
-        
-                        // Charger les informations du client
-                        Client client = clientDAO.getClientById(idClient);
-        
-                        // Ajouter les détails au résultat
-                        res.append(rank++).append(". ").append(client.toString())
-                           .append(" (Chiffre d'affaires: ").append(totalCA).append(" euros)\n");
-                    } while (resultSet.next());
-                }
+                res = new StringBuilder("Top 5 des clients ayant généré le plus de chiffre d'affaires :\n");
+                int rank = 1;
+    
+                while (resultSet.next()) {
+                    int idClient = resultSet.getInt("idClient");
+                    double totalCA = resultSet.getDouble("totalCA");
+    
+                    // Charger les informations du client
+                    Client client = clientDAO.getClientById(idClient);
+    
+                    // Ajouter les détails au résultat
+                    res.append(rank++).append(". ").append(client.toString())
+                        .append(" (Chiffre d'affaires: ").append(totalCA).append(" euros)\n");
+                } 
+                
             }
     
         } catch (SQLException e) {

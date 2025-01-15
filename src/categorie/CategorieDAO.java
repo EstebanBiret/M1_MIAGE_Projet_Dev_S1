@@ -19,6 +19,10 @@ public class CategorieDAO {
         categoriesDisponibles = getCategories();
     }
 
+    public List<String> getCategoriesDisponibles() {
+        return categoriesDisponibles;
+    }
+
     public List<String> getCategories() {
         List<String> categories = new ArrayList<>();
         String query = "SELECT nomCategorie FROM categorie";
@@ -29,6 +33,7 @@ public class CategorieDAO {
 
             while (resultSet.next()) {
                 categories.add(resultSet.getString("nomCategorie"));
+
             }
         } catch (SQLException e) {
             System.err.println("Erreur lors de la récupération des catégories : " + e.getMessage());
