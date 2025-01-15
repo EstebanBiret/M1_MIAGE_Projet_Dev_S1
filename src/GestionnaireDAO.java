@@ -101,7 +101,7 @@ public class GestionnaireDAO {
     /*
      * Permet de valider la modification d'un produit en BD
      */
-    public void majProduitCatalogue(Produit p) {
+    /*public void majProduitCatalogue(Produit p) {
         try (Connection connection = DBConnection.getConnection()) {
 
             String updateQuery = "UPDATE produit SET libelleProduit = ?, prixUnitaire = ?, prixKilo = ?, nutriscore = ?, poidsProduit = ?, conditionnementProduit = ?, marqueProduit = ? WHERE idProduit = ?";
@@ -133,40 +133,7 @@ public class GestionnaireDAO {
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
-    }
-
-   /*
-    * Permet de supprimer un produit en BD
-    */
-    public void supprProduitCatalogue(Produit p) {
-        try (Connection connection = DBConnection.getConnection()) {
-
-            String deleteQuery = "DELETE FROM produit WHERE idProduit = ?";
-            //TODO : supprimer les références de ce produit dans les tables concernées
-
-            try (PreparedStatement pstmt = connection.prepareStatement(deleteQuery)) {
-                pstmt.setInt(1, p.getIdProduit());
-
-                //exécution de la requête
-                int rowsAffected = pstmt.executeUpdate();
-                if (rowsAffected > 0) {
-                    System.out.println("Produit supprimé avec succès (" + p.getIdProduit()+ ").");
-                } else {
-                    System.out.println("Aucun produit trouvé avec cet ID.");
-                }
-
-                //connection.commit();
-            } catch (SQLException e) {
-                //rollback si erreur
-                connection.rollback();
-                System.out.println("Erreur lors de la suppression : " + e.getMessage());
-            }
-            connection.close();
-
-        } catch (SQLException e) {
-            System.out.println("Erreur de connexion : " + e.getMessage());
-        }
-    }
+    }*/
 
     //maj le stock d'un produit dans les magasins spécifiés
     public void majStockProduit(int idProduit, int quantite, int idMagasin, boolean augmenter) {
@@ -433,8 +400,8 @@ public class GestionnaireDAO {
     }
     
     //US 3.2
-    // Méthode pour calculer le temps moyen de réalisation des paniers terminés (en heure)
-    public double calculerTempsMoyenRealisation() {
+    // Méthode pour calculer le temps moyen de réalisation des paniers terminés (en heures)
+    public double calculerTempsMoyenRealisationPaniers() {
         try (Connection connection = DBConnection.getConnection()){
         String queryTempsMoyen = "SELECT AVG(TIMESTAMPDIFF(HOUR, dateDebutPanier, dateFinPanier)) AS tempsMoyen " +
                                  "FROM panier " +
@@ -452,7 +419,7 @@ public class GestionnaireDAO {
         return 0;
     }
     // Méthode pour calculer le temps moyen de préparation des commandes (en heures)
-    public double calculerTempsMoyenPreparation() {
+    public double calculerTempsMoyenPreparationCommandes() {
         double tempsMoyen = 0;
 
         String query = "SELECT AVG(TIMESTAMPDIFF(HOUR, datePreparation, dateFinalisation)) AS temps_moyen_preparation " +
@@ -476,6 +443,7 @@ public class GestionnaireDAO {
         return tempsMoyen;
     }
 
+    //TODO afficher les profils des clients (pour chaque client, on regarde si 50% ou plus de ses produits commandés sont dans la même catégorie, si oui, on lui attribue le profil correspondant)
     /* 
     public Map<String, String> determineClientProfiles() {
         Map<String, String> clientProfiles = new HashMap<>();

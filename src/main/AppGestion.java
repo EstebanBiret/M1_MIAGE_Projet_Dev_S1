@@ -19,6 +19,7 @@ public class AppGestion {
         System.out.println("| [3] Augmenter la quantité d'un produit       |");
         System.out.println("| [4] Baisser la quantité d'un produit         |");
         System.out.println("| [5] Voir les statistiques                    |");
+        System.out.println("| [6] Profils de consommateurs                 |");
         System.out.println("| [0] Quitter                                  |");
         System.out.println("|                                              |");
         System.out.println("------------------------------------------------");
@@ -229,11 +230,11 @@ public class AppGestion {
                                 System.out.println(marc.getTopsClientsChiffreAffaires());
                                 break;
                             case 5:
-                                System.out.println("Temps moyen de réalisation des paniers : " + marc.calculerTempsMoyenRealisation() + " heures.");
+                                System.out.println("Temps moyen de réalisation des paniers : " + marc.calculerTempsMoyenRealisationPaniers() + " heures.");
                                 break;
             
                             case 6:
-                                System.out.println("Temps moyen de préparation des commandes : " + marc.calculerTempsMoyenPreparation() + " heures.");
+                                System.out.println("Temps moyen de préparation des commandes : " + marc.calculerTempsMoyenPreparationCommandes() + " heures.");
                                 break;
                             case 0:
                                 System.out.println("Retour au menu principal.");
@@ -243,6 +244,9 @@ public class AppGestion {
                         }
                         System.out.println("\n");
                     }
+                    break;
+                case 6:
+                    //TODO
                     break;
 
                 case 0:
