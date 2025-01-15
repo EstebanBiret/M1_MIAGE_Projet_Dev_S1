@@ -85,11 +85,14 @@ public class Algorithmes {
                         resultSet.getString("nomMagasin")
                         );
 
-                        //on regarde grâce à un stream si un produit dans la liste a déjà le même id que le produit que l'on veut ajouter à celle-ci
-                        boolean produitExistant = produitsAlternatifs.stream().anyMatch(p -> p.getIdProduit() == produit.getIdProduit());
+                        // Vérification de la quantité disponible
+                        if (produit.getQuantiteDisponible() > 0) {
+                            // on regarde grâce à un stream si un produit dans la liste a déjà le même id que le produit que l'on veut ajouter à celle-ci
+                            boolean produitExistant = produitsAlternatifs.stream().anyMatch(p -> p.getIdProduit() == produit.getIdProduit());
 
-                        if (!produitExistant) {
-                            produitsAlternatifs.add(produit);
+                            if (!produitExistant) {
+                                produitsAlternatifs.add(produit);
+                            }
                         }
                     }
                 }
@@ -150,13 +153,13 @@ public class Algorithmes {
             case 0: // même libellé, catégorie, marque, nutriscore et magasin
                 requete += """
                     SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
-                           p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
-                           s.quantiteEnStock, s.idMagasin, m.nomMagasin
-                    FROM produit p
-                    JOIN appartenir a ON p.idProduit = a.idProduit
-                    JOIN stocker s ON s.idProduit = p.idProduit
-                    JOIN magasin m ON s.idMagasin = m.idMagasin
-                    WHERE p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
+                    s.quantiteEnStock, s.idMagasin, m.nomMagasin
+                    FROM produit p, appartenir a, stocker s, magasin m
+                    WHERE p.idProduit = a.idProduit
+                    AND s.idProduit = p.idProduit
+                    AND s.idMagasin = m.idMagasin
+                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
                     AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.nutriscore = (SELECT nutriscore FROM produit WHERE idProduit = ?)
@@ -170,11 +173,11 @@ public class Algorithmes {
                     SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
                            p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
                            s.quantiteEnStock, s.idMagasin, m.nomMagasin
-                    FROM produit p
-                    JOIN appartenir a ON p.idProduit = a.idProduit
-                    JOIN stocker s ON s.idProduit = p.idProduit
-                    JOIN magasin m ON s.idMagasin = m.idMagasin
-                    WHERE p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    FROM produit p, appartenir a, stocker s, magasin m
+                    WHERE p.idProduit = a.idProduit
+                    AND s.idProduit = p.idProduit
+                    AND s.idMagasin = m.idMagasin
+                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
                     AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.nutriscore = (SELECT nutriscore FROM produit WHERE idProduit = ?)
@@ -187,11 +190,11 @@ public class Algorithmes {
                     SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
                            p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
                            s.quantiteEnStock, s.idMagasin, m.nomMagasin
-                    FROM produit p
-                    JOIN appartenir a ON p.idProduit = a.idProduit
-                    JOIN stocker s ON s.idProduit = p.idProduit
-                    JOIN magasin m ON s.idMagasin = m.idMagasin
-                    WHERE p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    FROM produit p, appartenir a, stocker s, magasin m
+                    WHERE p.idProduit = a.idProduit
+                    AND s.idProduit = p.idProduit
+                    AND s.idMagasin = m.idMagasin
+                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
                     AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.idProduit != ?;
@@ -203,11 +206,11 @@ public class Algorithmes {
                     SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
                            p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
                            s.quantiteEnStock, s.idMagasin, m.nomMagasin
-                    FROM produit p
-                    JOIN appartenir a ON p.idProduit = a.idProduit
-                    JOIN stocker s ON s.idProduit = p.idProduit
-                    JOIN magasin m ON s.idMagasin = m.idMagasin
-                    WHERE p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    FROM produit p, appartenir a, stocker s, magasin m
+                    WHERE p.idProduit = a.idProduit
+                    AND s.idProduit = p.idProduit
+                    AND s.idMagasin = m.idMagasin
+                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
                     AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.idProduit != ?;
                 """;
@@ -218,11 +221,11 @@ public class Algorithmes {
                     SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
                            p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
                            s.quantiteEnStock, s.idMagasin, m.nomMagasin
-                    FROM produit p
-                    JOIN appartenir a ON p.idProduit = a.idProduit
-                    JOIN stocker s ON s.idProduit = p.idProduit
-                    JOIN magasin m ON s.idMagasin = m.idMagasin
-                    WHERE a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                    FROM produit p, appartenir a, stocker s, magasin m
+                    WHERE p.idProduit = a.idProduit
+                    AND s.idProduit = p.idProduit
+                    AND s.idMagasin = m.idMagasin
+                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.idProduit != ?;
                 """;
                 break;

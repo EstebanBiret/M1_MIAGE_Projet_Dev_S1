@@ -141,13 +141,14 @@ public class ClientDAO {
         Map<String, Integer> nutriscoreCounts = new HashMap<>();
     
         String query = """
-            SELECT p.marqueProduit, cat.nomCategorie, p.nutriscore, ppm.quantiteVoulue
-            FROM panier_produit_magasin ppm
-            JOIN produit p ON ppm.idProduit = p.idProduit
-            JOIN Appartenir a ON p.idProduit = a.idProduit
-            JOIN categorie cat ON a.idCategorie = cat.idCategorie
-            WHERE ppm.idPanier = ?
+        SELECT p.marqueProduit, cat.nomCategorie, p.nutriscore, ppm.quantiteVoulue
+        FROM panier_produit_magasin ppm, produit p, Appartenir a, categorie cat
+        WHERE ppm.idProduit = p.idProduit
+        AND p.idProduit = a.idProduit
+        AND a.idCategorie = cat.idCategorie
+        AND ppm.idPanier = ?
         """;
+
     
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -221,12 +222,13 @@ public class ClientDAO {
         String query = """
             SELECT c.idCommande, c.idPanier, c.typeCommande, c.statutCommande, c.dateReception, c.datePreparation, c.dateFinalisation,
                 SUM(ppm.quantiteVoulue) AS nbProduits
-            FROM commande c
-            JOIN panier p ON c.idPanier = p.idPanier
-            LEFT JOIN panier_produit_magasin ppm ON p.idPanier = ppm.idPanier
-            WHERE p.idClient = ?
+            FROM commande c, panier p, panier_produit_magasin ppm
+            WHERE c.idPanier = p.idPanier
+            AND p.idClient = ?
+            AND p.idPanier = ppm.idPanier
             GROUP BY c.idCommande, c.typeCommande, c.statutCommande, c.dateReception, c.datePreparation, c.dateFinalisation
-        """; 
+        """;
+
     
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query)) {
@@ -267,9 +269,9 @@ public class ClientDAO {
         Map<Integer, Integer> produitCounts = new HashMap<>();
         String query = """
             SELECT p.idProduit, ppm.quantiteVoulue
-            FROM panier_produit_magasin ppm
-            JOIN produit p ON ppm.idProduit = p.idProduit
+            FROM panier_produit_magasin ppm, produit p
             WHERE ppm.idPanier = ?
+            AND p.idProduit = ppm.idProduit        
         """;
     
         try (Connection connection = DBConnection.getConnection();
@@ -315,9 +317,9 @@ public class ClientDAO {
         String profileName = null;
         String query = """
             SELECT pr.nomProfil
-            FROM client_profil cp
-            JOIN profil pr ON cp.idProfil = pr.idProfil
-            WHERE cp.idClient = ?
+            FROM client_profil cp, profil pr
+            WHERE cp.idClient = ? 
+            AND cp.idProfil = pr.idProfil
         """;
 
         try (Connection connection = DBConnection.getConnection();

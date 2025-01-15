@@ -250,15 +250,6 @@ public class AppClient {
                     }
                     break;
                 case "3":
-                    /*System.out.println("\nMes commandes :\n");
-                    List<String> commandes = clientDAO.getCommandes(client.getIdClient());
-                    if (commandes.isEmpty()) {
-                        System.out.println("Aucune commande trouvée.");
-                    } else {
-                        for (String commande : commandes) {
-                            System.out.println(commande);
-                        }
-                    }*/
                     List<Commande> commandes = clientDAO.getCommandes(client.getIdClient());
                     clientDAO.afficherCommandes(commandes);
                     break;

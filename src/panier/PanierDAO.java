@@ -360,10 +360,13 @@ public class PanierDAO {
         try (Connection connection = DBConnection.getConnection()) {
         
             // Vérification des quantités pour chaque produit du panier
-            String queryCheckStock = "SELECT ppm.idMagasin,ppm.idProduit, ppm.quantiteVoulue, s.quantiteEnStock " +
-                                    "FROM panier_produit_magasin ppm " +
-                                    "JOIN stocker s ON ppm.idProduit = s.idProduit AND ppm.idMagasin = s.idMagasin " +
-                                    "WHERE ppm.idPanier = ?";
+            String queryCheckStock = """
+                SELECT ppm.idMagasin, ppm.idProduit, ppm.quantiteVoulue, s.quantiteEnStock
+                FROM panier_produit_magasin ppm, stocker s
+                WHERE ppm.idProduit = s.idProduit
+                AND ppm.idMagasin = s.idMagasin
+                AND ppm.idPanier = ?;    
+            """;
 
             try (PreparedStatement pstmtCheckStock = connection.prepareStatement(queryCheckStock)) {
                 pstmtCheckStock.setInt(1, idPanier);
@@ -417,10 +420,13 @@ public class PanierDAO {
             }
 
             //maj des quantités en stock
-            String queryStockUpdate = "UPDATE stocker s " +
-                                    "JOIN panier_produit_magasin ppm ON s.idProduit = ppm.idProduit AND s.idMagasin = ppm.idMagasin " +
-                                    "SET s.quantiteEnStock = s.quantiteEnStock - ppm.quantiteVoulue " +
-                                    "WHERE ppm.idPanier = ?";
+            String queryStockUpdate = """
+                UPDATE stocker s, panier_produit_magasin ppm
+                SET s.quantiteEnStock = s.quantiteEnStock - ppm.quantiteVoulue
+                WHERE s.idProduit = ppm.idProduit
+                AND s.idMagasin = ppm.idMagasin
+                AND ppm.idPanier = ?;
+            """;
 
             try (PreparedStatement pstmtStockUpdate = connection.prepareStatement(queryStockUpdate)) {
                 pstmtStockUpdate.setInt(1, idPanier);

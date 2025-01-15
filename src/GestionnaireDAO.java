@@ -470,7 +470,7 @@ public class GestionnaireDAO {
         return tempsMoyen;
     }
 
-    //-----US 3.5-----//
+    /* 
     public Map<String, String> determineClientProfiles() {
         Map<String, String> clientProfiles = new HashMap<>();
     
@@ -566,7 +566,7 @@ public class GestionnaireDAO {
     
         return clientProfiles;
     }
-    
+    */
     
 
     
