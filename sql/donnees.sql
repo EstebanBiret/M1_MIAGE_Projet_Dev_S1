@@ -1,3 +1,124 @@
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+--
+-- Base de données : `projet_dev_m1_miage_s1`
+--
+CREATE DATABASE IF NOT EXISTS `projet_dev_m1_miage_s1` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `projet_dev_m1_miage_s1`;
+
+-- --------------------------------------------------------
+
+--
+-- Création des tables
+--
+
+CREATE table magasin(
+  `idMagasin` int(11) NOT NULL AUTO_INCREMENT,
+  `nomMagasin` varchar(128) NOT NULL,
+  `adresseMagasin` varchar(128) NOT NULL,
+  PRIMARY KEY(idMagasin)
+);
+
+CREATE TABLE `produit` (
+  `idProduit` int(11) NOT NULL AUTO_INCREMENT,
+  `libelleProduit` varchar(128) NOT NULL,
+  `prixUnitaire` DECIMAL(6,2) NOT NULL,
+  `prixKilo` DECIMAL(6,2),
+  `nutriscore` enum('A', 'B', 'C', 'D', 'E') NOT NULL,
+  `poidsProduit` DECIMAL(6,3) NOT NULL,
+  `conditionnementProduit` varchar(128) NOT NULL,
+  `marqueProduit` varchar(128) NOT NULL,
+  PRIMARY KEY (idProduit)
+);
+
+CREATE TABLE `categorie` (
+  `idCategorie` int(11) NOT NULL AUTO_INCREMENT,
+  `nomCategorie` varchar(128) NOT NULL,
+  PRIMARY KEY (idCategorie)
+);
+
+CREATE TABLE `profil` (
+  `idProfil` int(11) NOT NULL AUTO_INCREMENT,
+  `nomProfil` varchar(128) NOT NULL,
+  PRIMARY KEY (idProfil)
+);
+
+CREATE TABLE `client` (
+  `idClient` int(11) NOT NULL AUTO_INCREMENT,
+  `idMagasin` int(11) NOT NULL,
+  `nomClient` varchar(128) NOT NULL,
+  `prenomClient` varchar(128) NOT NULL,
+  `adresseClient` varchar(128) NOT NULL,
+  `telClient` varchar(128) NOT NULL,
+  PRIMARY KEY(idClient),
+  FOREIGN KEY(idMagasin) REFERENCES magasin(idMagasin)
+);
+
+CREATE TABLE `client_profil` (
+  `idClient` int(11) NOT NULL,
+  `idProfil` int(11) NOT NULL,
+  PRIMARY KEY(idClient, idProfil),
+  FOREIGN KEY(idClient) REFERENCES client(idClient),
+  FOREIGN KEY(idProfil) REFERENCES profil(idProfil)
+);
+
+CREATE TABLE `appartenir` (
+  `idCategorie` int(11) NOT NULL,
+  `idProduit` int(11) NOT NULL,
+  PRIMARY KEY (idCategorie, idProduit),
+  FOREIGN KEY(idCategorie) REFERENCES categorie(idCategorie),
+  FOREIGN KEY(idProduit) REFERENCES produit(idProduit)
+);
+
+CREATE table `stocker` (
+  `idMagasin` int(11) NOT NULL,
+  `idProduit` int(11) NOT NULL, 
+  `quantiteEnStock` int(11) NOT NULL,
+  PRIMARY KEY(idMagasin,idProduit),
+  FOREIGN KEY(idMagasin) REFERENCES magasin(idMagasin),
+  FOREIGN KEY(idProduit) REFERENCES produit(idProduit)
+);
+
+CREATE TABLE `panier` (
+  `idPanier` int(11) NOT NULL AUTO_INCREMENT,
+  `idClient` int(11) NOT NULL,
+  `panierTermine` boolean NOT NULL,
+  `dateDebutPanier` datetime NOT NULL,
+  `dateFinPanier` datetime,
+  PRIMARY KEY (idPanier),
+  FOREIGN KEY (idClient) REFERENCES client(idClient)
+);
+
+CREATE TABLE `commande` (
+  `idCommande` int(11) NOT NULL AUTO_INCREMENT,
+  `idPanier` int(11) NOT NULL,
+  `typeCommande` enum('livraison', 'retrait'),
+  `statutCommande` enum('en attente', 'preparation', 'terminee') NOT NULL,
+  `dateReception` datetime NOT NULL,
+  `datePreparation` datetime,
+  `dateFinalisation` datetime,
+  PRIMARY KEY (idCommande),
+  FOREIGN KEY (idPanier) REFERENCES panier(idPanier)
+);
+
+CREATE TABLE `panier_produit_magasin` (
+  `idPanier` int(11) NOT NULL,
+  `idProduit` int(11) NOT NULL,
+  `idMagasin` int(11) NOT NULL,
+  `quantiteVoulue` int(11) NOT NULL,
+  `modeLivraison`  enum('livraison', 'ratrait') NOT NULL,
+  PRIMARY KEY (idPanier, idProduit, idMagasin),
+  FOREIGN KEY (idPanier) REFERENCES panier(idPanier),
+  FOREIGN KEY (idProduit) REFERENCES produit(idProduit),
+  FOREIGN KEY (idMagasin) REFERENCES magasin(idMagasin)
+);
+
+--
+-- Insertion des données (petites pour tests)
+--
+
 -- Insertion des données pour la table MAGASIN
 INSERT INTO magasin (nomMagasin, adresseMagasin) VALUES
 ('ForU', '10 Rue Alsace Lorraine, Toulouse'),
@@ -21,34 +142,378 @@ INSERT INTO magasin (nomMagasin, adresseMagasin) VALUES
 ('ForU', '55 Avenue Pasteur, Lille'),
 ('ForU', '120 Boulevard Gambetta, Nice');
 
--- Insertion des données pour la table CATEGORIE
-INSERT INTO categorie (nomCategorie) VALUES
-('Produits frais'),
-('Produits bio'),
-('Produits surgelés'),
-('Épicerie'),
-('Boissons'),
-('Snacks'),
-('Plats préparés'),
-('Pâtisseries et confiseries'),
-('Produits pour bébés'),
-('Jardin'),
-('Électroménager'),
-('Mode'),
-('Livres'),
-('Mobilier'),
-('Décoration'),
-('Bricolage'),
-('Sports'),
-('Informatique'),
-('High-tech'),
-('Beauté et soin'),
-('Hygiène'),
-('Produits pour animaux'),
-('Papeterie'),
-('Jouets'),
-('Bagages et maroquinerie'),
-('Auto et moto');
+-- Insertion de donnees dans la table profil
+INSERT INTO profil (nomProfil) VALUES
+('Famille'),
+('Végétarien'),
+('Vegan'),
+('Produit local'),
+('Gourmand'),
+('Sans gluten'),
+('Sans lactose'),
+('Sportif'),
+('Épicurien'),
+('Bio'),
+('Pescétarien'),
+('Amateur de viande'),
+('Économique'),
+('Gastronomique'),
+('Prêt-à-cuisiner'),
+('Adolescent'),
+('Senior'),
+('Jeune actif'),
+('Fête et festivités'),
+('Parent pressé');
+
+-- Insertion des donnees dans la table client
+INSERT INTO client (idMagasin, nomClient, prenomClient, adresseClient, telClient) VALUES
+(1, 'Durand', 'Jean', '12 Rue de Paris', '0612345678'),
+(2, 'Martin', 'Marie', '34 Avenue des Fleurs', '0623456789'),
+(3, 'Dupont', 'Paul', '56 Boulevard Saint-Michel', '0634567890'),
+(4, 'Petit', 'Sophie', '78 Rue Lafayette', '0645678901'),
+(5, 'Lemoine', 'Julien', '90 Avenue Victor Hugo', '0656789012'),
+(6, 'Morel', 'Emma', '11 Rue de la République', '0667890123'),
+(7, 'Blanc', 'Lucas', '22 Rue Jean Jaurès', '0678901234'),
+(8, 'Roux', 'Camille', '44 Avenue Charles de Gaulle', '0689012345'),
+(9, 'Fontaine', 'Alice', '66 Boulevard Haussmann', '0690123456'),
+(10, 'Bonnet', 'Thomas', '88 Rue des Lilas', '0611223344'),
+(11, 'Chevalier', 'Chloé', '101 Rue Montmartre', '0622334455'),
+(12, 'Legrand', 'Maxime', '202 Avenue des Champs', '0633445566'),
+(13, 'Garnier', 'Lucie', '303 Boulevard Voltaire', '0644556677'),
+(14, 'Faure', 'Nathan', '404 Rue de Rivoli', '0655667788'),
+(15, 'Perrin', 'Laura', '505 Avenue de la Gare', '0666778899'),
+(16, 'Renaud', 'Léo', '606 Rue Pasteur', '0677889900'),
+(17, 'Marchand', 'Manon', '707 Boulevard Gambetta', '0688990011'),
+(18, 'Schmitt', 'Antoine', '808 Rue de Lyon', '0699001122'),
+(19, 'Robin', 'Clara', '909 Avenue de la Liberté', '0610112233'),
+(20, 'Bernard', 'Arthur', '1010 Rue Saint-Honoré', '0621223344'),
+(1, 'Lemoine', 'Elise', '1111 Rue de la Mairie', '0632334455'),
+(2, 'Girard', 'Victor', '1212 Avenue Mozart', '0643445566'),
+(3, 'Lemoine', 'Emma', '1313 Boulevard Parnasse', '0654556677'),
+(4, 'Morin', 'Nina', '1414 Rue du Bac', '0665667788'),
+(5, 'Leclerc', 'Alexis', '1515 Avenue Henri IV', '0676778899'),
+(6, 'Denis', 'Sarah', '1616 Rue Clémenceau', '0687889900'),
+(7, 'Boyer', 'Jules', '1717 Boulevard Charonne', '0698990011'),
+(8, 'Gauthier', 'Anna', '1818 Rue de Sébastopol', '0619001122'),
+(9, 'Moulin', 'Ethan', '1919 Avenue de l’Opéra', '0620112233'),
+(10, 'Dupuis', 'Amandine', '2020 Rue du Commerce', '0631223344'),
+(11, 'Michel', 'Hugo', '2121 Boulevard de la Liberté', '0642334455'),
+(12, 'Thomas', 'Zoé', '2222 Avenue de la Paix', '0653445566'),
+(13, 'Garcia', 'Quentin', '2323 Rue des Rosiers', '0664556677'),
+(14, 'Martinez', 'Léa', '2424 Rue de Rome', '0675667788'),
+(15, 'Lopez', 'Oscar', '2525 Boulevard de Strasbourg', '0686778899'),
+(16, 'Gomez', 'Margaux', '2626 Avenue de l’Europe', '0697889900'),
+(17, 'Rodriguez', 'Bastien', '2727 Rue de Marseille', '0618990011'),
+(18, 'Perez', 'Mia', '2828 Rue de Nice', '0629001122'),
+(19, 'Sanchez', 'Gabriel', '2929 Avenue de la Mer', '0630112233'),
+(20, 'Romero', 'Eva', '3030 Rue de Toulon', '0641223344'),
+(1, 'Benitez', 'Adrien', '3131 Boulevard de Lille', '0652334455'),
+(2, 'Ortiz', 'Jade', '3232 Rue de Metz', '0663445566'),
+(3, 'Moreno', 'Noah', '3333 Avenue de Nancy', '0674556677'),
+(4, 'Alvarez', 'Clémence', '3434 Rue de Bordeaux', '0685667788'),
+(5, 'Gomez', 'Sacha', '3535 Rue de Toulouse', '0696778899'),
+(6, 'Navarro', 'Juliette', '3636 Rue de Rennes', '0617889900'),
+(7, 'Torres', 'Victor', '3737 Avenue de Brest', '0628990011'),
+(8, 'Ramirez', 'Charlotte', '3838 Rue de Nantes', '0639001122'),
+(9, 'Marquez', 'Rayan', '3939 Rue de Rouen', '0640112233'),
+(10, 'Castro', 'Élodie', '4040 Rue de Nancy', '0651223344'),
+(11, 'Mendez', 'Léna', '4141 Boulevard de la Côte', '0662334455'),
+(12, 'Dominguez', 'Tom', '4242 Avenue de Lyon', '0673445566'),
+(13, 'Hernandez', 'Céline', '4343 Rue de Dijon', '0684556677'),
+(14, 'Fernandez', 'Gaël', '4444 Rue de Brest', '0695667788'),
+(15, 'Vega', 'Alicia', '4545 Avenue de Limoges', '0616778899'),
+(16, 'Ramos', 'Nicolas', '4646 Boulevard de Clermont', '0627889900'),
+(17, 'Ruiz', 'Clara', '4747 Rue de Montpellier', '0638990011'),
+(18, 'Jimenez', 'Mathieu', '4848 Rue de Strasbourg', '0649001122'),
+(19, 'Medina', 'Lucie', '4949 Rue de Nancy', '0650112233'),
+(20, 'Cruz', 'Raphaël', '5050 Boulevard de la Marne', '0661223344'),
+(1, 'Reyes', 'Marie', '5151 Avenue des Alpes', '0672334455'),
+(2, 'Ortiz', 'Thomas', '5252 Rue des Vosges', '0683445566'),
+(3, 'Morales', 'Jules', '5353 Avenue des Pyrénées', '0694556677'),
+(4, 'Gomez', 'Camille', '5454 Rue de l’Océan', '0615667788'),
+(5, 'Navarro', 'Alexandre', '5555 Rue des Volcans', '0626778899'),
+(6, 'Torres', 'Chloé', '5656 Boulevard du Soleil', '0637889900'),
+(7, 'Ramirez', 'Lucas', '5757 Rue de Provence', '0648990011'),
+(8, 'Marquez', 'Nina', '5858 Avenue des Fleurs', '0659001122'),
+(9, 'Castro', 'Léo', '5959 Rue de la Côte', '0660112233'),
+(10, 'Mendez', 'Emma', '6060 Boulevard des Plages', '0671223344'),
+(11, 'Dominguez', 'Maxime', '6161 Rue des Rivières', '0682334455'),
+(12, 'Hernandez', 'Anna', '6262 Avenue des Îles', '0693445566'),
+(13, 'Fernandez', 'Arthur', '6363 Rue des Sapins', '0614556677'),
+(14, 'Vega', 'Léa', '6464 Rue des Pins', '0625667788'),
+(15, 'Ramos', 'Hugo', '6565 Rue de la Forêt', '0636778899'),
+(16, 'Ruiz', 'Margaux', '6666 Boulevard des Montagnes', '0647889900'),
+(17, 'Jimenez', 'Nathan', '6767 Rue des Champs', '0658990011'),
+(18, 'Medina', 'Alice', '6868 Rue des Arbres', '0669001122'),
+(19, 'Cruz', 'Julien', '6969 Rue des Étoiles', '0670112233'),
+(1, 'Reyes', 'Sophie', '7070 Boulevard de la Lune', '0681223344'),
+(2, 'Ortiz', 'Clara', '7171 Rue des Planètes', '0692334455'),
+(3, 'Morales', 'Émilie', '7272 Avenue de Saturne', '0613445566'),
+(4, 'Gomez', 'Antoine', '7373 Rue de Mars', '0624556677'),
+(5, 'Navarro', 'Lucie', '7474 Rue de Vénus', '0635667788'),
+(6, 'Torres', 'Quentin', '7575 Boulevard de Neptune', '0646778899'),
+(7, 'Ramirez', 'Manon', '7676 Rue de Mercure', '0657889900'),
+(8, 'Dubois', 'Louis', '12 Rue des Cerisiers', '0667891234'),
+(9, 'Michel', 'Louise', '34 Avenue des Platanes', '0612345678'),
+(10, 'Lemoine', 'Alice', '56 Boulevard Saint-Martin', '0678902345'),
+(11, 'Rousseau', 'Julien', '78 Rue de la Gloire', '0690123456'),
+(12, 'Gauthier', 'Emma', '90 Rue de la Fontaine', '0623456789'),
+(13, 'Clement', 'Hugo', '11 Avenue des Marronniers', '0634567890'),
+(14, 'Morin', 'Laura', '22 Rue des Chênes', '0645678901'),
+(15, 'Girard', 'Lucas', '44 Boulevard Haussmann', '0656789012'),
+(16, 'Noël', 'Sophie', '66 Rue du Soleil', '0667890123'),
+(17, 'Perrin', 'Nathan', '88 Rue des Érables', '0678901234'),
+(18, 'Arnaud', 'Mia', '101 Avenue des Lilas', '0689012345'),
+(19, 'Masson', 'Arthur', '202 Boulevard de la République', '0690123456'),
+(20, 'Vidal', 'Chloé', '303 Rue de Provence', '0611223344'),
+(1, 'Da Silva', 'Quentin', '404 Avenue des Champs', '0622334455'),
+(2, 'Adam', 'Manon', '505 Rue de la Gare', '0633445566'),
+(3, 'Lemoine', 'Léa', '606 Rue de la Paix', '0644556677'),
+(4, 'Bernard', 'Gabriel', '707 Avenue des Fleurs', '0655667788'),
+(5, 'Henry', 'Clara', '808 Boulevard Voltaire', '0666778899'),
+(6, 'Bonnet', 'Ethan', '909 Rue Saint-Honoré', '0677889900'),
+(7, 'Richard', 'Nina', '1010 Rue du Commerce', '0688990011'),
+(8, 'Chevalier', 'Tom', '1111 Avenue Mozart', '0699001122'),
+(9, 'Renaud', 'Zoé', '1212 Rue Pasteur', '0610112233'),
+(10, 'Morel', 'Victor', '1313 Boulevard Saint-Michel', '0621223344'),
+(11, 'Barbier', 'Camille', '1414 Rue Lafayette', '0632334455'),
+(12, 'Perez', 'Oscar', '1515 Avenue Victor Hugo', '0643445566'),
+(13, 'Rolland', 'Alice', '1616 Rue de Lyon', '0654556677'),
+(14, 'Weber', 'Maxime', '1717 Boulevard Gambetta', '0665667788'),
+(15, 'Marchand', 'Juliette', '1818 Rue Montmartre', '0676778899'),
+(16, 'Giraud', 'Léo', '1919 Avenue de l’Opéra', '0687889900'),
+(17, 'Leclerc', 'Charlotte', '2020 Rue des Rosiers', '0698990011'),
+(18, 'Moreno', 'Antoine', '2121 Rue des Vosges', '0619001122'),
+(19, 'Martinez', 'Margaux', '2222 Rue des Pyrénées', '0620112233'),
+(20, 'Garcia', 'Élise', '2323 Rue de Marseille', '0631223344'),
+(1, 'Lopez', 'Mathieu', '2424 Avenue des Plages', '0642334455'),
+(2, 'Gomez', 'Lucie', '2525 Boulevard des Champs', '0653445566'),
+(3, 'Navarro', 'Adrien', '2626 Rue de l’Europe', '0664556677'),
+(4, 'Hernandez', 'Julien', '2727 Rue des Volcans', '0675667788'),
+(5, 'Cruz', 'Léna', '2828 Rue des Sapins', '0686778899'),
+(6, 'Reyes', 'Émilie', '2929 Avenue des Pins', '0697889900'),
+(7, 'Alvarez', 'Paul', '3030 Rue de Rennes', '0618990011'),
+(8, 'Mendez', 'Sacha', '3131 Boulevard de Brest', '0629001122'),
+(9, 'Ruiz', 'Noé', '3232 Rue de Limoges', '0630112233'),
+(10, 'Ramos', 'Victor', '3333 Rue de Toulouse', '0641223344'),
+(11, 'Jimenez', 'Jade', '3434 Rue de Bordeaux', '0652334455'),
+(12, 'Morales', 'Tom', '3535 Avenue Henri IV', '0663445566'),
+(13, 'Torres', 'Léo', '3636 Rue Clémenceau', '0674556677'),
+(14, 'Fernandez', 'Anna', '3737 Rue Charonne', '0685667788'),
+(15, 'Romero', 'Amandine', '3838 Rue de Sébastopol', '0696778899'),
+(16, 'Ramirez', 'Emma', '3939 Rue de Nice', '0617889900'),
+(17, 'Vega', 'Hugo', '4040 Rue de Marseille', '0628990011'),
+(18, 'Castro', 'Sarah', '4141 Rue de Toulon', '0639001122'),
+(19, 'Dominguez', 'Clément', '4242 Rue de l’Océan', '0640112233'),
+(20, 'Benitez', 'Juliette', '4343 Rue des Alpes', '0651223344'),
+(1, 'Navarro', 'Léa', '4444 Rue des Rivières', '0662334455'),
+(2, 'Gomez', 'Nathan', '4545 Avenue des Îles', '0673445566'),
+(3, 'Marquez', 'Antoine', '4646 Rue des Sapins', '0684556677'),
+(4, 'Hernandez', 'Mia', '4747 Rue des Pins', '0695667788'),
+(5, 'Lopez', 'Gabriel', '4848 Rue de la Forêt', '0616778899'),
+(6, 'Reyes', 'Lila', '4949 Rue des Montagnes', '0627889900'),
+(7, 'Ramos', 'Noémie', '5050 Rue des Champs', '0638990011'),
+(8, 'Jimenez', 'Ethan', '5151 Rue des Arbres', '0649001122'),
+(9, 'Moreno', 'Lucie', '5252 Rue des Étoiles', '0650112233'),
+(10, 'Marchand', 'Alice', '5353 Rue de la Lune', '0661223344'),
+(11, 'Thomas', 'Arthur', '5454 Rue des Planètes', '0672334455'),
+(12, 'Weber', 'Camille', '5555 Avenue de Saturne', '0683445566'),
+(13, 'Vidal', 'Pauline', '5656 Rue de Mars', '0694556677'),
+(14, 'Masson', 'Émilie', '5757 Rue de Vénus', '0615667788'),
+(15, 'Arnaud', 'Oscar', '5858 Boulevard de Neptune', '0626778899'),
+(16, 'Dupuis', 'Emma', '5959 Rue de Mercure', '0637889900'),
+(17, 'Blanc', 'Tom', '6060 Rue des Cerisiers', '0648990011'),
+(18, 'Petit', 'Nathan', '6161 Avenue des Platanes', '0659001122'),
+(19, 'Fontaine', 'Chloé', '6262 Boulevard Saint-Martin', '0660112233'),
+(20, 'Chevalier', 'Alice', '6363 Rue de la Gloire', '0671223344'),
+(14, 'Lemoine', 'Julien', '6464 Rue de la Fontaine', '0682334455'),
+(15, 'Durand', 'Lucas', '6565 Avenue des Marronniers', '0693445566'),
+(16, 'Bernard', 'Mia', '6666 Rue des Chênes', '0614556677'),
+(17, 'Girard', 'Ethan', '6767 Boulevard Haussmann', '0625667788'),
+(18, 'Martin', 'Sophie', '6868 Rue du Soleil', '0636778899'),
+(19, 'Michel', 'Louis', '6969 Rue des Érables', '0647889900'),
+(20, 'Dupont', 'Clara', '7070 Rue des Lilas', '0658990011'),
+(1, 'Rousseau', 'Gabriel', '7171 Boulevard de la République', '0669001122'),
+(2, 'Noël', 'Emma', '7272 Rue de Provence', '0670112233'),
+(3, 'Garnier', 'Victor', '7373 Avenue des Champs', '0681223344'),
+(4, 'Faure', 'Margaux', '7474 Rue de la Gare', '0692334455'),
+(5, 'Robin', 'Antoine', '7575 Rue de la Paix', '0613445566'),
+(6, 'Perrin', 'Clément', '7676 Rue des Fleurs', '0624556677');
+
+-- Insertion de données dans la table client_profil
+INSERT INTO client_profil (idClient, idProfil) VALUES
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5),
+(6, 6),
+(7, 7),
+(8, 8),
+(9, 9),
+(10, 10),
+(11, 11),
+(12, 12),
+(13, 13),
+(14, 14),
+(15, 15),
+(16, 16),
+(17, 17),
+(18, 18),
+(19, 19),
+(20, 20),
+(21, 1),
+(22, 2),
+(23, 3),
+(24, 4),
+(25, 5),
+(26, 6),
+(27, 7),
+(28, 8),
+(29, 9),
+(30, 10),
+(31, 11),
+(32, 12),
+(33, 13),
+(34, 14),
+(35, 15),
+(36, 16),
+(37, 17),
+(38, 18),
+(39, 19),
+(40, 20),
+(41, 1),
+(42, 2),
+(43, 3),
+(44, 4),
+(45, 5),
+(46, 6),
+(47, 7),
+(48, 8),
+(49, 9),
+(50, 10),
+(51, 11),
+(52, 12),
+(53, 13),
+(54, 14),
+(55, 15),
+(56, 16),
+(57, 17),
+(58, 18),
+(59, 19),
+(60, 20),
+(61, 1),
+(62, 2),
+(63, 3),
+(64, 4),
+(65, 5),
+(66, 6),
+(67, 7),
+(68, 8),
+(69, 9),
+(70, 10),
+(71, 11),
+(72, 12),
+(73, 13),
+(74, 14),
+(75, 15),
+(76, 16),
+(77, 17),
+(78, 18),
+(79, 19),
+(80, 20),
+(81, 1),
+(82, 2),
+(83, 3),
+(84, 4),
+(85, 5),
+(86, 6),
+(87, 7),
+(88, 8),
+(89, 9),
+(90, 10),
+(91, 11),
+(92, 12),
+(93, 13),
+(94, 14),
+(95, 15),
+(96, 16),
+(97, 17),
+(98, 18),
+(99, 19),
+(100, 20),
+(101, 1),
+(102, 2),
+(103, 3),
+(104, 4),
+(105, 5),
+(106, 6),
+(107, 7),
+(108, 8),
+(109, 9),
+(110, 10),
+(111, 11),
+(112, 12),
+(113, 13),
+(114, 14),
+(115, 15),
+(116, 16),
+(117, 17),
+(118, 18),
+(119, 19),
+(120, 20),
+(121, 1),
+(122, 2),
+(123, 3),
+(124, 4),
+(125, 5),
+(126, 6),
+(127, 7),
+(128, 8),
+(129, 9),
+(130, 10),
+(131, 11),
+(132, 12),
+(133, 13),
+(134, 14),
+(135, 15),
+(136, 16),
+(137, 17),
+(138, 18),
+(139, 19),
+(140, 20),
+(141, 1),
+(142, 2),
+(143, 3),
+(144, 4),
+(145, 5),
+(146, 6),
+(147, 7),
+(148, 8),
+(149, 9),
+(150, 10),
+(151, 11),
+(152, 12),
+(153, 13),
+(154, 14),
+(155, 15),
+(156, 16),
+(157, 17),
+(158, 18),
+(159, 19),
+(160, 20),
+(161, 1),
+(162, 2),
+(163, 3),
+(164, 4),
+(165, 5),
+(166, 6),
+(167, 7),
+(168, 8),
+(169, 9),
+(170, 10),
+(171, 11),
+(172, 12);
 
 -- Insertion des données pour la table PRODUIT
 INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES
@@ -258,294 +723,6 @@ INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsPr
 ('Machine à coudre', 200.00, NULL, 'B', 8.000, 'Boîte 8kg', 'Singer'),
 ('Projecteur LED', 60.00, NULL, 'A', 1.500, 'Boîte 1.5kg', 'Philips'),
 ('Vase en céramique', 30.00, NULL, 'A', 2.000, 'Pièce', 'Ikea');
-
---Insertion des données pour la table APPARTENIR
-INSERT INTO appartenir (idCategorie, idProduit) VALUES
-(1, 1), (1, 2), (2, 7), (2, 8), (3, 5), (3, 6),
-(4, 13), (4, 14), (5, 21), (5, 22), (6, 33), (6, 34),
-(7, 27), (7, 28), (8, 29), (8, 30), (9, 17), (9, 18),
-(10, 19), (10, 20), (11, 25), (11, 26), (12, 11), (12, 12),
-(13, 3), (13, 4), (14, 9), (14, 10), (15, 15), (15, 16),
-(16, 23), (16, 24), (17, 31), (17, 32), (18, 35), (18, 36),
-(19, 37), (19, 38), (20, 39), (20, 40), (21, 41), (21, 42),
-(22, 43), (22, 44), (23, 45), (23, 46), (24, 47), (24, 48),
-(25, 49), (25, 50),
-
-(1, 51),  -- Pois chiches bio -> Produits frais
-(2, 52),  -- Chips nature (Lay's) -> Snacks
-(2, 53),  -- Chips nature (Bret's) -> Snacks
-(3, 54),  -- Pizza Margherita (Buitoni) -> Produits surgelés
-(3, 55),  -- Pizza Margherita (Dr. Oetker) -> Produits surgelés
-(4, 56),  -- Céréales complètes (Jordan's) -> Épicerie
-(4, 57),  -- Céréales complètes (Nestlé) -> Épicerie
-(1, 58),  -- Yaourt aux fruits (Danone) -> Produits frais
-(1, 59),  -- Yaourt aux fruits (Yoplait) -> Produits frais
-(4, 60),  -- Pain de mie complet (Harry's) -> Épicerie
-(4, 61),  -- Pain de mie complet (Jacquet) -> Épicerie
-(5, 62),  -- Jus de pomme bio (Innocent) -> Boissons
-(5, 63),  -- Jus de pomme bio (Carrefour Bio) -> Boissons
-(7, 64),  -- Raviolis bolognaise (Zapetti) -> Plats préparés
-(7, 65),  -- Raviolis bolognaise (William Saurin) -> Plats préparés
-(2, 66),  -- Quinoa bio (Markal) -> Produits bio
-(2, 67),  -- Quinoa bio (Carrefour Bio) -> Produits bio
-(8, 68),  -- Compote de pommes (Materne) -> Pâtisseries et confiseries
-(8, 69),  -- Compote de pommes (Andros) -> Pâtisseries et confiseries
-(1, 70),  -- Saucisses de Strasbourg (Herta) -> Produits frais
-(1, 71),  -- Saucisses de Strasbourg (Fleury Michon) -> Produits frais
-(3, 72),  -- Bâtonnets de poisson (Findus) -> Produits surgelés
-(3, 73),  -- Bâtonnets de poisson (Iglo) -> Produits surgelés
-(2, 74),  -- Riz complet bio (Markal) -> Produits bio
-(2, 75),  -- Riz complet bio (Taureau Ailé) -> Produits bio
-(5, 76),  -- Lait d'amande (Alpro) -> Boissons
-(5, 77),  -- Lait d'amande (Bjorg) -> Boissons
-(2, 78),  -- Thé vert bio (Lipton) -> Produits bio
-(2, 79),  -- Thé vert bio (Twinings) -> Produits bio
-(8, 80),  -- Gâteau au chocolat (Bonne Maman) -> Pâtisseries et confiseries
-(8, 81),  -- Gâteau au chocolat (La Mie Câline) -> Pâtisseries et confiseries
-(8, 82),  -- Confiture d'abricot (Bonne Maman) -> Pâtisseries et confiseries
-(8, 83),  -- Confiture d'abricot (Andros) -> Pâtisseries et confiseries
-(2, 84),  -- Farine de blé bio (Markal) -> Produits bio
-(2, 85),  -- Farine de blé bio (Francine) -> Produits bio
-(8, 86),  -- Chocolat noir 85% (Lindt) -> Pâtisseries et confiseries
-(8, 87),  -- Chocolat noir 85% (Nestlé) -> Pâtisseries et confiseries
-(1, 88),  -- Yaourt aux fraises (Danone) -> Produits frais
-(1, 89),  -- Yaourt aux fraises (Yoplait) -> Produits frais
-(2, 90),  -- Filet de cabillaud (Labeyrie) -> Produits bio
-(2, 91),  -- Filet de cabillaud (Marine Harvest) -> Produits bio
-(1, 92),  -- Banane bio (Bio Village) -> Produits frais
-(1, 93),  -- Banane bio (Carrefour Bio) -> Produits frais
-(8, 94),  -- Croissant au beurre (Tradition) -> Pâtisseries et confiseries
-(8, 95),  -- Croissant au beurre (Le Fournil) -> Pâtisseries et confiseries
-(7, 96),  -- Lasagnes bio (Barilla) -> Plats préparés
-(7, 97),  -- Lasagnes bio (Panzani) -> Plats préparés
-(1, 98),  -- Camembert bio (Président) -> Produits frais
-(1, 99),  -- Camembert bio (Soignon) -> Produits frais
-(2, 100), -- Pois cassés bio (Markal) -> Produits bio
-(2, 101), -- Pois cassés bio (Carrefour Bio) -> Produits bio
-
--- Carottes râpées bio
-(1, 102), -- Produits frais
-(2, 102), -- Produits bio
-
--- Riz jasmin bio (Taureau Ailé)
-(4, 103), -- Épicerie
-(2, 103), -- Produits bio
-
--- Riz jasmin bio (Carrefour Bio)
-(4, 104), -- Épicerie
-(2, 104), -- Produits bio
-
--- Huile de colza bio (Puget)
-(4, 105), -- Épicerie
-(2, 105), -- Produits bio
-
--- Huile de colza bio (Terre d’Italie)
-(4, 106), -- Épicerie
-(2, 106), -- Produits bio
-
--- Chocolat blanc (Lindt)
-(8, 107), -- Pâtisseries et confiseries
-
--- Chocolat blanc (Milka)
-(8, 108), -- Pâtisseries et confiseries
-
--- Lait entier bio (Lactel)
-(2, 109), -- Produits bio
-(21, 109), -- Hygiène
-
--- Lait entier bio (Carrefour Bio)
-(2, 110), -- Produits bio
-(21, 110), -- Hygiène
-
--- Saucisse fumée (Herta)
-(1, 111), -- Produits frais
-
--- Saucisse fumée (Fleury Michon)
-(1, 112), -- Produits frais
-
--- Gâteau au yaourt (Bonne Maman)
-(8, 113), -- Pâtisseries et confiseries
-
--- Gâteau au yaourt (La Mie Câline)
-(8, 114), -- Pâtisseries et confiseries
-
--- Thé noir bio (Lipton)
-(2, 115), -- Produits bio
-(4, 115), -- Épicerie
-
--- Thé noir bio (Twinings)
-(2, 116), -- Produits bio
-(4, 116), -- Épicerie
-
--- Compote de poire (Materne)
-(4, 117), -- Épicerie
-(8, 117), -- Pâtisseries et confiseries
-
--- Compote de poire (Andros)
-(4, 118), -- Épicerie
-(8, 118), -- Pâtisseries et confiseries
-
--- Pâtes tortellini (Barilla)
-(4, 119), -- Épicerie
-
--- Pâtes tortellini (Panzani)
-(4, 120), -- Épicerie
-
--- Lentilles corail bio (Markal)
-(4, 121), -- Épicerie
-(2, 121), -- Produits bio
-
--- Lentilles corail bio (Carrefour Bio)
-(4, 122), -- Épicerie
-(2, 122), -- Produits bio
-
--- Crème fraîche bio (Président)
-(1, 123), -- Produits frais
-(2, 123), -- Produits bio
-
--- Crème fraîche bio (Elle & Vire)
-(1, 124), -- Produits frais
-(2, 124), -- Produits bio
-
--- Farine complète bio (Francine)
-(4, 125), -- Épicerie
-(2, 125), -- Produits bio
-
--- Farine complète bio (Markal)
-(4, 126), -- Épicerie
-(2, 126), -- Produits bio
-
--- Jus multifruits (Innocent)
-(5, 127), -- Boissons
-(2, 127), -- Produits bio
-
--- Jus multifruits (Carrefour Bio)
-(5, 128), -- Boissons
-(2, 128), -- Produits bio
-
--- Bouillon de légumes (Knorr)
-(4, 129), -- Épicerie
-
--- Bouillon de légumes (Maggi)
-(4, 130), -- Épicerie
-
--- Biscuits apéritifs (Belin)
-(6, 131), -- Snacks
-
--- Biscuits apéritifs (Bret’s)
-(6, 132), -- Snacks
-
--- Steak haché 5% MG (Charal)
-(1, 133), -- Produits frais
-
--- Steak haché 15% MG (Bigard)
-(1, 134), -- Produits frais
-
--- Escalope de dinde (Le Gaulois)
-(1, 135), -- Produits frais
-
--- Escalope de poulet (Maître Coq)
-(1, 136), -- Produits frais
-
--- Côte de porc (Bigard)
-(1, 137), -- Produits frais
-
--- Côte de veau (Charal)
-(1, 138), -- Produits frais
-
--- Saucisse de Toulouse (Jean Rozé)
-(1, 139), -- Produits frais
-
--- Saucisse fumée (Herta)
-(1, 140), -- Produits frais
-
--- Rôti de porc (Fleury Michon)
-(1, 141), -- Produits frais
-
--- Rôti de veau (Charal)
-(1, 142), -- Produits frais
-
--- Cuisses de poulet (Le Gaulois)
-(1, 143), -- Produits frais
-
--- Filet de canard (Fleury Michon)
-(1, 144), -- Produits frais
-
--- Foie gras (Labeyrie)
-(1, 145), -- Produits frais
-
--- Magret de canard (Jean Rozé)
-(1, 146), -- Produits frais
-
--- Cuisse de lapin (Fleury Michon)
-(1, 147), -- Produits frais
-
--- Filet mignon de porc (Herta)
-(1, 148), -- Produits frais
-
--- Tournedos de bœuf (Charal)
-(1, 149), -- Produits frais
-
--- Rosbif (Jean Rozé)
-(1, 150), -- Produits frais
-
--- Jarret de veau (Bigard)
-(1, 151), -- Produits frais
-
--- Émincé de bœuf (Charal)
-(1, 152),-- Produits frais
-(1, 153), -- Gigot d’agneau -> Produits frais
-(10, 154), -- Tondeuse à gazon -> Jardin
-(11, 155), -- Robot de cuisine -> Électroménager
-(12, 156), -- Pull en laine -> Mode
-(19, 157), -- Console de jeux vidéo -> High-tech
-(13, 158), -- Livre de cuisine -> Livres
-(15, 159), -- Chaise de bureau -> Mobilier
-(15, 160), -- Table basse -> Mobilier
-(16, 161), -- Perceuse sans fil -> Bricolage
-(17, 162), -- Rameur de fitness -> Sports
-(19, 163), -- Smartphone -> High-tech
-(19, 164), -- Tablette tactile -> High-tech
-(20, 165), -- Shampooing bio -> Beauté et soin
-(20, 166), -- Parfum floral -> Beauté et soin
-(11, 167), -- Grill électrique -> Électroménager
-(10, 168), -- Jardinère extérieure -> Jardin
-(15, 169), -- Lit double -> Mobilier
-(21, 170), -- Sèche-cheveux -> Hygiène
-(19, 171), -- Montre connectée -> High-tech
-(18, 172), -- Guitare acoustique -> Informatique
-(19, 173), -- Caméra de surveillance -> High-tech
-(17, 174), -- Tapis de yoga -> Sports
-(15, 175), -- Bougie parfumée -> Décoration
-(19, 176), -- Enceinte Bluetooth -> High-tech
-(19, 177), -- Casque audio -> High-tech
-(19, 178), -- Liseuse électronique -> High-tech
-(17, 179), -- Vélo électrique -> Sports
-(10, 180), -- Plante verte -> Jardin
-(11, 181), -- Machine à laver -> Électroménager
-(15, 182), -- Lampadaire design -> Décoration
-(15, 183), -- Miroir mural -> Décoration
-(14, 184), -- Couverts inox -> Épicerie
-(14, 185), -- Serviettes de bain -> Épicerie
-(11, 186), -- Presse-agrumes électrique -> Électroménager
-(11, 187), -- Réfrigérateur -> Électroménager
-(11, 188), -- Four à micro-ondes -> Électroménager
-(15, 189), -- Tapis d’entrée -> Décoration
-(24, 190), -- Jeu de société -> Jouets
-(11, 191), -- Aspirateur robot -> Électroménager
-(14, 192), -- Set de casseroles -> Épicerie
-(10, 193), -- Hamac de jardin -> Jardin
-(11, 194), -- Ventilateur colonne -> Électroménager
-(15, 195), -- Armoire de rangement -> Mobilier
-(11, 196), -- Plancha électrique -> Électroménager
-(15, 197), -- Boîte de rangement plastique -> Décoration
-(25, 198), -- Valise cabine -> Bagages et maroquinerie
-(11, 199), -- Mixeur plongeant -> Électroménager
-(15, 200), -- Abat-jour -> Décoration
-(15, 201), -- Horloge murale -> Décoration
-(11, 202), -- Machine à coudre -> Électroménager
-(19, 203), -- Projecteur LED -> High-tech
-(15,204);
 
 INSERT INTO stocker (idMagasin, idProduit, quantiteEnStock) VALUES
 (15, 55, 462),
@@ -2545,487 +2722,320 @@ INSERT INTO stocker (idMagasin, idProduit, quantiteEnStock) VALUES
 (12, 160, 409),
 (15, 203, 487);
 
--- Insertion des donnees dans la table client
-INSERT INTO client (idMagasin, nomClient, prenomClient, adresseClient, telClient) VALUES
-(1, 'Durand', 'Jean', '12 Rue de Paris', '0612345678'),
-(2, 'Martin', 'Marie', '34 Avenue des Fleurs', '0623456789'),
-(3, 'Dupont', 'Paul', '56 Boulevard Saint-Michel', '0634567890'),
-(4, 'Petit', 'Sophie', '78 Rue Lafayette', '0645678901'),
-(5, 'Lemoine', 'Julien', '90 Avenue Victor Hugo', '0656789012'),
-(6, 'Morel', 'Emma', '11 Rue de la République', '0667890123'),
-(7, 'Blanc', 'Lucas', '22 Rue Jean Jaurès', '0678901234'),
-(8, 'Roux', 'Camille', '44 Avenue Charles de Gaulle', '0689012345'),
-(9, 'Fontaine', 'Alice', '66 Boulevard Haussmann', '0690123456'),
-(10, 'Bonnet', 'Thomas', '88 Rue des Lilas', '0611223344'),
-(11, 'Chevalier', 'Chloé', '101 Rue Montmartre', '0622334455'),
-(12, 'Legrand', 'Maxime', '202 Avenue des Champs', '0633445566'),
-(13, 'Garnier', 'Lucie', '303 Boulevard Voltaire', '0644556677'),
-(14, 'Faure', 'Nathan', '404 Rue de Rivoli', '0655667788'),
-(15, 'Perrin', 'Laura', '505 Avenue de la Gare', '0666778899'),
-(16, 'Renaud', 'Léo', '606 Rue Pasteur', '0677889900'),
-(17, 'Marchand', 'Manon', '707 Boulevard Gambetta', '0688990011'),
-(18, 'Schmitt', 'Antoine', '808 Rue de Lyon', '0699001122'),
-(19, 'Robin', 'Clara', '909 Avenue de la Liberté', '0610112233'),
-(20, 'Bernard', 'Arthur', '1010 Rue Saint-Honoré', '0621223344'),
-(1, 'Lemoine', 'Elise', '1111 Rue de la Mairie', '0632334455'),
-(2, 'Girard', 'Victor', '1212 Avenue Mozart', '0643445566'),
-(3, 'Lemoine', 'Emma', '1313 Boulevard Parnasse', '0654556677'),
-(4, 'Morin', 'Nina', '1414 Rue du Bac', '0665667788'),
-(5, 'Leclerc', 'Alexis', '1515 Avenue Henri IV', '0676778899'),
-(6, 'Denis', 'Sarah', '1616 Rue Clémenceau', '0687889900'),
-(7, 'Boyer', 'Jules', '1717 Boulevard Charonne', '0698990011'),
-(8, 'Gauthier', 'Anna', '1818 Rue de Sébastopol', '0619001122'),
-(9, 'Moulin', 'Ethan', '1919 Avenue de l’Opéra', '0620112233'),
-(10, 'Dupuis', 'Amandine', '2020 Rue du Commerce', '0631223344'),
-(11, 'Michel', 'Hugo', '2121 Boulevard de la Liberté', '0642334455'),
-(12, 'Thomas', 'Zoé', '2222 Avenue de la Paix', '0653445566'),
-(13, 'Garcia', 'Quentin', '2323 Rue des Rosiers', '0664556677'),
-(14, 'Martinez', 'Léa', '2424 Rue de Rome', '0675667788'),
-(15, 'Lopez', 'Oscar', '2525 Boulevard de Strasbourg', '0686778899'),
-(16, 'Gomez', 'Margaux', '2626 Avenue de l’Europe', '0697889900'),
-(17, 'Rodriguez', 'Bastien', '2727 Rue de Marseille', '0618990011'),
-(18, 'Perez', 'Mia', '2828 Rue de Nice', '0629001122'),
-(19, 'Sanchez', 'Gabriel', '2929 Avenue de la Mer', '0630112233'),
-(20, 'Romero', 'Eva', '3030 Rue de Toulon', '0641223344'),
-(1, 'Benitez', 'Adrien', '3131 Boulevard de Lille', '0652334455'),
-(2, 'Ortiz', 'Jade', '3232 Rue de Metz', '0663445566'),
-(3, 'Moreno', 'Noah', '3333 Avenue de Nancy', '0674556677'),
-(4, 'Alvarez', 'Clémence', '3434 Rue de Bordeaux', '0685667788'),
-(5, 'Gomez', 'Sacha', '3535 Rue de Toulouse', '0696778899'),
-(6, 'Navarro', 'Juliette', '3636 Rue de Rennes', '0617889900'),
-(7, 'Torres', 'Victor', '3737 Avenue de Brest', '0628990011'),
-(8, 'Ramirez', 'Charlotte', '3838 Rue de Nantes', '0639001122'),
-(9, 'Marquez', 'Rayan', '3939 Rue de Rouen', '0640112233'),
-(10, 'Castro', 'Élodie', '4040 Rue de Nancy', '0651223344'),
-(11, 'Mendez', 'Léna', '4141 Boulevard de la Côte', '0662334455'),
-(12, 'Dominguez', 'Tom', '4242 Avenue de Lyon', '0673445566'),
-(13, 'Hernandez', 'Céline', '4343 Rue de Dijon', '0684556677'),
-(14, 'Fernandez', 'Gaël', '4444 Rue de Brest', '0695667788'),
-(15, 'Vega', 'Alicia', '4545 Avenue de Limoges', '0616778899'),
-(16, 'Ramos', 'Nicolas', '4646 Boulevard de Clermont', '0627889900'),
-(17, 'Ruiz', 'Clara', '4747 Rue de Montpellier', '0638990011'),
-(18, 'Jimenez', 'Mathieu', '4848 Rue de Strasbourg', '0649001122'),
-(19, 'Medina', 'Lucie', '4949 Rue de Nancy', '0650112233'),
-(20, 'Cruz', 'Raphaël', '5050 Boulevard de la Marne', '0661223344'),
-(1, 'Reyes', 'Marie', '5151 Avenue des Alpes', '0672334455'),
-(2, 'Ortiz', 'Thomas', '5252 Rue des Vosges', '0683445566'),
-(3, 'Morales', 'Jules', '5353 Avenue des Pyrénées', '0694556677'),
-(4, 'Gomez', 'Camille', '5454 Rue de l’Océan', '0615667788'),
-(5, 'Navarro', 'Alexandre', '5555 Rue des Volcans', '0626778899'),
-(6, 'Torres', 'Chloé', '5656 Boulevard du Soleil', '0637889900'),
-(7, 'Ramirez', 'Lucas', '5757 Rue de Provence', '0648990011'),
-(8, 'Marquez', 'Nina', '5858 Avenue des Fleurs', '0659001122'),
-(9, 'Castro', 'Léo', '5959 Rue de la Côte', '0660112233'),
-(10, 'Mendez', 'Emma', '6060 Boulevard des Plages', '0671223344'),
-(11, 'Dominguez', 'Maxime', '6161 Rue des Rivières', '0682334455'),
-(12, 'Hernandez', 'Anna', '6262 Avenue des Îles', '0693445566'),
-(13, 'Fernandez', 'Arthur', '6363 Rue des Sapins', '0614556677'),
-(14, 'Vega', 'Léa', '6464 Rue des Pins', '0625667788'),
-(15, 'Ramos', 'Hugo', '6565 Rue de la Forêt', '0636778899'),
-(16, 'Ruiz', 'Margaux', '6666 Boulevard des Montagnes', '0647889900'),
-(17, 'Jimenez', 'Nathan', '6767 Rue des Champs', '0658990011'),
-(18, 'Medina', 'Alice', '6868 Rue des Arbres', '0669001122'),
-(19, 'Cruz', 'Julien', '6969 Rue des Étoiles', '0670112233'),
-(1, 'Reyes', 'Sophie', '7070 Boulevard de la Lune', '0681223344'),
-(2, 'Ortiz', 'Clara', '7171 Rue des Planètes', '0692334455'),
-(3, 'Morales', 'Émilie', '7272 Avenue de Saturne', '0613445566'),
-(4, 'Gomez', 'Antoine', '7373 Rue de Mars', '0624556677'),
-(5, 'Navarro', 'Lucie', '7474 Rue de Vénus', '0635667788'),
-(6, 'Torres', 'Quentin', '7575 Boulevard de Neptune', '0646778899'),
-(7, 'Ramirez', 'Manon', '7676 Rue de Mercure', '0657889900'),
-(8, 'Dubois', 'Louis', '12 Rue des Cerisiers', '0667891234'),
-(9, 'Michel', 'Louise', '34 Avenue des Platanes', '0612345678'),
-(10, 'Lemoine', 'Alice', '56 Boulevard Saint-Martin', '0678902345'),
-(11, 'Rousseau', 'Julien', '78 Rue de la Gloire', '0690123456'),
-(12, 'Gauthier', 'Emma', '90 Rue de la Fontaine', '0623456789'),
-(13, 'Clement', 'Hugo', '11 Avenue des Marronniers', '0634567890'),
-(14, 'Morin', 'Laura', '22 Rue des Chênes', '0645678901'),
-(15, 'Girard', 'Lucas', '44 Boulevard Haussmann', '0656789012'),
-(16, 'Noël', 'Sophie', '66 Rue du Soleil', '0667890123'),
-(17, 'Perrin', 'Nathan', '88 Rue des Érables', '0678901234'),
-(18, 'Arnaud', 'Mia', '101 Avenue des Lilas', '0689012345'),
-(19, 'Masson', 'Arthur', '202 Boulevard de la République', '0690123456'),
-(20, 'Vidal', 'Chloé', '303 Rue de Provence', '0611223344'),
-(1, 'Da Silva', 'Quentin', '404 Avenue des Champs', '0622334455'),
-(2, 'Adam', 'Manon', '505 Rue de la Gare', '0633445566'),
-(3, 'Lemoine', 'Léa', '606 Rue de la Paix', '0644556677'),
-(4, 'Bernard', 'Gabriel', '707 Avenue des Fleurs', '0655667788'),
-(5, 'Henry', 'Clara', '808 Boulevard Voltaire', '0666778899'),
-(6, 'Bonnet', 'Ethan', '909 Rue Saint-Honoré', '0677889900'),
-(7, 'Richard', 'Nina', '1010 Rue du Commerce', '0688990011'),
-(8, 'Chevalier', 'Tom', '1111 Avenue Mozart', '0699001122'),
-(9, 'Renaud', 'Zoé', '1212 Rue Pasteur', '0610112233'),
-(10, 'Morel', 'Victor', '1313 Boulevard Saint-Michel', '0621223344'),
-(11, 'Barbier', 'Camille', '1414 Rue Lafayette', '0632334455'),
-(12, 'Perez', 'Oscar', '1515 Avenue Victor Hugo', '0643445566'),
-(13, 'Rolland', 'Alice', '1616 Rue de Lyon', '0654556677'),
-(14, 'Weber', 'Maxime', '1717 Boulevard Gambetta', '0665667788'),
-(15, 'Marchand', 'Juliette', '1818 Rue Montmartre', '0676778899'),
-(16, 'Giraud', 'Léo', '1919 Avenue de l’Opéra', '0687889900'),
-(17, 'Leclerc', 'Charlotte', '2020 Rue des Rosiers', '0698990011'),
-(18, 'Moreno', 'Antoine', '2121 Rue des Vosges', '0619001122'),
-(19, 'Martinez', 'Margaux', '2222 Rue des Pyrénées', '0620112233'),
-(20, 'Garcia', 'Élise', '2323 Rue de Marseille', '0631223344'),
-(1, 'Lopez', 'Mathieu', '2424 Avenue des Plages', '0642334455'),
-(2, 'Gomez', 'Lucie', '2525 Boulevard des Champs', '0653445566'),
-(3, 'Navarro', 'Adrien', '2626 Rue de l’Europe', '0664556677'),
-(4, 'Hernandez', 'Julien', '2727 Rue des Volcans', '0675667788'),
-(5, 'Cruz', 'Léna', '2828 Rue des Sapins', '0686778899'),
-(6, 'Reyes', 'Émilie', '2929 Avenue des Pins', '0697889900'),
-(7, 'Alvarez', 'Paul', '3030 Rue de Rennes', '0618990011'),
-(8, 'Mendez', 'Sacha', '3131 Boulevard de Brest', '0629001122'),
-(9, 'Ruiz', 'Noé', '3232 Rue de Limoges', '0630112233'),
-(10, 'Ramos', 'Victor', '3333 Rue de Toulouse', '0641223344'),
-(11, 'Jimenez', 'Jade', '3434 Rue de Bordeaux', '0652334455'),
-(12, 'Morales', 'Tom', '3535 Avenue Henri IV', '0663445566'),
-(13, 'Torres', 'Léo', '3636 Rue Clémenceau', '0674556677'),
-(14, 'Fernandez', 'Anna', '3737 Rue Charonne', '0685667788'),
-(15, 'Romero', 'Amandine', '3838 Rue de Sébastopol', '0696778899'),
-(16, 'Ramirez', 'Emma', '3939 Rue de Nice', '0617889900'),
-(17, 'Vega', 'Hugo', '4040 Rue de Marseille', '0628990011'),
-(18, 'Castro', 'Sarah', '4141 Rue de Toulon', '0639001122'),
-(19, 'Dominguez', 'Clément', '4242 Rue de l’Océan', '0640112233'),
-(20, 'Benitez', 'Juliette', '4343 Rue des Alpes', '0651223344'),
-(1, 'Navarro', 'Léa', '4444 Rue des Rivières', '0662334455'),
-(2, 'Gomez', 'Nathan', '4545 Avenue des Îles', '0673445566'),
-(3, 'Marquez', 'Antoine', '4646 Rue des Sapins', '0684556677'),
-(4, 'Hernandez', 'Mia', '4747 Rue des Pins', '0695667788'),
-(5, 'Lopez', 'Gabriel', '4848 Rue de la Forêt', '0616778899'),
-(6, 'Reyes', 'Lila', '4949 Rue des Montagnes', '0627889900'),
-(7, 'Ramos', 'Noémie', '5050 Rue des Champs', '0638990011'),
-(8, 'Jimenez', 'Ethan', '5151 Rue des Arbres', '0649001122'),
-(9, 'Moreno', 'Lucie', '5252 Rue des Étoiles', '0650112233'),
-(10, 'Marchand', 'Alice', '5353 Rue de la Lune', '0661223344'),
-(11, 'Thomas', 'Arthur', '5454 Rue des Planètes', '0672334455'),
-(12, 'Weber', 'Camille', '5555 Avenue de Saturne', '0683445566'),
-(13, 'Vidal', 'Pauline', '5656 Rue de Mars', '0694556677'),
-(14, 'Masson', 'Émilie', '5757 Rue de Vénus', '0615667788'),
-(15, 'Arnaud', 'Oscar', '5858 Boulevard de Neptune', '0626778899'),
-(16, 'Dupuis', 'Emma', '5959 Rue de Mercure', '0637889900'),
-(17, 'Blanc', 'Tom', '6060 Rue des Cerisiers', '0648990011'),
-(18, 'Petit', 'Nathan', '6161 Avenue des Platanes', '0659001122'),
-(19, 'Fontaine', 'Chloé', '6262 Boulevard Saint-Martin', '0660112233'),
-(20, 'Chevalier', 'Alice', '6363 Rue de la Gloire', '0671223344'),
-(14, 'Lemoine', 'Julien', '6464 Rue de la Fontaine', '0682334455'),
-(15, 'Durand', 'Lucas', '6565 Avenue des Marronniers', '0693445566'),
-(16, 'Bernard', 'Mia', '6666 Rue des Chênes', '0614556677'),
-(17, 'Girard', 'Ethan', '6767 Boulevard Haussmann', '0625667788'),
-(18, 'Martin', 'Sophie', '6868 Rue du Soleil', '0636778899'),
-(19, 'Michel', 'Louis', '6969 Rue des Érables', '0647889900'),
-(20, 'Dupont', 'Clara', '7070 Rue des Lilas', '0658990011'),
-(1, 'Rousseau', 'Gabriel', '7171 Boulevard de la République', '0669001122'),
-(2, 'Noël', 'Emma', '7272 Rue de Provence', '0670112233'),
-(3, 'Garnier', 'Victor', '7373 Avenue des Champs', '0681223344'),
-(4, 'Faure', 'Margaux', '7474 Rue de la Gare', '0692334455'),
-(5, 'Robin', 'Antoine', '7575 Rue de la Paix', '0613445566'),
-(6, 'Perrin', 'Clément', '7676 Rue des Fleurs', '0624556677');
+-- Insertion des données pour la table CATEGORIE
+INSERT INTO categorie (nomCategorie) VALUES
+('Produits frais'),
+('Produits bio'),
+('Produits surgelés'),
+('Épicerie'),
+('Boissons'),
+('Snacks'),
+('Plats préparés'),
+('Pâtisseries et confiseries'),
+('Produits pour bébés'),
+('Jardin'),
+('Électroménager'),
+('Mode'),
+('Livres'),
+('Mobilier'),
+('Décoration'),
+('Bricolage'),
+('Sports'),
+('Informatique'),
+('High-tech'),
+('Beauté et soin'),
+('Hygiène'),
+('Produits pour animaux'),
+('Papeterie'),
+('Jouets'),
+('Bagages et maroquinerie'),
+('Auto et moto');
 
--- Insertion de donnees dans la table profil
-INSERT INTO profil (nomProfil) VALUES
-('Famille'),
-('Végétarien'),
-('Vegan'),
-('Produit local'),
-('Gourmand'),
-('Sans gluten'),
-('Sans lactose'),
-('Sportif'),
-('Épicurien'),
-('Bio'),
-('Pescétarien'),
-('Amateur de viande'),
-('Économique'),
-('Gastronomique'),
-('Prêt-à-cuisiner'),
-('Adolescent'),
-('Senior'),
-('Jeune actif'),
-('Fête et festivités'),
-('Parent pressé');
+INSERT INTO appartenir (idCategorie, idProduit) VALUES
+(1, 1), (1, 2), (2, 7), (2, 8), (3, 5), (3, 6),
+(4, 13), (4, 14), (5, 21), (5, 22), (6, 33), (6, 34),
+(7, 27), (7, 28), (8, 29), (8, 30), (9, 17), (9, 18),
+(10, 19), (10, 20), (11, 25), (11, 26), (12, 11), (12, 12),
+(13, 3), (13, 4), (14, 9), (14, 10), (15, 15), (15, 16),
+(16, 23), (16, 24), (17, 31), (17, 32), (18, 35), (18, 36),
+(19, 37), (19, 38), (20, 39), (20, 40), (21, 41), (21, 42),
+(22, 43), (22, 44), (23, 45), (23, 46), (24, 47), (24, 48),
+(25, 49), (25, 50),
+(1, 51),  -- Pois chiches bio -> Produits frais
+(2, 52),  -- Chips nature (Lay's) -> Snacks
+(2, 53),  -- Chips nature (Bret's) -> Snacks
+(3, 54),  -- Pizza Margherita (Buitoni) -> Produits surgelés
+(3, 55),  -- Pizza Margherita (Dr. Oetker) -> Produits surgelés
+(4, 56),  -- Céréales complètes (Jordan's) -> Épicerie
+(4, 57),  -- Céréales complètes (Nestlé) -> Épicerie
+(1, 58),  -- Yaourt aux fruits (Danone) -> Produits frais
+(1, 59),  -- Yaourt aux fruits (Yoplait) -> Produits frais
+(4, 60),  -- Pain de mie complet (Harry's) -> Épicerie
+(4, 61),  -- Pain de mie complet (Jacquet) -> Épicerie
+(5, 62),  -- Jus de pomme bio (Innocent) -> Boissons
+(5, 63),  -- Jus de pomme bio (Carrefour Bio) -> Boissons
+(7, 64),  -- Raviolis bolognaise (Zapetti) -> Plats préparés
+(7, 65),  -- Raviolis bolognaise (William Saurin) -> Plats préparés
+(2, 66),  -- Quinoa bio (Markal) -> Produits bio
+(2, 67),  -- Quinoa bio (Carrefour Bio) -> Produits bio
+(8, 68),  -- Compote de pommes (Materne) -> Pâtisseries et confiseries
+(8, 69),  -- Compote de pommes (Andros) -> Pâtisseries et confiseries
+(1, 70),  -- Saucisses de Strasbourg (Herta) -> Produits frais
+(1, 71),  -- Saucisses de Strasbourg (Fleury Michon) -> Produits frais
+(3, 72),  -- Bâtonnets de poisson (Findus) -> Produits surgelés
+(3, 73),  -- Bâtonnets de poisson (Iglo) -> Produits surgelés
+(2, 74),  -- Riz complet bio (Markal) -> Produits bio
+(2, 75),  -- Riz complet bio (Taureau Ailé) -> Produits bio
+(5, 76),  -- Lait d'amande (Alpro) -> Boissons
+(5, 77),  -- Lait d'amande (Bjorg) -> Boissons
+(2, 78),  -- Thé vert bio (Lipton) -> Produits bio
+(2, 79),  -- Thé vert bio (Twinings) -> Produits bio
+(8, 80),  -- Gâteau au chocolat (Bonne Maman) -> Pâtisseries et confiseries
+(8, 81),  -- Gâteau au chocolat (La Mie Câline) -> Pâtisseries et confiseries
+(8, 82),  -- Confiture d'abricot (Bonne Maman) -> Pâtisseries et confiseries
+(8, 83),  -- Confiture d'abricot (Andros) -> Pâtisseries et confiseries
+(2, 84),  -- Farine de blé bio (Markal) -> Produits bio
+(2, 85),  -- Farine de blé bio (Francine) -> Produits bio
+(8, 86),  -- Chocolat noir 85% (Lindt) -> Pâtisseries et confiseries
+(8, 87),  -- Chocolat noir 85% (Nestlé) -> Pâtisseries et confiseries
+(1, 88),  -- Yaourt aux fraises (Danone) -> Produits frais
+(1, 89),  -- Yaourt aux fraises (Yoplait) -> Produits frais
+(2, 90),  -- Filet de cabillaud (Labeyrie) -> Produits bio
+(2, 91),  -- Filet de cabillaud (Marine Harvest) -> Produits bio
+(1, 92),  -- Banane bio (Bio Village) -> Produits frais
+(1, 93),  -- Banane bio (Carrefour Bio) -> Produits frais
+(8, 94),  -- Croissant au beurre (Tradition) -> Pâtisseries et confiseries
+(8, 95),  -- Croissant au beurre (Le Fournil) -> Pâtisseries et confiseries
+(7, 96),  -- Lasagnes bio (Barilla) -> Plats préparés
+(7, 97),  -- Lasagnes bio (Panzani) -> Plats préparés
+(1, 98),  -- Camembert bio (Président) -> Produits frais
+(1, 99),  -- Camembert bio (Soignon) -> Produits frais
+(2, 100), -- Pois cassés bio (Markal) -> Produits bio
+(2, 101), -- Pois cassés bio (Carrefour Bio) -> Produits bio
 
--- Insertion de données dans la table client_profil
-INSERT INTO client_profil (idClient, idProfil) VALUES
-(1, 1),
-(2, 2),
-(3, 3),
-(4, 4),
-(5, 5),
-(6, 6),
-(7, 7),
-(8, 8),
-(9, 9),
-(10, 10),
-(11, 11),
-(12, 12),
-(13, 13),
-(14, 14),
-(15, 15),
-(16, 16),
-(17, 17),
-(18, 18),
-(19, 19),
-(20, 20),
-(21, 1),
-(22, 2),
-(23, 3),
-(24, 4),
-(25, 5),
-(26, 6),
-(27, 7),
-(28, 8),
-(29, 9),
-(30, 10),
-(31, 11),
-(32, 12),
-(33, 13),
-(34, 14),
-(35, 15),
-(36, 16),
-(37, 17),
-(38, 18),
-(39, 19),
-(40, 20),
-(41, 1),
-(42, 2),
-(43, 3),
-(44, 4),
-(45, 5),
-(46, 6),
-(47, 7),
-(48, 8),
-(49, 9),
-(50, 10),
-(51, 11),
-(52, 12),
-(53, 13),
-(54, 14),
-(55, 15),
-(56, 16),
-(57, 17),
-(58, 18),
-(59, 19),
-(60, 20),
-(61, 1),
-(62, 2),
-(63, 3),
-(64, 4),
-(65, 5),
-(66, 6),
-(67, 7),
-(68, 8),
-(69, 9),
-(70, 10),
-(71, 11),
-(72, 12),
-(73, 13),
-(74, 14),
-(75, 15),
-(76, 16),
-(77, 17),
-(78, 18),
-(79, 19),
-(80, 20),
-(81, 1),
-(82, 2),
-(83, 3),
-(84, 4),
-(85, 5),
-(86, 6),
-(87, 7),
-(88, 8),
-(89, 9),
-(90, 10),
-(91, 11),
-(92, 12),
-(93, 13),
-(94, 14),
-(95, 15),
-(96, 16),
-(97, 17),
-(98, 18),
-(99, 19),
-(100, 20),
-(101, 1),
-(102, 2),
-(103, 3),
-(104, 4),
-(105, 5),
-(106, 6),
-(107, 7),
-(108, 8),
-(109, 9),
-(110, 10),
-(111, 11),
-(112, 12),
-(113, 13),
-(114, 14),
-(115, 15),
-(116, 16),
-(117, 17),
-(118, 18),
-(119, 19),
-(120, 20),
-(121, 1),
-(122, 2),
-(123, 3),
-(124, 4),
-(125, 5),
-(126, 6),
-(127, 7),
-(128, 8),
-(129, 9),
-(130, 10),
-(131, 11),
-(132, 12),
-(133, 13),
-(134, 14),
-(135, 15),
-(136, 16),
-(137, 17),
-(138, 18),
-(139, 19),
-(140, 20),
-(141, 1),
-(142, 2),
-(143, 3),
-(144, 4),
-(145, 5),
-(146, 6),
-(147, 7),
-(148, 8),
-(149, 9),
-(150, 10),
-(151, 11),
-(152, 12),
-(153, 13),
-(154, 14),
-(155, 15),
-(156, 16),
-(157, 17),
-(158, 18),
-(159, 19),
-(160, 20),
-(161, 1),
-(162, 2),
-(163, 3),
-(164, 4),
-(165, 5),
-(166, 6),
-(167, 7),
-(168, 8),
-(169, 9),
-(170, 10),
-(171, 11),
-(172, 12);
+-- Carottes râpées bio
+(1, 102), -- Produits frais
+(2, 102), -- Produits bio
 
--- Données générées pour la table commande
-INSERT INTO commande (idPanier, typeCommande, statutCommande, dateReception, datePreparation, dateFinalisation) VALUES
-(1, 'livraison', 'preparation', '2024-01-01 12:30:00', '2024-01-01 14:30:00', NULL),
-(3, 'retrait', 'terminee', '2024-01-03 11:45:00', '2024-01-03 13:00:00', '2024-01-03 14:00:00'),
-(5, 'livraison', 'en attente', '2024-01-05 14:45:00', NULL, NULL),
-(7, 'retrait', 'preparation', '2024-01-07 19:20:00', '2024-01-07 21:00:00', NULL),
-(9, 'livraison', 'terminee', '2024-01-09 16:45:00', '2024-01-09 18:00:00', '2024-01-09 19:00:00'),
-(10, 'retrait', 'en attente', '2024-01-10 13:20:00', NULL, NULL),
-(12, 'livraison', 'preparation', '2024-01-12 18:30:00', '2024-01-12 20:00:00', NULL),
-(13, 'retrait', 'terminee', '2024-01-13 12:50:00', '2024-01-13 14:00:00', '2024-01-13 15:00:00'),
-(15, 'livraison', 'en attente', '2024-01-15 09:40:00', NULL, NULL),
-(17, 'retrait', 'preparation', '2024-01-17 11:30:00', '2024-01-17 13:00:00', NULL),
-(19, 'livraison', 'terminee', '2024-01-19 10:15:00', '2024-01-19 11:30:00', '2024-01-19 12:30:00'),
-(20, 'retrait', 'en attente', '2024-01-20 18:40:00', NULL, NULL),
-(22, 'livraison', 'preparation', '2024-01-22 12:50:00', '2024-01-22 14:00:00', NULL),
-(24, 'retrait', 'terminee', '2024-01-24 09:45:00', '2024-01-24 11:00:00', '2024-01-24 12:00:00'),
-(26, 'livraison', 'en attente', '2024-01-26 12:15:00', NULL, NULL),
-(28, 'retrait', 'preparation', '2024-01-28 10:40:00', '2024-01-28 12:00:00', NULL),
-(29, 'livraison', 'terminee', '2024-01-29 16:45:00', '2024-01-29 18:00:00', '2024-01-29 19:00:00'),
-(31, 'retrait', 'en attente', '2024-01-31 10:20:00', NULL, NULL),
-(33, 'livraison', 'preparation', '2024-02-02 12:40:00', '2024-02-02 14:00:00', NULL),
-(35, 'retrait', 'terminee', '2024-02-04 11:00:00', '2024-02-04 12:00:00', '2024-02-04 13:00:00'),
-(36, 'livraison', 'en attente', '2024-02-05 17:15:00', NULL, NULL),
-(38, 'retrait', 'preparation', '2024-02-07 10:10:00', '2024-02-07 11:30:00', NULL),
-(40, 'livraison', 'terminee', '2024-02-09 12:15:00', '2024-02-09 13:30:00', '2024-02-09 14:30:00'),
-(42, 'retrait', 'en attente', '2024-02-11 10:40:00', NULL, NULL),
-(43, 'livraison', 'preparation', '2024-02-12 16:30:00', '2024-02-12 18:00:00', NULL),
-(45, 'retrait', 'terminee', '2024-02-14 10:20:00', '2024-02-14 11:30:00', '2024-02-14 12:30:00'),
-(47, 'livraison', 'en attente', '2024-02-16 12:45:00', NULL, NULL),
-(49, 'retrait', 'preparation', '2024-02-18 09:40:00', '2024-02-18 11:00:00', NULL),
-(50, 'livraison', 'terminee', '2024-02-19 20:00:00', '2024-02-19 21:30:00', '2024-02-19 22:30:00'),
-(52, 'livraison', 'preparation', '2024-02-21 15:15:00', '2024-02-21 17:15:00', NULL),
-(54, 'retrait', 'terminee', '2024-02-23 18:10:00', '2024-02-23 20:10:00', '2024-02-23 21:10:00'),
-(56, 'livraison', 'en attente', '2024-02-25 10:15:00', NULL, NULL),
-(57, 'retrait', 'preparation', '2024-02-26 16:00:00', '2024-02-26 18:00:00', NULL),
-(59, 'livraison', 'terminee', '2024-02-28 09:30:00', '2024-02-28 11:30:00', '2024-02-28 12:30:00'),
-(61, 'retrait', 'en attente', '2024-03-01 10:00:00', NULL, NULL),
-(63, 'livraison', 'preparation', '2024-03-03 16:00:00', '2024-03-03 18:00:00', NULL),
-(64, 'retrait', 'terminee', '2024-03-04 10:45:00', '2024-03-04 12:45:00', '2024-03-04 13:45:00'),
-(66, 'livraison', 'en attente', '2024-03-06 19:00:00', NULL, NULL),
-(68, 'retrait', 'preparation', '2024-03-08 09:45:00', '2024-03-08 11:45:00', NULL),
-(69, 'livraison', 'terminee', '2024-03-09 17:00:00', '2024-03-09 19:00:00', '2024-03-09 20:00:00'),
-(71, 'retrait', 'en attente', '2024-03-11 10:10:00', NULL, NULL),
-(72, 'livraison', 'preparation', '2024-03-12 15:45:00', '2024-03-12 17:45:00', NULL),
-(74, 'retrait', 'terminee', '2024-03-14 17:45:00', '2024-03-14 19:45:00', '2024-03-14 20:45:00'),
-(75, 'livraison', 'en attente', '2024-03-15 11:30:00', NULL, NULL),
-(77, 'retrait', 'preparation', '2024-03-17 16:30:00', '2024-03-17 18:30:00', NULL),
-(79, 'livraison', 'terminee', '2024-03-19 09:30:00', '2024-03-19 11:30:00', '2024-03-19 12:30:00'),
-(80, 'retrait', 'en attente', '2024-03-20 18:15:00', NULL, NULL),
-(82, 'livraison', 'preparation', '2024-03-22 14:45:00', '2024-03-22 16:45:00', NULL),
-(84, 'retrait', 'terminee', '2024-03-24 17:10:00', '2024-03-24 19:10:00', '2024-03-24 20:10:00'),
-(86, 'livraison', 'en attente', '2024-03-26 12:20:00', NULL, NULL),
-(88, 'retrait', 'preparation', '2024-03-28 11:00:00', '2024-03-28 13:00:00', NULL),
-(90, 'livraison', 'terminee', '2024-03-30 11:30:00', '2024-03-30 13:30:00', '2024-03-30 14:30:00'),
-(91, 'retrait', 'en attente', '2024-03-31 10:15:00', NULL, NULL),
-(93, 'livraison', 'preparation', '2024-04-02 12:50:00', '2024-04-02 14:50:00', NULL),
-(95, 'retrait', 'terminee', '2024-04-04 15:30:00', '2024-04-04 17:30:00', '2024-04-04 18:30:00'),
-(96, 'livraison', 'en attente', '2024-04-05 10:20:00', NULL, NULL),
-(98, 'retrait', 'preparation', '2024-04-07 12:15:00', '2024-04-07 14:15:00', NULL),
-(100, 'livraison', 'terminee', '2024-04-09 15:40:00', '2024-04-09 17:40:00', '2024-04-09 18:40:00'),
-(101, 'livraison', 'preparation', '2024-04-10 10:45:00', '2024-04-10 12:45:00', NULL),
-(103, 'retrait', 'terminee', '2024-04-12 11:30:00', '2024-04-12 13:30:00', '2024-04-12 14:30:00'),
-(105, 'livraison', 'en attente', '2024-04-14 16:45:00', NULL, NULL),
-(106, 'retrait', 'preparation', '2024-04-15 12:20:00', '2024-04-15 14:20:00', NULL),
-(108, 'livraison', 'terminee', '2024-04-17 15:15:00', '2024-04-17 17:15:00', '2024-04-17 18:15:00'),
-(110, 'retrait', 'en attente', '2024-04-19 18:10:00', NULL, NULL),
-(111, 'livraison', 'preparation', '2024-04-20 12:00:00', '2024-04-20 14:00:00', NULL),
-(113, 'retrait', 'terminee', '2024-04-22 16:00:00', '2024-04-22 18:00:00', '2024-04-22 19:00:00'),
-(114, 'livraison', 'en attente', '2024-04-23 10:10:00', NULL, NULL),
-(116, 'retrait', 'preparation', '2024-04-25 13:15:00', '2024-04-25 15:15:00', NULL),
-(118, 'livraison', 'terminee', '2024-04-27 17:00:00', '2024-04-27 19:00:00', '2024-04-27 20:00:00'),
-(120, 'retrait', 'en attente', '2024-04-29 15:40:00', NULL, NULL),
-(121, 'livraison', 'preparation', '2024-04-30 10:45:00', '2024-04-30 12:45:00', NULL),
-(123, 'retrait', 'terminee', '2024-05-02 10:15:00', '2024-05-02 12:15:00', '2024-05-02 13:15:00'),
-(125, 'livraison', 'en attente', '2024-05-04 12:20:00', NULL, NULL),
-(126, 'retrait', 'preparation', '2024-05-05 09:40:00', '2024-05-05 11:40:00', NULL),
-(128, 'livraison', 'terminee', '2024-05-07 10:30:00', '2024-05-07 12:30:00', '2024-05-07 13:30:00'),
-(130, 'retrait', 'en attente', '2024-05-09 12:50:00', NULL, NULL),
-(131, 'livraison', 'preparation', '2024-05-10 11:15:00', '2024-05-10 13:15:00', NULL),
-(133, 'retrait', 'terminee', '2024-05-12 09:30:00', '2024-05-12 11:30:00', '2024-05-12 12:30:00'),
-(134, 'livraison', 'preparation', '2024-05-13 16:30:00', '2024-05-13 18:30:00', NULL),
-(136, 'retrait', 'terminee', '2024-05-15 11:10:00', '2024-05-15 13:10:00', '2024-05-15 14:10:00'),
-(138, 'livraison', 'en attente', '2024-05-17 11:45:00', NULL, NULL),
-(140, 'retrait', 'preparation', '2024-05-19 16:15:00', '2024-05-19 18:15:00', NULL),
-(141, 'livraison', 'terminee', '2024-05-20 11:20:00', '2024-05-20 13:20:00', '2024-05-20 14:20:00'),
-(143, 'retrait', 'en attente', '2024-05-22 15:00:00', NULL, NULL),
-(145, 'livraison', 'preparation', '2024-05-24 17:00:00', '2024-05-24 19:00:00', NULL),
-(146, 'retrait', 'terminee', '2024-05-25 12:15:00', '2024-05-25 14:15:00', '2024-05-25 15:15:00'),
-(148, 'livraison', 'en attente', '2024-05-27 15:45:00', NULL, NULL),
-(150, 'retrait', 'preparation', '2024-05-29 18:45:00', '2024-05-29 20:45:00', NULL),
-(152, 'livraison', 'terminee', '2024-05-31 11:15:00', '2024-05-31 13:15:00', '2024-05-31 14:15:00'),
-(154, 'retrait', 'en attente', '2024-06-02 12:30:00', NULL, NULL),
-(156, 'livraison', 'preparation', '2024-06-04 16:00:00', '2024-06-04 18:00:00', NULL),
-(158, 'retrait', 'terminee', '2024-06-06 10:20:00', '2024-06-06 12:20:00', '2024-06-06 13:20:00'),
-(159, 'livraison', 'en attente', '2024-06-07 17:10:00', NULL, NULL),
-(161, 'retrait', 'preparation', '2024-06-09 15:30:00', '2024-06-09 17:30:00', NULL),
-(163, 'livraison', 'terminee', '2024-06-11 15:10:00', '2024-06-11 17:10:00', '2024-06-11 18:10:00'),
-(165, 'retrait', 'en attente', '2024-06-13 17:45:00', NULL, NULL),
-(166, 'livraison', 'preparation', '2024-06-14 12:30:00', '2024-06-14 14:30:00', NULL),
-(168, 'retrait', 'terminee', '2024-06-16 16:10:00', '2024-06-16 18:10:00', '2024-06-16 19:10:00'),
-(170, 'livraison', 'en attente', '2024-06-18 09:50:00', NULL, NULL),
-(171, 'retrait', 'preparation', '2024-06-19 17:15:00', '2024-06-19 19:15:00', NULL),
-(173, 'livraison', 'terminee', '2024-06-21 10:45:00', '2024-06-21 12:45:00', '2024-06-21 13:45:00'),
-(176, 'retrait', 'en attente', '2024-06-23 10:10:00', NULL, NULL),
-(177, 'livraison', 'preparation', '2024-06-24 16:50:00', '2024-06-24 18:50:00', NULL),
-(179, 'retrait', 'terminee', '2024-06-26 11:20:00', '2024-06-26 13:20:00', '2024-06-26 14:20:00'),
-(181, 'livraison', 'en attente', '2024-06-28 11:40:00', NULL, NULL),
-(183, 'retrait', 'preparation', '2024-06-30 15:50:00', '2024-06-30 17:50:00', NULL);
+-- Riz jasmin bio (Taureau Ailé)
+(4, 103), -- Épicerie
+(2, 103), -- Produits bio
+
+-- Riz jasmin bio (Carrefour Bio)
+(4, 104), -- Épicerie
+(2, 104), -- Produits bio
+
+-- Huile de colza bio (Puget)
+(4, 105), -- Épicerie
+(2, 105), -- Produits bio
+
+-- Huile de colza bio (Terre d’Italie)
+(4, 106), -- Épicerie
+(2, 106), -- Produits bio
+
+-- Chocolat blanc (Lindt)
+(8, 107), -- Pâtisseries et confiseries
+
+-- Chocolat blanc (Milka)
+(8, 108), -- Pâtisseries et confiseries
+
+-- Lait entier bio (Lactel)
+(2, 109), -- Produits bio
+(21, 109), -- Hygiène
+
+-- Lait entier bio (Carrefour Bio)
+(2, 110), -- Produits bio
+(21, 110), -- Hygiène
+
+-- Saucisse fumée (Herta)
+(1, 111), -- Produits frais
+
+-- Saucisse fumée (Fleury Michon)
+(1, 112), -- Produits frais
+
+-- Gâteau au yaourt (Bonne Maman)
+(8, 113), -- Pâtisseries et confiseries
+
+-- Gâteau au yaourt (La Mie Câline)
+(8, 114), -- Pâtisseries et confiseries
+
+-- Thé noir bio (Lipton)
+(2, 115), -- Produits bio
+(4, 115), -- Épicerie
+
+-- Thé noir bio (Twinings)
+(2, 116), -- Produits bio
+(4, 116), -- Épicerie
+
+-- Compote de poire (Materne)
+(4, 117), -- Épicerie
+(8, 117), -- Pâtisseries et confiseries
+
+-- Compote de poire (Andros)
+(4, 118), -- Épicerie
+(8, 118), -- Pâtisseries et confiseries
+
+-- Pâtes tortellini (Barilla)
+(4, 119), -- Épicerie
+
+-- Pâtes tortellini (Panzani)
+(4, 120), -- Épicerie
+
+-- Lentilles corail bio (Markal)
+(4, 121), -- Épicerie
+(2, 121), -- Produits bio
+
+-- Lentilles corail bio (Carrefour Bio)
+(4, 122), -- Épicerie
+(2, 122), -- Produits bio
+
+-- Crème fraîche bio (Président)
+(1, 123), -- Produits frais
+(2, 123), -- Produits bio
+
+-- Crème fraîche bio (Elle & Vire)
+(1, 124), -- Produits frais
+(2, 124), -- Produits bio
+
+-- Farine complète bio (Francine)
+(4, 125), -- Épicerie
+(2, 125), -- Produits bio
+
+-- Farine complète bio (Markal)
+(4, 126), -- Épicerie
+(2, 126), -- Produits bio
+
+-- Jus multifruits (Innocent)
+(5, 127), -- Boissons
+(2, 127), -- Produits bio
+
+-- Jus multifruits (Carrefour Bio)
+(5, 128), -- Boissons
+(2, 128), -- Produits bio
+
+-- Bouillon de légumes (Knorr)
+(4, 129), -- Épicerie
+
+-- Bouillon de légumes (Maggi)
+(4, 130), -- Épicerie
+
+-- Biscuits apéritifs (Belin)
+(6, 131), -- Snacks
+
+-- Biscuits apéritifs (Bret’s)
+(6, 132), -- Snacks
+
+-- Steak haché 5% MG (Charal)
+(1, 133), -- Produits frais
+
+-- Steak haché 15% MG (Bigard)
+(1, 134), -- Produits frais
+
+-- Escalope de dinde (Le Gaulois)
+(1, 135), -- Produits frais
+
+-- Escalope de poulet (Maître Coq)
+(1, 136), -- Produits frais
+
+-- Côte de porc (Bigard)
+(1, 137), -- Produits frais
+
+-- Côte de veau (Charal)
+(1, 138), -- Produits frais
+
+-- Saucisse de Toulouse (Jean Rozé)
+(1, 139), -- Produits frais
+
+-- Saucisse fumée (Herta)
+(1, 140), -- Produits frais
+
+-- Rôti de porc (Fleury Michon)
+(1, 141), -- Produits frais
+
+-- Rôti de veau (Charal)
+(1, 142), -- Produits frais
+
+-- Cuisses de poulet (Le Gaulois)
+(1, 143), -- Produits frais
+
+-- Filet de canard (Fleury Michon)
+(1, 144), -- Produits frais
+
+-- Foie gras (Labeyrie)
+(1, 145), -- Produits frais
+
+-- Magret de canard (Jean Rozé)
+(1, 146), -- Produits frais
+
+-- Cuisse de lapin (Fleury Michon)
+(1, 147), -- Produits frais
+
+-- Filet mignon de porc (Herta)
+(1, 148), -- Produits frais
+
+-- Tournedos de bœuf (Charal)
+(1, 149), -- Produits frais
+
+-- Rosbif (Jean Rozé)
+(1, 150), -- Produits frais
+
+-- Jarret de veau (Bigard)
+(1, 151), -- Produits frais
+
+-- Émincé de bœuf (Charal)
+(1, 152),-- Produits frais
+(1, 153), -- Gigot d’agneau -> Produits frais
+(10, 154), -- Tondeuse à gazon -> Jardin
+(11, 155), -- Robot de cuisine -> Électroménager
+(12, 156), -- Pull en laine -> Mode
+(19, 157), -- Console de jeux vidéo -> High-tech
+(13, 158), -- Livre de cuisine -> Livres
+(15, 159), -- Chaise de bureau -> Mobilier
+(15, 160), -- Table basse -> Mobilier
+(16, 161), -- Perceuse sans fil -> Bricolage
+(17, 162), -- Rameur de fitness -> Sports
+(19, 163), -- Smartphone -> High-tech
+(19, 164), -- Tablette tactile -> High-tech
+(20, 165), -- Shampooing bio -> Beauté et soin
+(20, 166), -- Parfum floral -> Beauté et soin
+(11, 167), -- Grill électrique -> Électroménager
+(10, 168), -- Jardinère extérieure -> Jardin
+(15, 169), -- Lit double -> Mobilier
+(21, 170), -- Sèche-cheveux -> Hygiène
+(19, 171), -- Montre connectée -> High-tech
+(18, 172), -- Guitare acoustique -> Informatique
+(19, 173), -- Caméra de surveillance -> High-tech
+(17, 174), -- Tapis de yoga -> Sports
+(15, 175), -- Bougie parfumée -> Décoration
+(19, 176), -- Enceinte Bluetooth -> High-tech
+(19, 177), -- Casque audio -> High-tech
+(19, 178), -- Liseuse électronique -> High-tech
+(17, 179), -- Vélo électrique -> Sports
+(10, 180), -- Plante verte -> Jardin
+(11, 181), -- Machine à laver -> Électroménager
+(15, 182), -- Lampadaire design -> Décoration
+(15, 183), -- Miroir mural -> Décoration
+(14, 184), -- Couverts inox -> Épicerie
+(14, 185), -- Serviettes de bain -> Épicerie
+(11, 186), -- Presse-agrumes électrique -> Électroménager
+(11, 187), -- Réfrigérateur -> Électroménager
+(11, 188), -- Four à micro-ondes -> Électroménager
+(15, 189), -- Tapis d’entrée -> Décoration
+(24, 190), -- Jeu de société -> Jouets
+(11, 191), -- Aspirateur robot -> Électroménager
+(14, 192), -- Set de casseroles -> Épicerie
+(10, 193), -- Hamac de jardin -> Jardin
+(11, 194), -- Ventilateur colonne -> Électroménager
+(15, 195), -- Armoire de rangement -> Mobilier
+(11, 196), -- Plancha électrique -> Électroménager
+(15, 197), -- Boîte de rangement plastique -> Décoration
+(25, 198), -- Valise cabine -> Bagages et maroquinerie
+(11, 199), -- Mixeur plongeant -> Électroménager
+(15, 200), -- Abat-jour -> Décoration
+(15, 201), -- Horloge murale -> Décoration
+(11, 202), -- Machine à coudre -> Électroménager
+(19, 203), -- Projecteur LED -> High-tech
+(15,204);
 
 -- La table panier
 INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VALUES
@@ -3212,753 +3222,755 @@ INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VAL
 (95, FALSE, '2024-06-29 08:30:00', '2024-06-29 10:15:00'),
 (96, TRUE, '2024-06-30 14:00:00', '2024-06-30 15:50:00');
 
-INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue) VALUES
-(1, 68, 9, 72),
-(1, 39, 4, 1),
-(2, 199, 13, 240),
-(2, 154, 5, 415),
-(3, 7, 13, 187),
-(3, 87, 10, 44),
-(4, 187, 19, 16),
-(4, 198, 14, 39),
-(5, 94, 12, 72),
-(5, 132, 13, 156),
-(6, 58, 9, 104),
-(6, 110, 10, 92),
-(6, 171, 9, 46),
-(6, 24, 18, 40),
-(7, 162, 4, 223),
-(7, 21, 10, 184),
-(7, 161, 19, 94),
-(8, 139, 16, 55),
-(8, 34, 7, 136),
-(8, 109, 19, 231),
-(8, 157, 16, 36),
-(9, 158, 13, 10),
-(9, 4, 1, 1),
-(9, 174, 8, 19),
-(10, 27, 7, 99),
-(10, 158, 16, 232),
-(11, 35, 7, 358),
-(11, 186, 9, 191),
-(11, 1, 18, 127),
-(11, 21, 15, 2),
-(11, 193, 13, 445),
-(12, 98, 14, 422),
-(12, 51, 2, 131),
-(12, 149, 6, 136),
-(13, 156, 9, 168),
-(13, 142, 13, 125),
-(13, 67, 2, 56),
-(14, 9, 8, 1),
-(14, 122, 2, 426),
-(14, 38, 18, 150),
-(15, 36, 17, 136),
-(15, 50, 15, 142),
-(15, 105, 6, 38),
-(15, 11, 20, 92),
-(16, 3, 11, 167),
-(16, 33, 10, 111),
-(16, 21, 10, 118),
-(17, 120, 5, 150),
-(17, 79, 16, 219),
-(17, 43, 14, 215),
-(18, 30, 7, 25),
-(18, 11, 12, 124),
-(18, 106, 9, 13),
-(18, 24, 15, 92),
-(19, 116, 10, 169),
-(19, 73, 19, 221),
-(19, 194, 16, 111),
-(19, 8, 5, 189),
-(19, 190, 12, 284),
-(20, 27, 15, 36),
-(20, 65, 16, 412),
-(20, 44, 17, 36),
-(21, 186, 17, 18),
-(21, 95, 14, 63),
-(21, 136, 16, 26),
-(21, 146, 13, 350),
-(21, 132, 2, 74),
-(22, 1, 9, 69),
-(22, 59, 15, 146),
-(22, 115, 10, 2),
-(22, 100, 12, 143),
-(22, 68, 6, 122),
-(23, 123, 8, 397),
-(23, 68, 6, 192),
-(23, 109, 11, 59),
-(23, 4, 20, 133),
-(24, 44, 12, 12),
-(24, 107, 4, 271),
-(24, 31, 7, 225),
-(24, 109, 4, 274),
-(24, 107, 13, 68),
-(25, 119, 10, 23),
-(25, 85, 10, 185),
-(25, 80, 2, 114),
-(25, 156, 13, 10),
-(25, 184, 11, 294),
-(26, 89, 17, 68),
-(26, 104, 20, 54),
-(26, 158, 5, 198),
-(27, 149, 2, 467),
-(27, 148, 15, 63),
-(28, 105, 9, 426),
-(28, 142, 15, 218),
-(28, 141, 14, 47),
-(29, 153, 13, 264),
-(29, 131, 5, 142),
-(30, 121, 10, 154),
-(30, 183, 17, 3),
-(31, 196, 12, 63),
-(31, 24, 8, 83),
-(31, 85, 14, 103),
-(32, 159, 1, 68),
-(32, 163, 18, 21),
-(32, 199, 14, 51),
-(32, 164, 5, 3),
-(32, 179, 7, 7),
-(33, 114, 19, 57),
-(33, 189, 9, 110),
-(33, 127, 1, 20),
-(33, 39, 11, 86),
-(33, 24, 8, 61),
-(34, 154, 2, 48),
-(34, 29, 8, 53),
-(35, 143, 7, 60),
-(35, 80, 5, 228),
-(35, 154, 18, 376),
-(35, 192, 6, 37),
-(36, 155, 7, 54),
-(36, 71, 11, 24),
-(36, 113, 4, 57),
-(36, 124, 18, 28),
-(36, 97, 12, 286),
-(37, 6, 12, 109),
-(37, 16, 14, 219),
-(38, 78, 13, 19),
-(38, 126, 17, 408),
-(38, 101, 18, 39),
-(38, 192, 17, 168),
-(38, 90, 6, 88),
-(39, 204, 12, 4),
-(39, 177, 19, 74),
-(39, 184, 3, 18),
-(39, 50, 9, 30),
-(39, 47, 9, 65),
-(40, 119, 17, 78),
-(40, 70, 8, 14),
-(40, 166, 2, 90),
-(40, 94, 5, 124),
-(41, 40, 11, 39),
-(41, 137, 11, 139),
-(41, 177, 7, 176),
-(41, 131, 3, 131),
-(41, 62, 6, 8),
-(42, 126, 1, 1),
-(42, 97, 15, 283),
-(42, 52, 8, 25),
-(42, 10, 5, 19),
-(42, 45, 10, 28),
-(43, 38, 2, 234),
-(43, 17, 13, 7),
-(44, 59, 8, 13),
-(44, 125, 11, 88),
-(44, 132, 8, 54),
-(44, 12, 8, 434),
-(45, 24, 4, 253),
-(45, 39, 14, 34),
-(46, 192, 16, 146),
-(46, 46, 9, 232),
-(46, 59, 3, 48),
-(46, 193, 10, 217),
-(46, 44, 19, 73),
-(47, 146, 2, 27),
-(47, 165, 5, 339),
-(48, 185, 12, 256),
-(48, 200, 19, 56),
-(48, 152, 2, 106),
-(49, 33, 3, 28),
-(49, 196, 12, 27),
-(49, 163, 5, 4),
-(50, 120, 5, 280),
-(50, 40, 17, 42),
-(51, 138, 10, 97),
-(51, 55, 20, 112),
-(51, 128, 10, 21),
-(52, 53, 3, 149),
-(52, 181, 11, 62),
-(52, 123, 20, 1),
-(52, 132, 9, 61),
-(52, 103, 1, 52),
-(53, 106, 15, 287),
-(53, 12, 15, 390),
-(53, 127, 7, 24),
-(53, 42, 15, 167),
-(54, 28, 15, 222),
-(54, 188, 10, 193),
-(54, 190, 12, 365),
-(55, 8, 16, 100),
-(55, 190, 3, 135),
-(55, 145, 17, 46),
-(55, 80, 9, 226),
-(56, 85, 20, 12),
-(56, 39, 9, 163),
-(56, 151, 3, 91),
-(57, 6, 12, 296),
-(57, 123, 16, 77),
-(57, 37, 20, 15),
-(57, 105, 13, 25),
-(58, 195, 3, 14),
-(58, 50, 19, 5),
-(58, 115, 9, 22),
-(58, 193, 8, 278),
-(59, 32, 16, 95),
-(59, 88, 1, 7),
-(59, 174, 11, 50),
-(60, 178, 4, 167),
-(60, 200, 19, 52),
-(60, 144, 3, 39),
-(61, 4, 16, 77),
-(61, 68, 20, 50),
-(61, 149, 15, 117),
-(62, 64, 9, 73),
-(62, 121, 14, 67),
-(62, 137, 1, 58),
-(63, 95, 10, 242),
-(63, 54, 11, 70),
-(63, 194, 13, 16),
-(64, 7, 11, 1),
-(64, 48, 9, 4),
-(65, 119, 2, 2),
-(65, 45, 13, 46),
-(66, 146, 3, 204),
-(66, 10, 6, 331),
-(66, 199, 16, 195),
-(66, 29, 1, 48),
-(67, 80, 8, 129),
-(67, 142, 1, 144),
-(67, 147, 9, 9),
-(67, 192, 4, 153),
-(67, 189, 6, 42),
-(68, 110, 8, 3),
-(68, 12, 9, 383),
-(69, 166, 20, 56),
-(69, 122, 20, 65),
-(69, 141, 19, 77),
-(69, 111, 7, 326),
-(70, 172, 10, 406),
-(70, 27, 11, 22),
-(70, 146, 16, 41),
-(71, 60, 20, 415),
-(71, 56, 8, 320),
-(71, 153, 15, 232),
-(71, 2, 18, 14),
-(71, 20, 16, 45),
-(72, 119, 17, 17),
-(72, 60, 16, 105),
-(72, 56, 14, 51),
-(73, 79, 20, 29),
-(73, 69, 1, 14),
-(74, 14, 14, 424),
-(74, 182, 13, 44),
-(74, 40, 5, 107),
-(74, 149, 18, 12),
-(75, 192, 10, 36),
-(75, 128, 17, 99),
-(76, 24, 18, 266),
-(76, 180, 19, 6),
-(76, 4, 15, 207),
-(76, 65, 6, 238),
-(77, 92, 12, 36),
-(77, 57, 12, 209),
-(77, 203, 10, 79),
-(77, 89, 20, 138),
-(77, 34, 6, 136),
-(78, 7, 1, 257),
-(78, 74, 10, 24),
-(78, 90, 9, 103),
-(79, 33, 8, 64),
-(79, 113, 5, 241),
-(79, 87, 11, 273),
-(80, 122, 20, 108),
-(80, 149, 8, 4),
-(81, 69, 5, 64),
-(81, 119, 14, 124),
-(81, 180, 19, 1),
-(81, 49, 3, 2),
-(82, 87, 4, 128),
-(82, 178, 7, 3),
-(83, 147, 18, 302),
-(83, 16, 6, 151),
-(83, 81, 13, 153),
-(84, 174, 16, 189),
-(84, 178, 20, 187),
-(84, 130, 18, 187),
-(84, 145, 7, 250),
-(85, 64, 12, 116),
-(85, 168, 4, 128),
-(85, 68, 12, 61),
-(85, 94, 11, 91),
-(85, 26, 5, 258),
-(86, 42, 5, 151),
-(86, 154, 18, 204),
-(86, 9, 6, 15),
-(86, 24, 17, 96),
-(86, 147, 14, 336),
-(87, 93, 7, 58),
-(87, 160, 17, 155),
-(87, 93, 12, 73),
-(87, 203, 2, 181),
-(87, 80, 15, 163),
-(88, 107, 10, 174),
-(88, 56, 19, 232),
-(88, 199, 3, 302),
-(88, 51, 8, 249),
-(89, 179, 7, 84),
-(89, 71, 18, 10),
-(89, 20, 2, 190),
-(90, 127, 7, 7),
-(90, 188, 9, 9),
-(90, 155, 7, 27),
-(90, 165, 10, 16),
-(90, 107, 1, 274),
-(91, 197, 7, 383),
-(91, 70, 8, 67),
-(91, 8, 8, 70),
-(91, 196, 6, 100),
-(92, 71, 10, 7),
-(92, 190, 12, 193),
-(92, 123, 15, 26),
-(92, 104, 20, 19),
-(92, 121, 14, 85),
-(93, 128, 9, 37),
-(93, 120, 20, 165),
-(93, 88, 10, 101),
-(94, 27, 19, 97),
-(94, 203, 13, 165),
-(95, 148, 13, 33),
-(95, 145, 3, 84),
-(95, 197, 18, 49),
-(95, 158, 5, 298),
-(95, 178, 20, 210),
-(96, 35, 10, 110),
-(96, 199, 13, 12),
-(96, 106, 6, 11),
-(97, 19, 5, 139),
-(97, 49, 1, 38),
-(97, 194, 4, 90),
-(97, 9, 10, 6),
-(98, 186, 9, 240),
-(98, 127, 1, 18),
-(98, 11, 2, 41),
-(98, 50, 5, 70),
-(99, 148, 10, 12),
-(99, 67, 4, 19),
-(99, 42, 6, 49),
-(99, 11, 13, 413),
-(100, 63, 8, 167),
-(100, 121, 14, 47),
-(100, 19, 6, 72),
-(101, 127, 14, 101),
-(101, 40, 17, 104),
-(101, 8, 12, 14),
-(101, 184, 11, 23),
-(101, 15, 1, 181),
-(102, 54, 9, 250),
-(102, 79, 13, 394),
-(103, 15, 4, 23),
-(103, 57, 2, 148),
-(103, 109, 5, 39),
-(103, 114, 4, 216),
-(103, 174, 2, 101),
-(104, 115, 13, 307),
-(104, 14, 1, 58),
-(105, 169, 9, 67),
-(105, 36, 3, 20),
-(106, 19, 18, 25),
-(106, 55, 3, 120),
-(106, 78, 1, 385),
-(106, 33, 3, 9),
-(106, 34, 13, 45),
-(107, 124, 6, 196),
-(107, 144, 18, 80),
-(107, 190, 17, 57),
-(107, 104, 10, 365),
-(108, 140, 9, 257),
-(108, 58, 3, 162),
-(108, 199, 14, 54),
-(108, 97, 12, 150),
-(109, 137, 13, 40),
-(109, 25, 4, 389),
-(109, 13, 5, 162),
-(109, 17, 6, 3),
-(110, 109, 9, 58),
-(110, 52, 13, 187),
-(110, 179, 8, 3),
-(111, 107, 7, 14),
-(111, 78, 3, 64),
-(111, 32, 6, 8),
-(112, 109, 15, 120),
-(112, 193, 20, 33),
-(112, 169, 4, 365),
-(112, 69, 4, 312),
-(113, 182, 10, 261),
-(113, 199, 3, 59),
-(113, 76, 3, 148),
-(113, 101, 14, 14),
-(113, 78, 15, 107),
-(114, 46, 7, 346),
-(114, 187, 12, 263),
-(114, 183, 18, 102),
-(114, 181, 11, 43),
-(115, 49, 15, 67),
-(115, 80, 19, 37),
-(115, 38, 10, 78),
-(115, 30, 7, 41),
-(115, 30, 13, 94),
-(116, 188, 18, 64),
-(116, 42, 14, 1),
-(116, 126, 17, 30),
-(116, 147, 18, 134),
-(116, 23, 2, 132),
-(117, 28, 9, 272),
-(117, 109, 5, 337),
-(117, 104, 3, 186),
-(118, 131, 9, 74),
-(118, 157, 19, 66),
-(118, 18, 11, 165),
-(119, 169, 14, 31),
-(119, 195, 17, 236),
-(119, 196, 12, 128),
-(119, 69, 5, 25),
-(120, 64, 2, 420),
-(120, 84, 2, 38),
-(120, 119, 14, 31),
-(120, 119, 12, 313),
-(121, 83, 12, 27),
-(121, 203, 8, 48),
-(121, 106, 11, 2),
-(122, 17, 1, 127),
-(122, 184, 14, 170),
-(122, 115, 10, 16),
-(123, 11, 14, 153),
-(123, 21, 14, 12),
-(123, 170, 7, 134),
-(124, 57, 12, 158),
-(124, 123, 20, 42),
-(124, 87, 11, 158),
-(124, 149, 15, 103),
-(125, 32, 10, 26),
-(125, 115, 9, 12),
-(126, 199, 16, 304),
-(126, 54, 18, 159),
-(126, 10, 7, 119),
-(126, 58, 9, 12),
-(126, 196, 8, 92),
-(127, 141, 2, 174),
-(127, 100, 2, 11),
-(127, 194, 20, 38),
-(127, 174, 11, 98),
-(127, 153, 10, 132),
-(128, 43, 17, 147),
-(128, 7, 19, 6),
-(128, 56, 2, 253),
-(129, 60, 19, 175),
-(129, 115, 8, 76),
-(129, 43, 16, 61),
-(130, 156, 6, 103),
-(130, 193, 4, 107),
-(130, 66, 5, 50),
-(131, 57, 16, 17),
-(131, 135, 6, 36),
-(132, 5, 13, 401),
-(132, 7, 10, 194),
-(132, 152, 2, 32),
-(132, 63, 3, 11),
-(133, 25, 4, 250),
-(133, 31, 6, 45),
-(133, 128, 8, 165),
-(133, 186, 6, 316),
-(133, 83, 15, 133),
-(134, 161, 4, 75),
-(134, 119, 7, 96),
-(134, 117, 4, 192),
-(135, 33, 9, 204),
-(135, 140, 12, 70),
-(135, 26, 2, 52),
-(135, 60, 16, 249),
-(136, 49, 3, 1),
-(136, 159, 17, 49),
-(136, 141, 2, 123),
-(137, 54, 18, 57),
-(137, 56, 14, 107),
-(138, 162, 4, 245),
-(138, 40, 16, 32),
-(138, 18, 14, 229),
-(138, 137, 14, 6),
-(138, 75, 19, 53),
-(139, 91, 1, 91),
-(139, 194, 16, 5),
-(139, 164, 17, 238),
-(139, 8, 14, 105),
-(139, 79, 9, 157),
-(140, 35, 7, 279),
-(140, 53, 2, 234),
-(140, 82, 16, 107),
-(141, 153, 16, 133),
-(141, 105, 7, 13),
-(141, 94, 10, 68),
-(141, 105, 9, 428),
-(141, 190, 13, 98),
-(142, 112, 15, 73),
-(142, 176, 5, 10),
-(142, 192, 10, 18),
-(143, 134, 20, 37),
-(143, 21, 10, 216),
-(143, 22, 8, 150),
-(144, 87, 19, 55),
-(144, 10, 11, 26),
-(145, 56, 1, 34),
-(145, 120, 11, 12),
-(145, 4, 6, 94),
-(145, 192, 3, 13),
-(145, 19, 5, 78),
-(146, 162, 12, 276),
-(146, 78, 16, 82),
-(147, 30, 18, 156),
-(147, 186, 20, 12),
-(147, 167, 20, 105),
-(147, 9, 12, 129),
-(147, 71, 6, 214),
-(148, 6, 7, 367),
-(148, 70, 11, 155),
-(148, 168, 20, 1),
-(149, 101, 18, 94),
-(149, 56, 15, 38),
-(150, 132, 10, 15),
-(150, 56, 19, 190),
-(150, 78, 8, 3),
-(151, 112, 5, 18),
-(151, 63, 13, 335),
-(151, 76, 11, 101),
-(151, 175, 7, 144),
-(152, 175, 13, 179),
-(152, 193, 4, 59),
-(152, 92, 12, 48),
-(152, 102, 20, 192),
-(152, 145, 1, 39),
-(153, 204, 7, 125),
-(153, 15, 7, 142),
-(154, 194, 20, 42),
-(154, 79, 18, 59),
-(154, 126, 19, 31),
-(155, 10, 6, 267),
-(155, 94, 10, 58),
-(155, 169, 7, 24),
-(155, 43, 13, 4),
-(155, 139, 17, 116),
-(156, 44, 18, 129),
-(156, 53, 3, 169),
-(156, 5, 14, 11),
-(157, 182, 10, 69),
-(157, 53, 13, 237),
-(157, 131, 3, 9),
-(158, 46, 20, 67),
-(158, 192, 4, 361),
-(159, 50, 19, 7),
-(159, 165, 11, 168),
-(159, 6, 12, 342),
-(160, 64, 11, 33),
-(160, 61, 6, 323),
-(160, 103, 1, 282),
-(160, 27, 15, 26),
-(161, 116, 1, 124),
-(161, 173, 20, 1),
-(161, 182, 10, 210),
-(161, 38, 13, 8),
-(161, 13, 5, 346),
-(162, 5, 14, 194),
-(162, 165, 3, 307),
-(162, 144, 1, 63),
-(162, 120, 12, 289),
-(163, 164, 6, 86),
-(163, 155, 8, 83),
-(163, 110, 8, 28),
-(163, 12, 16, 16),
-(163, 21, 18, 21),
-(164, 102, 5, 77),
-(164, 37, 12, 28),
-(164, 83, 17, 218),
-(165, 50, 2, 171),
-(165, 159, 6, 149),
-(166, 155, 18, 129),
-(166, 75, 2, 1),
-(167, 107, 16, 3),
-(167, 63, 6, 5),
-(167, 27, 7, 23),
-(167, 46, 14, 9),
-(168, 144, 2, 171),
-(168, 182, 13, 15),
-(122, 115, 10, 16),
-(123, 11, 14, 153),
-(123, 21, 14, 12),
-(123, 170, 7, 134),
-(124, 57, 12, 158),
-(124, 123, 20, 42),
-(124, 87, 11, 158),
-(124, 149, 15, 103),
-(125, 32, 10, 26),
-(125, 115, 9, 12),
-(126, 199, 16, 304),
-(126, 54, 18, 159),
-(126, 10, 7, 119),
-(126, 58, 9, 12),
-(126, 196, 8, 92),
-(127, 141, 2, 174),
-(127, 100, 2, 11),
-(127, 194, 20, 38),
-(127, 174, 11, 98),
-(127, 153, 10, 132),
-(128, 43, 17, 147),
-(128, 7, 19, 6),
-(128, 56, 2, 253),
-(129, 60, 19, 175),
-(129, 115, 8, 76),
-(129, 43, 16, 61),
-(130, 156, 6, 103),
-(130, 193, 4, 107),
-(130, 66, 5, 50),
-(131, 57, 16, 17),
-(131, 135, 6, 36),
-(132, 5, 13, 401),
-(132, 7, 10, 194),
-(132, 152, 2, 32),
-(132, 63, 3, 11),
-(133, 25, 4, 250),
-(133, 31, 6, 45),
-(133, 128, 8, 165),
-(133, 186, 6, 316),
-(133, 83, 15, 133),
-(134, 161, 4, 75),
-(134, 119, 7, 96),
-(134, 117, 4, 192),
-(135, 33, 9, 204),
-(135, 140, 12, 70),
-(135, 26, 2, 52),
-(135, 60, 16, 249),
-(136, 49, 3, 1),
-(136, 159, 17, 49),
-(136, 141, 2, 123),
-(137, 54, 18, 57),
-(137, 56, 14, 107),
-(138, 162, 4, 245),
-(138, 40, 16, 32),
-(138, 18, 14, 229),
-(138, 137, 14, 6),
-(138, 75, 19, 53),
-(139, 91, 1, 91),
-(139, 194, 16, 5),
-(139, 164, 17, 238),
-(139, 8, 14, 105),
-(139, 79, 9, 157),
-(140, 35, 7, 279),
-(140, 53, 2, 234),
-(140, 82, 16, 107),
-(141, 153, 16, 133),
-(141, 105, 7, 13),
-(141, 94, 10, 68),
-(141, 105, 9, 428),
-(141, 190, 13, 98),
-(142, 112, 15, 73),
-(142, 176, 5, 10),
-(142, 192, 10, 18),
-(143, 134, 20, 37),
-(143, 21, 10, 216),
-(143, 22, 8, 150),
-(144, 87, 19, 55),
-(144, 10, 11, 26),
-(145, 56, 1, 34),
-(145, 120, 11, 12),
-(145, 4, 6, 94),
-(145, 192, 3, 13),
-(145, 19, 5, 78),
-(146, 162, 12, 276),
-(146, 78, 16, 82),
-(147, 30, 18, 156),
-(147, 186, 20, 12),
-(147, 167, 20, 105),
-(147, 9, 12, 129),
-(147, 71, 6, 214),
-(148, 6, 7, 367),
-(148, 70, 11, 155),
-(148, 168, 20, 1),
-(149, 101, 18, 94),
-(149, 56, 15, 38),
-(150, 132, 10, 15),
-(150, 56, 19, 190),
-(150, 78, 8, 3),
-(151, 112, 5, 18),
-(151, 63, 13, 335),
-(151, 76, 11, 101),
-(151, 175, 7, 144),
-(152, 175, 13, 179),
-(152, 193, 4, 59),
-(152, 92, 12, 48),
-(152, 102, 20, 192),
-(152, 145, 1, 39),
-(153, 204, 7, 125),
-(153, 15, 7, 142),
-(154, 194, 20, 42),
-(154, 79, 18, 59),
-(154, 126, 19, 31),
-(155, 10, 6, 267),
-(155, 94, 10, 58),
-(155, 169, 7, 24),
-(155, 43, 13, 4),
-(155, 139, 17, 116),
-(156, 44, 18, 129),
-(156, 53, 3, 169),
-(156, 5, 14, 11),
-(157, 182, 10, 69),
-(157, 53, 13, 237),
-(157, 131, 3, 9),
-(158, 46, 20, 67),
-(158, 192, 4, 361),
-(159, 50, 19, 7),
-(159, 165, 11, 168),
-(159, 6, 12, 342),
-(160, 64, 11, 33),
-(160, 61, 6, 323),
-(160, 103, 1, 282),
-(160, 27, 15, 26),
-(161, 116, 1, 124),
-(161, 173, 20, 1),
-(161, 182, 10, 210),
-(161, 38, 13, 8),
-(161, 13, 5, 346),
-(162, 5, 14, 194),
-(162, 165, 3, 307),
-(162, 144, 1, 63),
-(162, 120, 12, 289),
-(163, 164, 6, 86),
-(163, 155, 8, 83),
-(163, 110, 8, 28),
-(163, 12, 16, 16),
-(163, 21, 18, 21),
-(164, 102, 5, 77),
-(164, 37, 12, 28),
-(164, 83, 17, 218),
-(165, 50, 2, 171),
-(165, 159, 6, 149),
-(166, 155, 18, 129),
-(166, 75, 2, 1),
-(167, 107, 16, 3),
-(167, 63, 6, 5),
-(167, 27, 7, 23),
-(167, 46, 14, 9),
-(168, 144, 2, 171),
-(168, 182, 13, 15);
+-- Données générées pour la table commande
+INSERT INTO commande (idPanier, typeCommande, statutCommande, dateReception, datePreparation, dateFinalisation) VALUES
+(1, 'livraison', 'preparation', '2024-01-01 12:30:00', '2024-01-01 14:30:00', NULL),
+(3, 'retrait', 'terminee', '2024-01-03 11:45:00', '2024-01-03 13:00:00', '2024-01-03 14:00:00'),
+(5, 'livraison', 'en attente', '2024-01-05 14:45:00', NULL, NULL),
+(7, 'retrait', 'preparation', '2024-01-07 19:20:00', '2024-01-07 21:00:00', NULL),
+(9, 'livraison', 'terminee', '2024-01-09 16:45:00', '2024-01-09 18:00:00', '2024-01-09 19:00:00'),
+(10, 'retrait', 'en attente', '2024-01-10 13:20:00', NULL, NULL),
+(12, 'livraison', 'preparation', '2024-01-12 18:30:00', '2024-01-12 20:00:00', NULL),
+(13, 'retrait', 'terminee', '2024-01-13 12:50:00', '2024-01-13 14:00:00', '2024-01-13 15:00:00'),
+(15, 'livraison', 'en attente', '2024-01-15 09:40:00', NULL, NULL),
+(17, 'retrait', 'preparation', '2024-01-17 11:30:00', '2024-01-17 13:00:00', NULL),
+(19, 'livraison', 'terminee', '2024-01-19 10:15:00', '2024-01-19 11:30:00', '2024-01-19 12:30:00'),
+(20, 'retrait', 'en attente', '2024-01-20 18:40:00', NULL, NULL),
+(22, 'livraison', 'preparation', '2024-01-22 12:50:00', '2024-01-22 14:00:00', NULL),
+(24, 'retrait', 'terminee', '2024-01-24 09:45:00', '2024-01-24 11:00:00', '2024-01-24 12:00:00'),
+(26, 'livraison', 'en attente', '2024-01-26 12:15:00', NULL, NULL),
+(28, 'retrait', 'preparation', '2024-01-28 10:40:00', '2024-01-28 12:00:00', NULL),
+(29, 'livraison', 'terminee', '2024-01-29 16:45:00', '2024-01-29 18:00:00', '2024-01-29 19:00:00'),
+(31, 'retrait', 'en attente', '2024-01-31 10:20:00', NULL, NULL),
+(33, 'livraison', 'preparation', '2024-02-02 12:40:00', '2024-02-02 14:00:00', NULL),
+(35, 'retrait', 'terminee', '2024-02-04 11:00:00', '2024-02-04 12:00:00', '2024-02-04 13:00:00'),
+(36, 'livraison', 'en attente', '2024-02-05 17:15:00', NULL, NULL),
+(38, 'retrait', 'preparation', '2024-02-07 10:10:00', '2024-02-07 11:30:00', NULL),
+(40, 'livraison', 'terminee', '2024-02-09 12:15:00', '2024-02-09 13:30:00', '2024-02-09 14:30:00'),
+(42, 'retrait', 'en attente', '2024-02-11 10:40:00', NULL, NULL),
+(43, 'livraison', 'preparation', '2024-02-12 16:30:00', '2024-02-12 18:00:00', NULL),
+(45, 'retrait', 'terminee', '2024-02-14 10:20:00', '2024-02-14 11:30:00', '2024-02-14 12:30:00'),
+(47, 'livraison', 'en attente', '2024-02-16 12:45:00', NULL, NULL),
+(49, 'retrait', 'preparation', '2024-02-18 09:40:00', '2024-02-18 11:00:00', NULL),
+(50, 'livraison', 'terminee', '2024-02-19 20:00:00', '2024-02-19 21:30:00', '2024-02-19 22:30:00'),
+(52, 'livraison', 'preparation', '2024-02-21 15:15:00', '2024-02-21 17:15:00', NULL),
+(54, 'retrait', 'terminee', '2024-02-23 18:10:00', '2024-02-23 20:10:00', '2024-02-23 21:10:00'),
+(56, 'livraison', 'en attente', '2024-02-25 10:15:00', NULL, NULL),
+(57, 'retrait', 'preparation', '2024-02-26 16:00:00', '2024-02-26 18:00:00', NULL),
+(59, 'livraison', 'terminee', '2024-02-28 09:30:00', '2024-02-28 11:30:00', '2024-02-28 12:30:00'),
+(61, 'retrait', 'en attente', '2024-03-01 10:00:00', NULL, NULL),
+(63, 'livraison', 'preparation', '2024-03-03 16:00:00', '2024-03-03 18:00:00', NULL),
+(64, 'retrait', 'terminee', '2024-03-04 10:45:00', '2024-03-04 12:45:00', '2024-03-04 13:45:00'),
+(66, 'livraison', 'en attente', '2024-03-06 19:00:00', NULL, NULL),
+(68, 'retrait', 'preparation', '2024-03-08 09:45:00', '2024-03-08 11:45:00', NULL),
+(69, 'livraison', 'terminee', '2024-03-09 17:00:00', '2024-03-09 19:00:00', '2024-03-09 20:00:00'),
+(71, 'retrait', 'en attente', '2024-03-11 10:10:00', NULL, NULL),
+(72, 'livraison', 'preparation', '2024-03-12 15:45:00', '2024-03-12 17:45:00', NULL),
+(74, 'retrait', 'terminee', '2024-03-14 17:45:00', '2024-03-14 19:45:00', '2024-03-14 20:45:00'),
+(75, 'livraison', 'en attente', '2024-03-15 11:30:00', NULL, NULL),
+(77, 'retrait', 'preparation', '2024-03-17 16:30:00', '2024-03-17 18:30:00', NULL),
+(79, 'livraison', 'terminee', '2024-03-19 09:30:00', '2024-03-19 11:30:00', '2024-03-19 12:30:00'),
+(80, 'retrait', 'en attente', '2024-03-20 18:15:00', NULL, NULL),
+(82, 'livraison', 'preparation', '2024-03-22 14:45:00', '2024-03-22 16:45:00', NULL),
+(84, 'retrait', 'terminee', '2024-03-24 17:10:00', '2024-03-24 19:10:00', '2024-03-24 20:10:00'),
+(86, 'livraison', 'en attente', '2024-03-26 12:20:00', NULL, NULL),
+(88, 'retrait', 'preparation', '2024-03-28 11:00:00', '2024-03-28 13:00:00', NULL),
+(90, 'livraison', 'terminee', '2024-03-30 11:30:00', '2024-03-30 13:30:00', '2024-03-30 14:30:00'),
+(91, 'retrait', 'en attente', '2024-03-31 10:15:00', NULL, NULL),
+(93, 'livraison', 'preparation', '2024-04-02 12:50:00', '2024-04-02 14:50:00', NULL),
+(95, 'retrait', 'terminee', '2024-04-04 15:30:00', '2024-04-04 17:30:00', '2024-04-04 18:30:00'),
+(96, 'livraison', 'en attente', '2024-04-05 10:20:00', NULL, NULL),
+(98, 'retrait', 'preparation', '2024-04-07 12:15:00', '2024-04-07 14:15:00', NULL),
+(100, 'livraison', 'terminee', '2024-04-09 15:40:00', '2024-04-09 17:40:00', '2024-04-09 18:40:00'),
+(101, 'livraison', 'preparation', '2024-04-10 10:45:00', '2024-04-10 12:45:00', NULL),
+(103, 'retrait', 'terminee', '2024-04-12 11:30:00', '2024-04-12 13:30:00', '2024-04-12 14:30:00'),
+(105, 'livraison', 'en attente', '2024-04-14 16:45:00', NULL, NULL),
+(106, 'retrait', 'preparation', '2024-04-15 12:20:00', '2024-04-15 14:20:00', NULL),
+(108, 'livraison', 'terminee', '2024-04-17 15:15:00', '2024-04-17 17:15:00', '2024-04-17 18:15:00'),
+(110, 'retrait', 'en attente', '2024-04-19 18:10:00', NULL, NULL),
+(111, 'livraison', 'preparation', '2024-04-20 12:00:00', '2024-04-20 14:00:00', NULL),
+(113, 'retrait', 'terminee', '2024-04-22 16:00:00', '2024-04-22 18:00:00', '2024-04-22 19:00:00'),
+(114, 'livraison', 'en attente', '2024-04-23 10:10:00', NULL, NULL),
+(116, 'retrait', 'preparation', '2024-04-25 13:15:00', '2024-04-25 15:15:00', NULL),
+(118, 'livraison', 'terminee', '2024-04-27 17:00:00', '2024-04-27 19:00:00', '2024-04-27 20:00:00'),
+(120, 'retrait', 'en attente', '2024-04-29 15:40:00', NULL, NULL),
+(121, 'livraison', 'preparation', '2024-04-30 10:45:00', '2024-04-30 12:45:00', NULL),
+(123, 'retrait', 'terminee', '2024-05-02 10:15:00', '2024-05-02 12:15:00', '2024-05-02 13:15:00'),
+(125, 'livraison', 'en attente', '2024-05-04 12:20:00', NULL, NULL),
+(126, 'retrait', 'preparation', '2024-05-05 09:40:00', '2024-05-05 11:40:00', NULL),
+(128, 'livraison', 'terminee', '2024-05-07 10:30:00', '2024-05-07 12:30:00', '2024-05-07 13:30:00'),
+(130, 'retrait', 'en attente', '2024-05-09 12:50:00', NULL, NULL),
+(131, 'livraison', 'preparation', '2024-05-10 11:15:00', '2024-05-10 13:15:00', NULL),
+(133, 'retrait', 'terminee', '2024-05-12 09:30:00', '2024-05-12 11:30:00', '2024-05-12 12:30:00'),
+(134, 'livraison', 'preparation', '2024-05-13 16:30:00', '2024-05-13 18:30:00', NULL),
+(136, 'retrait', 'terminee', '2024-05-15 11:10:00', '2024-05-15 13:10:00', '2024-05-15 14:10:00'),
+(138, 'livraison', 'en attente', '2024-05-17 11:45:00', NULL, NULL),
+(140, 'retrait', 'preparation', '2024-05-19 16:15:00', '2024-05-19 18:15:00', NULL),
+(141, 'livraison', 'terminee', '2024-05-20 11:20:00', '2024-05-20 13:20:00', '2024-05-20 14:20:00'),
+(143, 'retrait', 'en attente', '2024-05-22 15:00:00', NULL, NULL),
+(145, 'livraison', 'preparation', '2024-05-24 17:00:00', '2024-05-24 19:00:00', NULL),
+(146, 'retrait', 'terminee', '2024-05-25 12:15:00', '2024-05-25 14:15:00', '2024-05-25 15:15:00'),
+(148, 'livraison', 'en attente', '2024-05-27 15:45:00', NULL, NULL),
+(150, 'retrait', 'preparation', '2024-05-29 18:45:00', '2024-05-29 20:45:00', NULL),
+(152, 'livraison', 'terminee', '2024-05-31 11:15:00', '2024-05-31 13:15:00', '2024-05-31 14:15:00'),
+(154, 'retrait', 'en attente', '2024-06-02 12:30:00', NULL, NULL),
+(156, 'livraison', 'preparation', '2024-06-04 16:00:00', '2024-06-04 18:00:00', NULL),
+(158, 'retrait', 'terminee', '2024-06-06 10:20:00', '2024-06-06 12:20:00', '2024-06-06 13:20:00'),
+(159, 'livraison', 'en attente', '2024-06-07 17:10:00', NULL, NULL),
+(161, 'retrait', 'preparation', '2024-06-09 15:30:00', '2024-06-09 17:30:00', NULL),
+(163, 'livraison', 'terminee', '2024-06-11 15:10:00', '2024-06-11 17:10:00', '2024-06-11 18:10:00'),
+(165, 'retrait', 'en attente', '2024-06-13 17:45:00', NULL, NULL),
+(166, 'livraison', 'preparation', '2024-06-14 12:30:00', '2024-06-14 14:30:00', NULL),
+(168, 'retrait', 'terminee', '2024-06-16 16:10:00', '2024-06-16 18:10:00', '2024-06-16 19:10:00'),
+(170, 'livraison', 'en attente', '2024-06-18 09:50:00', NULL, NULL),
+(171, 'retrait', 'preparation', '2024-06-19 17:15:00', '2024-06-19 19:15:00', NULL),
+(173, 'livraison', 'terminee', '2024-06-21 10:45:00', '2024-06-21 12:45:00', '2024-06-21 13:45:00'),
+(175, 'retrait', 'en attente', '2024-06-23 10:10:00', NULL, NULL),
+(176, 'livraison', 'preparation', '2024-06-24 16:50:00', '2024-06-24 18:50:00', NULL),
+(178, 'retrait', 'terminee', '2024-06-26 11:20:00', '2024-06-26 13:20:00', '2024-06-26 14:20:00'),
+(180, 'livraison', 'en attente', '2024-06-28 11:40:00', NULL, NULL),
+(182, 'retrait', 'preparation', '2024-06-30 15:50:00', '2024-06-30 17:50:00', NULL);
 
+INSERT INTO panier_produit_magasin (idPanier, idProduit, idMagasin, quantiteVoulue, modeLivraison) VALUES
+(1, 68, 9, 72, 'livraison'),
+(1, 39, 4, 1, 'livraison'),
+(2, 199, 13, 240, 'retrait'),
+(2, 154, 5, 415, 'livraison'),
+(3, 7, 13, 187, 'retrait'),
+(3, 87, 10, 44, 'livraison'),
+(4, 187, 19, 16, 'retrait'),
+(4, 198, 14, 39, 'retrait'),
+(5, 94, 12, 72, 'retrait'),
+(5, 132, 13, 156, 'retrait'),
+(6, 58, 9, 104, 'livraison'),
+(6, 110, 10, 92, 'livraison'),
+(6, 171, 9, 46, 'retrait'),
+(6, 24, 18, 40, 'livraison'),
+(7, 162, 4, 223, 'retrait'),
+(7, 21, 10, 184, 'retrait'),
+(7, 161, 19, 94, 'livraison'),
+(8, 139, 16, 55, 'livraison'),
+(8, 34, 7, 136, 'retrait'),
+(8, 109, 19, 231, 'retrait'),
+(8, 157, 16, 36, 'livraison'),
+(9, 158, 13, 10, 'livraison'),
+(9, 4, 1, 1, 'livraison'),
+(9, 174, 8, 19, 'retrait'),
+(10, 27, 7, 99, 'retrait'),
+(10, 158, 16, 232, 'retrait'),
+(11, 35, 7, 358, 'retrait'),
+(11, 186, 9, 191, 'livraison'),
+(11, 1, 18, 127, 'livraison'),
+(11, 21, 15, 2, 'livraison'),
+(11, 193, 13, 445, 'retrait'),
+(12, 98, 14, 422, 'livraison'),
+(12, 51, 2, 131, 'retrait'),
+(12, 149, 6, 136, 'retrait'),
+(13, 156, 9, 168, 'livraison'),
+(13, 142, 13, 125, 'retrait'),
+(13, 67, 2, 56, 'retrait'),
+(14, 9, 8, 1, 'retrait'),
+(14, 122, 2, 426, 'livraison'),
+(14, 38, 18, 150, 'retrait'),
+(15, 36, 17, 136, 'retrait'),
+(15, 50, 15, 142, 'retrait'),
+(15, 105, 6, 38, 'retrait'),
+(15, 11, 20, 92, 'livraison'),
+(16, 3, 11, 167, 'retrait'),
+(16, 33, 10, 111, 'livraison'),
+(16, 21, 10, 118, 'livraison'),
+(17, 120, 5, 150, 'retrait'),
+(17, 79, 16, 219, 'retrait'),
+(17, 43, 14, 215, 'livraison'),
+(18, 30, 7, 25, 'livraison'),
+(18, 11, 12, 124, 'retrait'),
+(18, 106, 9, 13, 'retrait'),
+(18, 24, 15, 92, 'retrait'),
+(19, 116, 10, 169, 'retrait'),
+(19, 73, 19, 221, 'livraison'),
+(19, 194, 16, 111, 'livraison'),
+(19, 8, 5, 189, 'livraison'),
+(19, 190, 12, 284, 'retrait'),
+(20, 27, 15, 36, 'livraison'),
+(20, 65, 16, 412, 'livraison'),
+(20, 44, 17, 36, 'livraison'),
+(21, 186, 17, 18, 'retrait'),
+(21, 95, 14, 63, 'retrait'),
+(21, 136, 16, 26, 'livraison'),
+(21, 146, 13, 350, 'retrait'),
+(21, 132, 2, 74, 'livraison'),
+(22, 1, 9, 69, 'livraison'),
+(22, 59, 15, 146, 'livraison'),
+(22, 115, 10, 2, 'retrait'),
+(22, 100, 12, 143, 'livraison'),
+(22, 68, 6, 122, 'retrait'),
+(23, 123, 8, 397, 'retrait'),
+(23, 68, 6, 192, 'livraison'),
+(23, 109, 11, 59, 'livraison'),
+(23, 4, 20, 133, 'retrait'),
+(24, 44, 12, 12, 'retrait'),
+(24, 107, 4, 271, 'retrait'),
+(24, 31, 7, 225, 'livraison'),
+(24, 109, 4, 274, 'livraison'),
+(24, 107, 13, 68, 'livraison'),
+(25, 119, 10, 23, 'livraison'),
+(25, 85, 10, 185, 'retrait'),
+(25, 80, 2, 114, 'livraison'),
+(25, 156, 13, 10, 'livraison'),
+(25, 184, 11, 294, 'livraison'),
+(26, 89, 17, 68, 'livraison'),
+(26, 104, 20, 54, 'livraison'),
+(26, 158, 5, 198, 'livraison'),
+(27, 149, 2, 467, 'retrait'),
+(27, 148, 15, 63, 'livraison'),
+(28, 105, 9, 426, 'livraison'),
+(28, 142, 15, 218, 'retrait'),
+(28, 141, 14, 47, 'retrait'),
+(29, 153, 13, 264, 'livraison'),
+(29, 131, 5, 142, 'retrait'),
+(30, 121, 10, 154, 'retrait'),
+(30, 183, 17, 3, 'retrait'),
+(31, 196, 12, 63, 'livraison'),
+(31, 24, 8, 83, 'retrait'),
+(31, 85, 14, 103, 'livraison'),
+(32, 159, 1, 68, 'retrait'),
+(32, 163, 18, 21, 'livraison'),
+(32, 199, 14, 51, 'livraison'),
+(32, 164, 5, 3, 'livraison'),
+(32, 179, 7, 7, 'retrait'),
+(33, 114, 19, 57, 'livraison'),
+(33, 189, 9, 110, 'livraison'),
+(33, 127, 1, 20, 'retrait'),
+(33, 39, 11, 86, 'livraison'),
+(33, 24, 8, 61, 'retrait'),
+(34, 154, 2, 48, 'retrait'),
+(34, 29, 8, 53, 'retrait'),
+(35, 143, 7, 60, 'livraison'),
+(35, 80, 5, 228, 'retrait'),
+(35, 154, 18, 376, 'retrait'),
+(35, 192, 6, 37, 'retrait'),
+(36, 155, 7, 54, 'retrait'),
+(36, 71, 11, 24, 'retrait'),
+(36, 113, 4, 57, 'livraison'),
+(36, 124, 18, 28, 'livraison'),
+(36, 97, 12, 286, 'retrait'),
+(37, 6, 12, 109, 'livraison'),
+(37, 16, 14, 219, 'retrait'),
+(38, 78, 13, 19, 'retrait'),
+(38, 126, 17, 408, 'retrait'),
+(38, 101, 18, 39, 'retrait'),
+(38, 192, 17, 168, 'livraison'),
+(38, 90, 6, 88, 'livraison'),
+(39, 204, 12, 4, 'livraison'),
+(39, 177, 19, 74, 'livraison'),
+(39, 184, 3, 18, 'retrait'),
+(39, 50, 9, 30, 'retrait'),
+(39, 47, 9, 65, 'livraison'),
+(40, 119, 17, 78, 'livraison'),
+(40, 70, 8, 14, 'retrait'),
+(40, 166, 2, 90, 'livraison'),
+(40, 94, 5, 124, 'retrait'),
+(41, 40, 11, 39, 'retrait'),
+(41, 137, 11, 139, 'retrait'),
+(41, 177, 7, 176, 'livraison'),
+(41, 131, 3, 131, 'livraison'),
+(41, 62, 6, 8, 'livraison'),
+(42, 126, 1, 1, 'livraison'),
+(42, 97, 15, 283, 'livraison'),
+(42, 52, 8, 25, 'retrait'),
+(42, 10, 5, 19, 'retrait'),
+(42, 45, 10, 28, 'retrait'),
+(43, 38, 2, 234, 'livraison'),
+(43, 17, 13, 7, 'retrait'),
+(44, 59, 8, 13, 'livraison'),
+(44, 125, 11, 88, 'retrait'),
+(44, 132, 8, 54, 'livraison'),
+(44, 12, 8, 434, 'livraison'),
+(45, 24, 4, 253, 'livraison'),
+(45, 39, 14, 34, 'retrait'),
+(46, 192, 16, 146, 'livraison'),
+(46, 46, 9, 232, 'retrait'),
+(46, 59, 3, 48, 'livraison'),
+(46, 193, 10, 217, 'livraison'),
+(46, 44, 19, 73, 'livraison'),
+(47, 146, 2, 27, 'livraison'),
+(47, 165, 5, 339, 'livraison'),
+(48, 185, 12, 256, 'livraison'),
+(48, 200, 19, 56, 'livraison'),
+(48, 152, 2, 106, 'livraison'),
+(49, 33, 3, 28, 'livraison'),
+(49, 196, 12, 27, 'livraison'),
+(49, 163, 5, 4, 'livraison'),
+(50, 120, 5, 280, 'livraison'),
+(50, 40, 17, 42, 'livraison'),
+(51, 138, 10, 97, 'livraison'),
+(51, 55, 20, 112, 'retrait'),
+(51, 128, 10, 21, 'livraison'),
+(52, 53, 3, 149, 'livraison'),
+(52, 181, 11, 62, 'livraison'),
+(52, 123, 20, 1, 'livraison'),
+(52, 132, 9, 61, 'retrait'),
+(52, 103, 1, 52, 'livraison'),
+(53, 106, 15, 287, 'retrait'),
+(53, 12, 15, 390, 'livraison'),
+(53, 127, 7, 24, 'retrait'),
+(53, 42, 15, 167, 'livraison'),
+(54, 28, 15, 222, 'retrait'),
+(54, 188, 10, 193, 'livraison'),
+(54, 190, 12, 365, 'livraison'),
+(55, 8, 16, 100, 'retrait'),
+(55, 190, 3, 135, 'livraison'),
+(55, 145, 17, 46, 'retrait'),
+(55, 80, 9, 226, 'livraison'),
+(56, 85, 20, 12, 'livraison'),
+(56, 39, 9, 163, 'livraison'),
+(56, 151, 3, 91, 'retrait'),
+(57, 6, 12, 296, 'livraison'),
+(57, 123, 16, 77, 'livraison'),
+(57, 37, 20, 15, 'retrait'),
+(57, 105, 13, 25, 'livraison'),
+(58, 195, 3, 14, 'livraison'),
+(58, 50, 19, 5, 'retrait'),
+(58, 115, 9, 22, 'retrait'),
+(58, 193, 8, 278, 'retrait'),
+(59, 32, 16, 95, 'livraison'),
+(59, 88, 1, 7, 'livraison'),
+(59, 174, 11, 50, 'retrait'),
+(60, 178, 4, 167, 'retrait'),
+(60, 200, 19, 52, 'retrait'),
+(60, 144, 3, 39, 'livraison'),
+(61, 4, 16, 77, 'livraison'),
+(61, 68, 20, 50, 'livraison'),
+(61, 149, 15, 117, 'retrait'),
+(62, 64, 9, 73, 'retrait'),
+(62, 121, 14, 67, 'livraison'),
+(62, 137, 1, 58, 'livraison'),
+(63, 95, 10, 242, 'retrait'),
+(63, 54, 11, 70, 'retrait'),
+(63, 194, 13, 16, 'retrait'),
+(64, 7, 11, 1, 'livraison'),
+(64, 48, 9, 4, 'livraison'),
+(65, 119, 2, 2, 'retrait'),
+(65, 45, 13, 46, 'retrait'),
+(66, 146, 3, 204, 'retrait'),
+(66, 10, 6, 331, 'retrait'),
+(66, 199, 16, 195, 'retrait'),
+(66, 29, 1, 48, 'retrait'),
+(67, 80, 8, 129, 'livraison'),
+(67, 142, 1, 144, 'retrait'),
+(67, 147, 9, 9, 'retrait'),
+(67, 192, 4, 153, 'retrait'),
+(67, 189, 6, 42, 'retrait'),
+(68, 110, 8, 3, 'retrait'),
+(68, 12, 9, 383, 'livraison'),
+(69, 166, 20, 56, 'retrait'),
+(69, 122, 20, 65, 'livraison'),
+(69, 141, 19, 77, 'retrait'),
+(69, 111, 7, 326, 'retrait'),
+(70, 172, 10, 406, 'retrait'),
+(70, 27, 11, 22, 'retrait'),
+(70, 146, 16, 41, 'livraison'),
+(71, 60, 20, 415, 'retrait'),
+(71, 56, 8, 320, 'retrait'),
+(71, 153, 15, 232, 'livraison'),
+(71, 2, 18, 14, 'retrait'),
+(71, 20, 16, 45, 'livraison'),
+(72, 119, 17, 17, 'livraison'),
+(72, 60, 16, 105, 'retrait'),
+(72, 56, 14, 51, 'livraison'),
+(73, 79, 20, 29, 'livraison'),
+(73, 69, 1, 14, 'livraison'),
+(74, 14, 14, 424, 'livraison'),
+(74, 182, 13, 44, 'retrait'),
+(74, 40, 5, 107, 'livraison'),
+(74, 149, 18, 12, 'retrait'),
+(75, 192, 10, 36, 'livraison'),
+(75, 128, 17, 99, 'retrait'),
+(76, 24, 18, 266, 'livraison'),
+(76, 180, 19, 6, 'retrait'),
+(76, 4, 15, 207, 'retrait'),
+(76, 65, 6, 238, 'retrait'),
+(77, 92, 12, 36, 'livraison'),
+(77, 57, 12, 209, 'retrait'),
+(77, 203, 10, 79, 'livraison'),
+(77, 89, 20, 138, 'livraison'),
+(77, 34, 6, 136, 'livraison'),
+(78, 7, 1, 257, 'retrait'),
+(78, 74, 10, 24, 'livraison'),
+(78, 90, 9, 103, 'livraison'),
+(79, 33, 8, 64, 'livraison'),
+(79, 113, 5, 241, 'livraison'),
+(79, 87, 11, 273, 'retrait'),
+(80, 122, 20, 108, 'livraison'),
+(80, 149, 8, 4, 'retrait'),
+(81, 69, 5, 64, 'retrait'),
+(81, 119, 14, 124, 'retrait'),
+(81, 180, 19, 1, 'livraison'),
+(81, 49, 3, 2, 'retrait'),
+(82, 87, 4, 128, 'livraison'),
+(82, 178, 7, 3, 'retrait'),
+(83, 147, 18, 302, 'retrait'),
+(83, 16, 6, 151, 'retrait'),
+(83, 81, 13, 153, 'retrait'),
+(84, 174, 16, 189, 'livraison'),
+(84, 178, 20, 187, 'livraison'),
+(84, 130, 18, 187, 'retrait'),
+(84, 145, 7, 250, 'retrait'),
+(85, 64, 12, 116, 'retrait'),
+(85, 168, 4, 128, 'livraison'),
+(85, 68, 12, 61, 'livraison'),
+(85, 94, 11, 91, 'livraison'),
+(85, 26, 5, 258, 'livraison'),
+(86, 42, 5, 151, 'retrait'),
+(86, 154, 18, 204, 'livraison'),
+(86, 9, 6, 15, 'livraison'),
+(86, 24, 17, 96, 'livraison'),
+(86, 147, 14, 336, 'retrait'),
+(87, 93, 7, 58, 'retrait'),
+(87, 160, 17, 155, 'retrait'),
+(87, 93, 12, 73, 'livraison'),
+(87, 203, 2, 181, 'retrait'),
+(87, 80, 15, 163, 'retrait'),
+(88, 107, 10, 174, 'livraison'),
+(88, 56, 19, 232, 'livraison'),
+(88, 199, 3, 302, 'livraison'),
+(88, 51, 8, 249, 'livraison'),
+(89, 179, 7, 84, 'retrait'),
+(89, 71, 18, 10, 'livraison'),
+(89, 20, 2, 190, 'livraison'),
+(90, 127, 7, 7, 'livraison'),
+(90, 188, 9, 9, 'livraison'),
+(90, 155, 7, 27, 'livraison'),
+(90, 165, 10, 16, 'livraison'),
+(90, 107, 1, 274, 'livraison'),
+(91, 197, 7, 383, 'retrait'),
+(91, 70, 8, 67, 'retrait'),
+(91, 8, 8, 70, 'retrait'),
+(91, 196, 6, 100, 'retrait'),
+(92, 71, 10, 7, 'retrait'),
+(92, 190, 12, 193, 'livraison'),
+(92, 123, 15, 26, 'livraison'),
+(92, 104, 20, 19, 'livraison'),
+(92, 121, 14, 85, 'retrait'),
+(93, 128, 9, 37, 'retrait'),
+(93, 120, 20, 165, 'livraison'),
+(93, 88, 10, 101, 'retrait'),
+(94, 27, 19, 97, 'livraison'),
+(94, 203, 13, 165, 'retrait'),
+(95, 148, 13, 33, 'livraison'),
+(95, 145, 3, 84, 'livraison'),
+(95, 197, 18, 49, 'retrait'),
+(95, 158, 5, 298, 'livraison'),
+(95, 178, 20, 210, 'retrait'),
+(96, 35, 10, 110, 'retrait'),
+(96, 199, 13, 12, 'retrait'),
+(96, 106, 6, 11, 'retrait'),
+(97, 19, 5, 139, 'livraison'),
+(97, 49, 1, 38, 'retrait'),
+(97, 194, 4, 90, 'retrait'),
+(97, 9, 10, 6, 'retrait'),
+(98, 186, 9, 240, 'livraison'),
+(98, 127, 1, 18, 'livraison'),
+(98, 11, 2, 41, 'livraison'),
+(98, 50, 5, 70, 'livraison'),
+(99, 148, 10, 12, 'livraison'),
+(99, 67, 4, 19, 'livraison'),
+(99, 42, 6, 49, 'retrait'),
+(99, 11, 13, 413, 'retrait'),
+(100, 63, 8, 167, 'livraison'),
+(100, 121, 14, 47, 'livraison'),
+(100, 19, 6, 72, 'retrait'),
+(101, 127, 14, 101, 'livraison'),
+(101, 40, 17, 104, 'retrait'),
+(101, 8, 12, 14, 'retrait'),
+(101, 184, 11, 23, 'retrait'),
+(101, 15, 1, 181, 'retrait'),
+(102, 54, 9, 250, 'livraison'),
+(102, 79, 13, 394, 'retrait'),
+(103, 15, 4, 23, 'retrait'),
+(103, 57, 2, 148, 'livraison'),
+(103, 109, 5, 39, 'retrait'),
+(103, 114, 4, 216, 'retrait'),
+(103, 174, 2, 101, 'retrait'),
+(104, 115, 13, 307, 'livraison'),
+(104, 14, 1, 58, 'retrait'),
+(105, 169, 9, 67, 'retrait'),
+(105, 36, 3, 20, 'retrait'),
+(106, 19, 18, 25, 'livraison'),
+(106, 55, 3, 120, 'retrait'),
+(106, 78, 1, 385, 'livraison'),
+(106, 33, 3, 9, 'retrait'),
+(106, 34, 13, 45, 'livraison'),
+(107, 124, 6, 196, 'livraison'),
+(107, 144, 18, 80, 'retrait'),
+(107, 190, 17, 57, 'livraison'),
+(107, 104, 10, 365, 'livraison'),
+(108, 140, 9, 257, 'livraison'),
+(108, 58, 3, 162, 'livraison'),
+(108, 199, 14, 54, 'livraison'),
+(108, 97, 12, 150, 'retrait'),
+(109, 137, 13, 40, 'livraison'),
+(109, 25, 4, 389, 'livraison'),
+(109, 13, 5, 162, 'livraison'),
+(109, 17, 6, 3, 'retrait'),
+(110, 109, 9, 58, 'retrait'),
+(110, 52, 13, 187, 'retrait'),
+(110, 179, 8, 3, 'livraison'),
+(111, 107, 7, 14, 'livraison'),
+(111, 78, 3, 64, 'retrait'),
+(111, 32, 6, 8, 'livraison'),
+(112, 109, 15, 120, 'retrait'),
+(112, 193, 20, 33, 'retrait'),
+(112, 169, 4, 365, 'retrait'),
+(112, 69, 4, 312, 'retrait'),
+(113, 182, 10, 261, 'retrait'),
+(113, 199, 3, 59, 'livraison'),
+(113, 76, 3, 148, 'livraison'),
+(113, 101, 14, 14, 'livraison'),
+(113, 78, 15, 107, 'retrait'),
+(114, 46, 7, 346, 'retrait'),
+(114, 187, 12, 263, 'retrait'),
+(114, 183, 18, 102, 'retrait'),
+(114, 181, 11, 43, 'retrait'),
+(115, 49, 15, 67, 'retrait'),
+(115, 80, 19, 37, 'livraison'),
+(115, 38, 10, 78, 'livraison'),
+(115, 30, 7, 41, 'livraison'),
+(115, 30, 13, 94, 'livraison'),
+(116, 188, 18, 64, 'livraison'),
+(116, 42, 14, 1, 'retrait'),
+(116, 126, 17, 30, 'livraison'),
+(116, 147, 18, 134, 'livraison'),
+(116, 23, 2, 132, 'retrait'),
+(117, 28, 9, 272, 'livraison'),
+(117, 109, 5, 337, 'livraison'),
+(117, 104, 3, 186, 'retrait'),
+(118, 131, 9, 74, 'retrait'),
+(118, 157, 19, 66, 'livraison'),
+(118, 18, 11, 165, 'retrait'),
+(119, 169, 14, 31, 'livraison'),
+(119, 195, 17, 236, 'retrait'),
+(119, 196, 12, 128, 'livraison'),
+(119, 69, 5, 25, 'livraison'),
+(120, 64, 2, 420, 'retrait'),
+(120, 84, 2, 38, 'retrait'),
+(120, 119, 14, 31, 'livraison'),
+(120, 119, 12, 313, 'retrait'),
+(121, 83, 12, 27, 'retrait'),
+(121, 203, 8, 48, 'livraison'),
+(121, 106, 11, 2, 'retrait'),
+(122, 17, 1, 127, 'livraison'),
+(122, 184, 14, 170, 'livraison'),
+(122, 115, 10, 16, 'livraison'),
+(123, 11, 14, 153, 'retrait'),
+(123, 21, 14, 12, 'retrait'),
+(123, 170, 7, 134, 'retrait'),
+(124, 57, 12, 158, 'livraison'),
+(124, 123, 20, 42, 'livraison'),
+(124, 87, 11, 158, 'retrait'),
+(124, 149, 15, 103, 'retrait'),
+(125, 32, 10, 26, 'retrait'),
+(125, 115, 9, 12, 'retrait'),
+(126, 199, 16, 304, 'livraison'),
+(126, 54, 18, 159, 'livraison'),
+(126, 10, 7, 119, 'retrait'),
+(126, 58, 9, 12, 'livraison'),
+(126, 196, 8, 92, 'retrait'),
+(127, 141, 2, 174, 'retrait'),
+(127, 100, 2, 11, 'retrait'),
+(127, 194, 20, 38, 'livraison'),
+(127, 174, 11, 98, 'retrait'),
+(127, 153, 10, 132, 'livraison'),
+(128, 43, 17, 147, 'livraison'),
+(128, 7, 19, 6, 'livraison'),
+(128, 56, 2, 253, 'livraison'),
+(129, 60, 19, 175, 'livraison'),
+(129, 115, 8, 76, 'retrait'),
+(129, 43, 16, 61, 'retrait'),
+(130, 156, 6, 103, 'livraison'),
+(130, 193, 4, 107, 'retrait'),
+(130, 66, 5, 50, 'livraison'),
+(131, 57, 16, 17, 'retrait'),
+(131, 135, 6, 36, 'livraison'),
+(132, 5, 13, 401, 'retrait'),
+(132, 7, 10, 194, 'retrait'),
+(132, 152, 2, 32, 'livraison'),
+(132, 63, 3, 11, 'livraison'),
+(133, 25, 4, 250, 'livraison'),
+(133, 31, 6, 45, 'retrait'),
+(133, 128, 8, 165, 'livraison'),
+(133, 186, 6, 316, 'retrait'),
+(133, 83, 15, 133, 'retrait'),
+(134, 161, 4, 75, 'retrait'),
+(134, 119, 7, 96, 'livraison'),
+(134, 117, 4, 192, 'retrait'),
+(135, 33, 9, 204, 'retrait'),
+(135, 140, 12, 70, 'retrait'),
+(135, 26, 2, 52, 'livraison'),
+(135, 60, 16, 249, 'retrait'),
+(136, 49, 3, 1, 'retrait'),
+(136, 159, 17, 49, 'livraison'),
+(136, 141, 2, 123, 'livraison'),
+(137, 54, 18, 57, 'retrait'),
+(137, 56, 14, 107, 'retrait'),
+(138, 162, 4, 245, 'livraison'),
+(138, 40, 16, 32, 'retrait'),
+(138, 18, 14, 229, 'retrait'),
+(138, 137, 14, 6, 'livraison'),
+(138, 75, 19, 53, 'retrait'),
+(139, 91, 1, 91, 'livraison'),
+(139, 194, 16, 5, 'livraison'),
+(139, 164, 17, 238, 'livraison'),
+(139, 8, 14, 105, 'retrait'),
+(139, 79, 9, 157, 'livraison'),
+(140, 35, 7, 279, 'retrait'),
+(140, 53, 2, 234, 'livraison'),
+(140, 82, 16, 107, 'retrait'),
+(141, 153, 16, 133, 'retrait'),
+(141, 105, 7, 13, 'retrait'),
+(141, 94, 10, 68, 'livraison'),
+(141, 105, 9, 428, 'retrait'),
+(141, 190, 13, 98, 'livraison'),
+(142, 112, 15, 73, 'livraison'),
+(142, 176, 5, 10, 'livraison'),
+(142, 192, 10, 18, 'livraison'),
+(143, 134, 20, 37, 'livraison'),
+(143, 21, 10, 216, 'livraison'),
+(143, 22, 8, 150, 'retrait'),
+(144, 87, 19, 55, 'retrait'),
+(144, 10, 11, 26, 'retrait'),
+(145, 56, 1, 34, 'retrait'),
+(145, 120, 11, 12, 'livraison'),
+(145, 4, 6, 94, 'retrait'),
+(145, 192, 3, 13, 'retrait'),
+(145, 19, 5, 78, 'livraison'),
+(146, 162, 12, 276, 'retrait'),
+(146, 78, 16, 82, 'retrait'),
+(147, 30, 18, 156, 'retrait'),
+(147, 186, 20, 12, 'livraison'),
+(147, 167, 20, 105, 'retrait'),
+(147, 9, 12, 129, 'retrait'),
+(147, 71, 6, 214, 'retrait'),
+(148, 6, 7, 367, 'retrait'),
+(148, 70, 11, 155, 'retrait'),
+(148, 168, 20, 1, 'livraison'),
+(149, 101, 18, 94, 'retrait'),
+(149, 56, 15, 38, 'livraison'),
+(150, 132, 10, 15, 'livraison'),
+(150, 56, 19, 190, 'livraison'),
+(150, 78, 8, 3, 'livraison'),
+(151, 112, 5, 18, 'retrait'),
+(151, 63, 13, 335, 'livraison'),
+(151, 76, 11, 101, 'livraison'),
+(151, 175, 7, 144, 'livraison'),
+(152, 175, 13, 179, 'livraison'),
+(152, 193, 4, 59, 'retrait'),
+(152, 92, 12, 48, 'livraison'),
+(152, 102, 20, 192, 'retrait'),
+(152, 145, 1, 39, 'livraison'),
+(153, 204, 7, 125, 'retrait'),
+(153, 15, 7, 142, 'retrait'),
+(154, 194, 20, 42, 'retrait'),
+(154, 79, 18, 59, 'retrait'),
+(154, 126, 19, 31, 'livraison'),
+(155, 10, 6, 267, 'retrait'),
+(155, 94, 10, 58, 'livraison'),
+(155, 169, 7, 24, 'retrait'),
+(155, 43, 13, 4, 'retrait'),
+(155, 139, 17, 116, 'retrait'),
+(156, 44, 18, 129, 'livraison'),
+(156, 53, 3, 169, 'retrait'),
+(156, 5, 14, 11, 'livraison'),
+(157, 182, 10, 69, 'livraison'),
+(157, 53, 13, 237, 'livraison'),
+(157, 131, 3, 9, 'retrait'),
+(158, 46, 20, 67, 'livraison'),
+(158, 192, 4, 361, 'livraison'),
+(159, 50, 19, 7, 'livraison'),
+(159, 165, 11, 168, 'retrait'),
+(159, 6, 12, 342, 'livraison'),
+(160, 64, 11, 33, 'retrait'),
+(160, 61, 6, 323, 'retrait'),
+(160, 103, 1, 282, 'retrait'),
+(160, 27, 15, 26, 'livraison'),
+(161, 116, 1, 124, 'retrait'),
+(161, 173, 20, 1, 'retrait'),
+(161, 182, 10, 210, 'retrait'),
+(161, 38, 13, 8, 'livraison'),
+(161, 13, 5, 346, 'livraison'),
+(162, 5, 14, 194, 'livraison'),
+(162, 165, 3, 307, 'retrait'),
+(162, 144, 1, 63, 'retrait'),
+(162, 120, 12, 289, 'retrait'),
+(163, 164, 6, 86, 'retrait'),
+(163, 155, 8, 83, 'livraison'),
+(163, 110, 8, 28, 'retrait'),
+(163, 12, 16, 16, 'retrait'),
+(163, 21, 18, 21, 'retrait'),
+(164, 102, 5, 77, 'livraison'),
+(164, 37, 12, 28, 'retrait'),
+(164, 83, 17, 218, 'retrait'),
+(165, 50, 2, 171, 'livraison'),
+(165, 159, 6, 149, 'livraison'),
+(166, 155, 18, 129, 'livraison'),
+(166, 75, 2, 1, 'retrait'),
+(167, 107, 16, 3, 'livraison'),
+(167, 63, 6, 5, 'livraison'),
+(167, 27, 7, 23, 'retrait'),
+(167, 46, 14, 9, 'livraison'),
+(168, 144, 2, 171, 'retrait'),
+(168, 182, 13, 15, 'livraison'),
+(168, 161, 18, 226, 'livraison'),
+(169, 142, 6, 107, 'livraison'),
+(169, 46, 20, 61, 'livraison'),
+(169, 166, 2, 40, 'livraison'),
+(169, 178, 1, 433, 'livraison'),
+(169, 25, 19, 379, 'retrait'),
+(170, 13, 4, 401, 'livraison'),
+(170, 14, 9, 7, 'livraison'),
+(171, 36, 7, 119, 'retrait'),
+(171, 174, 4, 10, 'livraison'),
+(171, 8, 18, 342, 'retrait'),
+(171, 119, 11, 348, 'retrait'),
+(172, 105, 7, 9, 'livraison'),
+(172, 173, 8, 10, 'livraison'),
+(172, 176, 13, 318, 'livraison'),
+(173, 93, 19, 61, 'livraison'),
+(173, 59, 1, 111, 'livraison'),
+(173, 33, 8, 118, 'retrait'),
+(174, 195, 10, 331, 'livraison'),
+(174, 148, 12, 47, 'livraison'),
+(174, 100, 11, 53, 'livraison'),
+(175, 4, 13, 21, 'livraison'),
+(175, 67, 4, 302, 'livraison'),
+(175, 173, 4, 247, 'retrait'),
+(175, 80, 7, 49, 'retrait'),
+(176, 107, 20, 54, 'livraison'),
+(176, 164, 1, 455, 'livraison'),
+(176, 160, 12, 309, 'retrait'),
+(177, 45, 5, 108, 'retrait'),
+(177, 128, 9, 58, 'livraison'),
+(177, 33, 10, 27, 'livraison'),
+(178, 3, 10, 90, 'livraison'),
+(178, 88, 4, 156, 'retrait'),
+(179, 103, 17, 364, 'retrait'),
+(179, 161, 6, 17, 'livraison'),
+(180, 164, 5, 6, 'livraison'),
+(180, 55, 12, 94, 'retrait'),
+(180, 182, 13, 17, 'livraison'),
+(180, 144, 18, 172, 'livraison'),
+(181, 18, 10, 79, 'livraison'),
+(181, 90, 9, 72, 'retrait'),
+(181, 131, 20, 107, 'livraison'),
+(181, 108, 13, 189, 'livraison'),
+(181, 68, 9, 170, 'livraison'),
+(182, 156, 19, 263, 'livraison'),
+(182, 185, 17, 44, 'retrait'),
+(182, 148, 15, 15, 'livraison'),
+(182, 45, 4, 187, 'livraison'),
+(182, 190, 13, 195, 'retrait');
 
+Alter Table panier_produit_magasin
+Drop Column modeLivraison;
+
+COMMIT;
