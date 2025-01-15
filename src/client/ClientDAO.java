@@ -227,6 +227,7 @@ public class ClientDAO {
             AND p.idClient = ?
             AND p.idPanier = ppm.idPanier
             GROUP BY c.idCommande, c.typeCommande, c.statutCommande, c.dateReception, c.datePreparation, c.dateFinalisation
+            ORDER BY c.dateReception DESC
         """;
 
     

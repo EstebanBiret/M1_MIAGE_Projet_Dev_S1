@@ -251,10 +251,8 @@ public class AppGestion {
                 default:
                     System.out.println("Option invalide. Veuillez réessayer.");
             }
-
             System.out.println("\n");
         }
-
         scanner.close();
     }
 }

@@ -5,49 +5,114 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import src.commande.Commande;
 
 public class PreparateurDAO {
- //classe pour les US 4, Adam - préparer
- //US 4.1 Consulter la liste des commandes à preparer par ordre de priorité
- public void afficherCommandesEnAttente() {
- // Requête SQL pour récupérer les commandes avec statut "en attente" triées par dateReception (la plus ancienne en premier)
-            
-            String query = """
-                SELECT idCommande, statutCommande, dateReception
-                FROM commande
-                WHERE statutCommande = 'en attente'
-                ORDER BY dateReception ASC;
-            """;
-            try (Connection connection = DBConnection.getConnection();
-                 PreparedStatement pstmt = connection.prepareStatement(query);
-                 ResultSet rs = pstmt.executeQuery()) {
-        
-                System.out.println("Liste des commandes en attente (par date de réception la plus ancienne) :");
-                boolean hasResults = false; // Pour vérifier si des résultats existent
-                while (rs.next()) {
-                    hasResults = true;
-                    int idCommande = rs.getInt("idCommande");
-                    String statutCommande = rs.getString("statutCommande");
-                    Timestamp dateReception = rs.getTimestamp("dateReception");
-        
-                    // Affichage des propriétés demandées
-                    System.out.printf(
-                        "ID Commande: %d | Statut: %s | Date Réception: %s%n",
-                        idCommande,
-                        statutCommande,
-                        dateReception != null ? dateReception.toString() : "N/A"
-                    );
-                }
-        
-                if (!hasResults) {
-                    System.out.println("Aucune commande en attente trouvée.");
-                }
-        
-            } catch (SQLException e) {
-                System.out.println("Erreur lors de la récupération des commandes : " + e.getMessage());
+
+    public List<Commande> getCommandesEnAttente() {
+        List<Commande> commandesEnAttente = new ArrayList<>();
+
+        //requête SQL pour récupérer les commandes avec statut "en attente" triées par dateReception (la plus ancienne en premier)
+        String query = """
+            SELECT *
+            FROM commande
+            WHERE statutCommande = 'en attente'
+            ORDER BY dateReception ASC;
+        """;
+
+        try (Connection connection = DBConnection.getConnection();
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery()) {
+    
+            //System.out.println("Liste des commandes en attente (par date de réception la plus ancienne) :");
+            while (rs.next()) {
+                int idCommande = rs.getInt("idCommande");
+                int idPanier = rs.getInt("idPanier");
+                String typeCommande = rs.getString("typeCommande");
+                String statutCommande = rs.getString("statutCommande");
+                Timestamp dateReception = rs.getTimestamp("dateReception");
+    
+                Commande commande = new Commande(idCommande, idPanier, typeCommande, statutCommande, dateReception, null, null);
+                commandesEnAttente.add(commande);
             }
+    
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la récupération des commandes : " + e.getMessage());
         }
-        
+        return commandesEnAttente;
+    }
+
+    public List<Commande> getCommandesPreparees() {
+        //requête SQL pour récupérer les commandes avec statut "préparée" triées par date de préparation (la plus ancienne en premier)
+        String query = """
+            SELECT *
+            FROM commande
+            WHERE statutCommande = 'preparation'
+            ORDER BY datePreparation ASC;
+        """;
+    
+        List<Commande> commandesPreparees = new ArrayList<>();
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+    
+            while (rs.next()) {
+                int idCommande = rs.getInt("idCommande");
+                int idPanier = rs.getInt("idPanier");
+                String typeCommande = rs.getString("typeCommande");
+                String statutCommande = rs.getString("statutCommande");
+                Timestamp dateReception = rs.getTimestamp("dateReception");
+                Timestamp datePreparation = rs.getTimestamp("datePreparation");
+
+                Commande commande = new Commande(idCommande, idPanier, typeCommande, statutCommande, dateReception, datePreparation, null);
+                commandesPreparees.add(commande);
+            }
+    
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la récupération des commandes préparées : " + e.getMessage());
+        }
+    
+        return commandesPreparees;
+    }
+    
+    public List<Commande> getCommandesFinalisees() {
+        // Requête SQL pour récupérer les commandes avec statut "finalisée" triées par date de réception
+        String query = """
+            SELECT *
+            FROM commande
+            WHERE statutCommande = 'terminee'
+            ORDER BY dateFinalisation ASC;
+        """;
+    
+        List<Commande> commandesFinalisees = new ArrayList<>();
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+    
+            while (rs.next()) {
+                int idCommande = rs.getInt("idCommande");
+                int idPanier = rs.getInt("idPanier");
+                String typeCommande = rs.getString("typeCommande");
+                String statutCommande = rs.getString("statutCommande");
+                Timestamp dateReception = rs.getTimestamp("dateReception");
+                Timestamp datePreparation = rs.getTimestamp("datePreparation");
+                Timestamp dateFinalisation = rs.getTimestamp("dateFinalisation");
+
+                Commande commande = new Commande(idCommande, idPanier, typeCommande, statutCommande, dateReception, datePreparation, dateFinalisation);
+                commandesFinalisees.add(commande);
+            }
+    
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la récupération des commandes finalisées : " + e.getMessage());
+        }
+    
+        return commandesFinalisees;
+    }
+    
+
     //US 4.2
     public void commencerAPreparer(int idCommande) {
         try (Connection connection = DBConnection.getConnection()) {
@@ -63,13 +128,13 @@ public class PreparateurDAO {
                                 pstmtUpdate.setInt(1, idCommande);
                                 int rowsAffected = pstmtUpdate.executeUpdate();
                                 if (rowsAffected > 0) {
-                                    System.out.println("Statut de la commande mis à jour avec succès.");
+                                    System.out.println("La commande " + idCommande + " a été mise en préparation.");
                                 } else {
                                     System.out.println("Aucune commande mise à jour.");
                                 }
                             }
                         } else {
-                            System.out.println("La commande n'est pas en attente. Statut actuel : " + statutCommande);
+                            System.out.println("La commande " + idCommande + " ne peut pas être mise en préparation. Vérifiez que son statut est bien 'en attente'.");
                         }
                     } else {
                         System.out.println("Commande introuvable pour l'ID : " + idCommande);
@@ -96,12 +161,12 @@ public class PreparateurDAO {
                 int rowsUpdated = pstmtUpdate.executeUpdate();
     
                 if (rowsUpdated > 0) {
-                    System.out.println("La commande #" + idCommande + " a été finalisée avec succès.");
+                    System.out.println("La commande " + idCommande + " a été finalisée.");
                 } else {
-                    System.out.println("La commande #" + idCommande + " ne peut pas être finalisée. Vérifiez que son statut est bien 'preparation'.");
+                    System.out.println("La commande " + idCommande + " ne peut pas être finalisée. Vérifiez que son statut est bien 'preparation'.");
                 }
             } catch (SQLException e) {
-                System.err.println("Erreur lors de la finalisation de la commande #" + idCommande + " : " + e.getMessage());
+                System.err.println("Erreur lors de la finalisation de la commande " + idCommande + " : " + e.getMessage());
             }
         } catch (SQLException e) {
             System.err.println("Erreur de connexion à la base de données : " + e.getMessage());

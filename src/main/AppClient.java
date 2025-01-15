@@ -195,7 +195,7 @@ public class AppClient {
                                             produit.getIdProduit(),
                                             quantite,
                                             scanner);
-                                    //scanner.nextLine();
+                                    return;
                                 }
                             } else {
                                 System.out.println("Numéro de produit invalide.");

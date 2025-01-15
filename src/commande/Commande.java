@@ -11,8 +11,8 @@ public class Commande {
     private Timestamp dateReception;
     private Timestamp datePreparation;
     private Timestamp dateFinalisation;
-    
-    //récupérer la commande d'un client
+
+    //constructeur
     public Commande(int idCommande, int idPanier, String typeCommande, String statutCommande, Timestamp dateReception, Timestamp datePreparation, Timestamp dateFinalisation) {
         this.idCommande = idCommande;
         this.idPanier = idPanier;
@@ -23,17 +23,6 @@ public class Commande {
         this.dateFinalisation = dateFinalisation;        
     }
 
-    //constructeur pour creer une nouvelle commande.
-    public Commande(int idPanier, String typeCommande, Timestamp dateReception){
-        this.idPanier = idPanier;
-        this.typeCommande = typeCommande;
-        this.dateReception = dateReception;
-        this.statutCommande = "en attente";
-        this.datePreparation = null;
-        this.dateFinalisation = null;
-    }
-
-    
     //getters & setters
     public int getIdCommande() {return idCommande;}
     public void setIdCommande(int idCommande) {this.idCommande = idCommande;}
@@ -49,11 +38,11 @@ public class Commande {
     public void setDatePreparation(Timestamp datePreparation) {this.datePreparation = datePreparation;}
     public void setDateFinalisation(Timestamp dateFinalisation) {this.dateFinalisation = dateFinalisation;}
 
-        @Override
-        public String toString() {
-            return "Commande [idCommande=" + idCommande + ", idPanier=" + idPanier + ", statutCommande="
-                    + statutCommande + ", typeCommande=" + typeCommande + ", dateReception=" + dateReception
-                    + ", datePreparation=" + datePreparation + ", dateFinalisation=" + dateFinalisation + "]";
-        }  
+    @Override
+    public String toString() {
+        return "Commande [idCommande=" + idCommande + ", idPanier=" + idPanier + ", typeCommande=" + typeCommande + ", statutCommande="
+                + statutCommande + ", dateReception=" + dateReception
+                + ", datePreparation=" + datePreparation + ", dateFinalisation=" + dateFinalisation + "]";
+    }  
     
 }
