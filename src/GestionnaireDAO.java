@@ -3,10 +3,13 @@ package src;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import src.client.Client;
 import src.client.ClientDAO;
 import src.produit.Produit;
 import src.produit.ProduitDAO;
+
 
 //classe pour les US 3, Marc - Gérer
 public class GestionnaireDAO {
@@ -476,104 +479,129 @@ public class GestionnaireDAO {
     }
 
     //TODO afficher les profils des clients (pour chaque client, on regarde si 50% ou plus de ses produits commandés sont dans la même catégorie, si oui, on lui attribue le profil correspondant)
-    /* 
-    public Map<String, String> determineClientProfiles() {
-        Map<String, String> clientProfiles = new HashMap<>();
-    
-        // Query for individual client profiles
-        String clientProfileQuery = """
-            SELECT c.nomClient, c.prenomClient, p.nomProfil
-            FROM client c
-            JOIN panier pn ON c.idClient = pn.idClient
-            JOIN commande cm ON pn.idPanier = cm.idPanier
-            JOIN panier_produit_magasin ppm ON cm.idPanier = ppm.idPanier
-            JOIN produit pr ON ppm.idProduit = pr.idProduit
+    public void analyserProfilsClients() {
+        String requeteCategoriesClients = """
+            SELECT c.idClient, c.nomClient, c.prenomClient, cat.nomCategorie, COUNT(pp.idProduit) AS productCount
+            FROM CLIENT c
+            JOIN PANIER p ON c.idClient = p.idClient
+            JOIN panier_produit_magasin pp ON p.idPanier = pp.idPanier
+            JOIN PRODUIT pr ON pp.idProduit = pr.idProduit
             JOIN Appartenir ap ON pr.idProduit = ap.idProduit
-            JOIN categorie cat ON ap.idCategorie = cat.idCategorie
-            JOIN client_profil cp ON cp.idClient = c.idClient
-            JOIN profil p ON cp.idProfil = p.idProfil
+            JOIN CATEGORIE cat ON ap.idCategorie = cat.idCategorie
+            GROUP BY c.idClient, c.nomClient, c.prenomClient, cat.nomCategorie
+            ORDER BY c.idClient, productCount DESC;
         """;
     
-        // Query for profile analytics
-        String profileAnalyticsQuery = """
-            SELECT 
-                p.nomProfil,
-                COUNT(DISTINCT c.idClient) AS nombreClients,
-                COUNT(DISTINCT cm.idCommande) AS nombreCommandes,
-                GROUP_CONCAT(DISTINCT cat.nomCategorie SEPARATOR ', ') AS categoriesAchats
-            FROM client c
-            JOIN panier pn ON c.idClient = pn.idClient
-            JOIN commande cm ON pn.idPanier = cm.idPanier
-            JOIN panier_produit_magasin ppm ON cm.idPanier = ppm.idPanier
-            JOIN produit pr ON ppm.idProduit = pr.idProduit
-            JOIN Appartenir ap ON pr.idProduit = ap.idProduit
-            JOIN categorie cat ON ap.idCategorie = cat.idCategorie
-            JOIN client_profil cp ON cp.idClient = c.idClient
-            JOIN profil p ON cp.idProfil = p.idProfil
-            GROUP BY p.nomProfil
-            ORDER BY nombreClients DESC
-        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(requeteCategoriesClients)) {
     
-        try (Connection connection = DBConnection.getConnection()) {
+            ResultSet rs = stmt.executeQuery();
+            Map<Integer, Map<String, Integer>> comptageCategoriesClients = new HashMap<>();
     
-            // Process individual client profiles
-            try (PreparedStatement statement = connection.prepareStatement(clientProfileQuery);
-                 ResultSet resultSet = statement.executeQuery()) {
+            // Agréger le comptage des catégories pour chaque client
+            int clientCount = 0;  // Pour suivre le nombre de clients traités
+            while (rs.next()) {
+                clientCount++;  // Incrémenter le nombre de clients traités
     
-                Map<String, Map<String, Integer>> clientProfileCounts = new HashMap<>();
+                int idClient = rs.getInt("idClient");
+                String categorie = rs.getString("nomCategorie");
+                int nombreProduits = rs.getInt("productCount");
     
-                while (resultSet.next()) {
-                    String clientName = resultSet.getString("nomClient") + " " + resultSet.getString("prenomClient");
-                    String profileName = resultSet.getString("nomProfil");
+                comptageCategoriesClients
+                    .computeIfAbsent(idClient, k -> new HashMap<>())
+                    .merge(categorie, nombreProduits, Integer::sum);
+            }
     
-                    clientProfileCounts.putIfAbsent(clientName, new HashMap<>());
-                    Map<String, Integer> profileCounts = clientProfileCounts.get(clientName);
+            System.out.println("Nombre total de clients traités : " + clientCount);  // Sortie de débogage
     
-                    profileCounts.put(profileName, profileCounts.getOrDefault(profileName, 0) + 1);
+            // Maintenant, déterminer le profil de chaque client
+            Map<Integer, String> profilsClients = new HashMap<>();
+            for (Map.Entry<Integer, Map<String, Integer>> entry : comptageCategoriesClients.entrySet()) {
+                int idClient = entry.getKey();
+                Map<String, Integer> comptageCategories = entry.getValue();
+    
+                // Calculer le nombre total de produits pour le client
+                int totalProduits = comptageCategories.values().stream().mapToInt(Integer::intValue).sum();
+    
+                // Trouver la catégorie ayant le plus grand pourcentage du total
+                String categorieDominante = null;
+                int nombreCategorieDominante = 0;
+                for (Map.Entry<String, Integer> categorieEntry : comptageCategories.entrySet()) {
+                    String categorie = categorieEntry.getKey();
+                    int nombreCategorie = categorieEntry.getValue();
+    
+                    // Vérifier si le nombre de produits d'une catégorie représente plus de 40% du total
+                    if (nombreCategorie * 100 / totalProduits > 40) {
+                        categorieDominante = categorie;
+                        break;
+                    }
+    
+                    // Sinon, trouver la catégorie ayant le plus grand nombre de produits
+                    if (nombreCategorie > nombreCategorieDominante) {
+                        categorieDominante = categorie;
+                        nombreCategorieDominante = nombreCategorie;
+                    }
                 }
     
-                // Find the most frequent profile for each client
-                for (Map.Entry<String, Map<String, Integer>> entry : clientProfileCounts.entrySet()) {
-                    String clientName = entry.getKey();
-                    Map<String, Integer> profileCounts = entry.getValue();
-    
-                    String mostFrequentProfile = profileCounts.entrySet().stream()
-                        .max(Map.Entry.comparingByValue())
-                        .map(Map.Entry::getKey)
-                        .orElse("No Profile");
-    
-                    clientProfiles.put(clientName, mostFrequentProfile);
+                // Assigner la catégorie dominante au client
+                if (categorieDominante != null) {
+                    profilsClients.put(idClient, categorieDominante);
                 }
             }
     
-            // Process profile analytics
-            try (PreparedStatement statement = connection.prepareStatement(profileAnalyticsQuery);
-                 ResultSet resultSet = statement.executeQuery()) {
+            // Afficher les profils pour chaque client
+            System.out.println("\nProfils des clients :");
+            profilsClients.forEach((id, categorie) ->
+                System.out.println("ID Client : " + id + ", Catégorie Dominante : " + categorie)
+            );
     
-                System.out.println("Profil Analytics:");
-                while (resultSet.next()) {
-                    String nomProfil = resultSet.getString("nomProfil");
-                    int nombreClients = resultSet.getInt("nombreClients");
-                    int nombreCommandes = resultSet.getInt("nombreCommandes");
-                    String categoriesAchats = resultSet.getString("categoriesAchats");
-    
-                    System.out.println("Profil: " + nomProfil);
-                    System.out.println("Nombre de clients: " + nombreClients);
-                    System.out.println("Nombre de commandes: " + nombreCommandes);
-                    System.out.println("Catégories d'achats: " + categoriesAchats);
-                    System.out.println("------------");
-                }
-            }
-    
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Erreur lors de la détermination des profils des clients : " + e.getMessage());
+            System.out.println("Une erreur est survenue lors de l'analyse des profils des clients.");
         }
-    
-        return clientProfiles;
     }
-    */
     
-
+    public void obtenirClientsParCategorie(String nomCategorie) {
+        String requete = """
+            SELECT c.idClient, c.nomClient, c.prenomClient
+            FROM CLIENT c
+            WHERE c.idClient IN (
+                SELECT DISTINCT c2.idClient
+                FROM CLIENT c2
+                JOIN PANIER p ON c2.idClient = p.idClient
+                JOIN panier_produit_magasin pp ON p.idPanier = pp.idPanier
+                JOIN PRODUIT pr ON pp.idProduit = pr.idProduit
+                JOIN Appartenir ap ON pr.idProduit = ap.idProduit
+                JOIN CATEGORIE cat ON ap.idCategorie = cat.idCategorie
+                WHERE cat.nomCategorie = ?
+            );
+        """;
     
-}
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(requete)) {
+    
+            stmt.setString(1, nomCategorie);
+            ResultSet rs = stmt.executeQuery();
+    
+            System.out.println("Clients avec la catégorie '" + nomCategorie + "' :");
+            boolean aDesResultats = false;
+    
+            while (rs.next()) {
+                aDesResultats = true;
+                int idClient = rs.getInt("idClient");
+                String nomClient = rs.getString("nomClient");
+                String prenomClient = rs.getString("prenomClient");
+                System.out.println("ID Client : " + idClient + ", Nom : " + prenomClient + " " + nomClient);
+            }
+    
+            if (!aDesResultats) {
+                System.out.println("Aucun client trouvé pour la catégorie '" + nomCategorie + "'.");
+            }
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Une erreur est survenue lors de la récupération des clients par catégorie.");
+        }
+    }
+    
+}   

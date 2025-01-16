@@ -2,7 +2,6 @@ package src.main;
 
 import java.util.List;
 import java.util.Scanner;
-
 import src.GestionnaireDAO;
 import src.categorie.CategorieDAO;
 import src.produit.Produit;
@@ -48,6 +47,9 @@ public class AppGestion {
         Scanner scanner = new Scanner(System.in);
         int choix = -1;
 
+        marc.analyserProfilsClients();
+        
+        
         while (choix != 0) {
             menuGestion();
             System.out.print("Veuillez choisir une option : ");
