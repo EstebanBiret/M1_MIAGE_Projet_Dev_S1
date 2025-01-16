@@ -38,6 +38,17 @@ public class Produit {
         this.marqueProduit = marqueProduit;
     }
 
+    //constructeur sans nutriscore
+    public Produit(String libelleProduit, double prixUnitaire, double prixKilo, double poidsProduit, String conditionnementProduit, String marqueProduit) {
+        this.libelleProduit = libelleProduit;
+        this.prixUnitaire = prixUnitaire;
+        this.prixKilo = prixKilo;
+        this.nutriscore = 'N';
+        this.poidsProduit = poidsProduit;
+        this.conditionnementProduit = conditionnementProduit;
+        this.marqueProduit = marqueProduit;
+    }
+
     //getters & setters
     public String getLibelleProduit() {return libelleProduit;}
     public void setLibelleProduit(String libelleProduit) {this.libelleProduit = libelleProduit;}

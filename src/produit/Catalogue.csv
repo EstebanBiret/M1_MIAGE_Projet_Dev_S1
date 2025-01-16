@@ -1,4 +1,4 @@
-﻿libelleProduit;prixUnitaire;prixKilo;nutriscore;poidsProduit;conditionnementProduit;marqueProduit
-Riz long;3;3.2;A;1;1L;Basmati
-Glace;4.5;0;B;0.4;1 piece;Ben&Jerry
-Gel douche;2;0;A;1;1L;Mixa
+﻿libelleProduit;prixUnitaire;prixKilo;nutriscore;poidsProduit;conditionnementProduit;marqueProduit;idCategorie
+Riz long;3;3.2;A;1;1L;Basmati;1
+Glace;4.5;0;B;0.4;1 piece;Ben&Jerry;2
+Gel douche;2;0;NULL;1;1L;Mixa;3

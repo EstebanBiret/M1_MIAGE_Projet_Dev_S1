@@ -18,12 +18,16 @@ public class ProduitDAO {
             statement.setInt(1, idProduit);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
+                    // Vérification si le nutriscore est null
+                    String nutriscoreStr = resultSet.getString("nutriscore");
+                    Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+
                     produit = new Produit(
                             resultSet.getInt("idProduit"),
                             resultSet.getString("libelleProduit"),
                             resultSet.getDouble("prixUnitaire"),
                             resultSet.getDouble("prixKilo"),
-                            resultSet.getString("nutriscore").charAt(0),
+                            nutriscore,
                             resultSet.getDouble("poidsProduit"),
                             resultSet.getString("conditionnementProduit"),
                             resultSet.getString("marqueProduit")
@@ -47,11 +51,15 @@ public class ProduitDAO {
 
                     //tant qu'il y a des produits, on les ajoute à la liste
                     while (rs.next()) {
+                        // Vérification si le nutriscore est null
+                        String nutriscoreStr = rs.getString("nutriscore");
+                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+
                         Produit produit = new Produit(
                             rs.getString("libelleProduit"),
                             rs.getDouble("prixUnitaire"),
                             rs.getDouble("prixKilo"),
-                            rs.getString("nutriscore").charAt(0),
+                            nutriscore,
                             rs.getDouble("poidsProduit"),
                             rs.getString("conditionnementProduit"),
                             rs.getString("marqueProduit")
@@ -88,11 +96,16 @@ public class ProduitDAO {
 
                     //tant qu'il y a des produits, on les ajoute à la liste
                     while (rs.next()) {
+
+                        // Vérification si le nutriscore est null
+                        String nutriscoreStr = rs.getString("nutriscore");
+                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+
                         Produit produit = new Produit(
                             rs.getString("libelleProduit"),
                             rs.getDouble("prixUnitaire"),
                             rs.getDouble("prixKilo"),
-                            rs.getString("nutriscore").charAt(0),
+                            nutriscore,
                             rs.getDouble("poidsProduit"),
                             rs.getString("conditionnementProduit"),
                             rs.getString("marqueProduit")
@@ -131,11 +144,16 @@ public class ProduitDAO {
                 pstmt.setString(1, libelleProduit);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     while (rs.next()) {
+
+                        // Vérification si le nutriscore est null
+                        String nutriscoreStr = rs.getString("nutriscore");
+                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+
                         Produit produit = new Produit(
                             rs.getString("libelleProduit"),
                             rs.getDouble("prixUnitaire"),
                             rs.getDouble("prixKilo"),
-                            rs.getString("nutriscore").charAt(0),
+                            nutriscore,
                             rs.getDouble("poidsProduit"),
                             rs.getString("conditionnementProduit"),
                             rs.getString("marqueProduit")
@@ -165,11 +183,16 @@ public class ProduitDAO {
                 pstmt.setString(1, marque);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     while (rs.next()) {
+
+                        // Vérification si le nutriscore est null
+                        String nutriscoreStr = rs.getString("nutriscore");
+                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+
                         Produit produit = new Produit(
                             rs.getString("libelleProduit"),
                             rs.getDouble("prixUnitaire"),
                             rs.getDouble("prixKilo"),
-                            rs.getString("nutriscore").charAt(0),
+                            nutriscore,
                             rs.getDouble("poidsProduit"),
                             rs.getString("conditionnementProduit"),
                             rs.getString("marqueProduit")

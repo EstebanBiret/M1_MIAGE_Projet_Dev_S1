@@ -71,12 +71,17 @@ public class Algorithmes {
                 // Exécution de la requête et ajout des résultats à la liste
                 try (ResultSet resultSet = statement.executeQuery()) {
                     while (resultSet.next() && produitsAlternatifs.size() < 5) {
+
+                        // Vérification si le nutriscore est null
+                        String nutriscoreStr = resultSet.getString("nutriscore");
+                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+
                         ProduitRemplacement produit = new ProduitRemplacement (
                         resultSet.getInt("idProduit"),
                         resultSet.getString("libelleProduit"),
                         resultSet.getDouble("prixUnitaire"),
                         resultSet.getDouble("prixKilo"),
-                        resultSet.getString("nutriscore").charAt(0),
+                        nutriscore,                        
                         resultSet.getDouble("poidsProduit"),
                         resultSet.getString("conditionnementProduit"),
                         resultSet.getString("marqueProduit"),

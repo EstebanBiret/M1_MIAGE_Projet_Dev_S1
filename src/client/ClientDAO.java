@@ -160,7 +160,11 @@ public class ClientDAO {
                     while (resultSet.next()) {
                         String categorie = resultSet.getString("nomCategorie");
                         String marque = resultSet.getString("marqueProduit");
-                        String nutriscore = resultSet.getString("nutriscore");
+
+                        // Vérification si le nutriscore est null
+                        String nutriscoreStr = resultSet.getString("nutriscore");
+                        String nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr : null;
+
                         int quantite = resultSet.getInt("quantiteVoulue");
     
                         categorieCounts.put(categorie, categorieCounts.getOrDefault(categorie, 0) + quantite);

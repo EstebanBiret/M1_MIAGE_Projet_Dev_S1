@@ -23,17 +23,16 @@ public class GestionnaireDAO {
             //vérifier qu'un produit n'existe pas déjà avec ces paramètres exacts
             String selectQuery = """
             SELECT * FROM produit WHERE libelleProduit = ?
-            AND prixUnitaire = ? AND prixKilo = ? AND nutriscore = ? AND poidsProduit = ? AND conditionnementProduit = ? AND marqueProduit = ?
+            AND prixUnitaire = ? AND prixKilo = ? AND poidsProduit = ? AND conditionnementProduit = ? AND marqueProduit = ?
             """;
 
             try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
                 pstmt.setString(1, p.getLibelleProduit());
                 pstmt.setDouble(2, p.getPrixUnitaire());
                 pstmt.setDouble(3, p.getPrixKilo());
-                pstmt.setString(4, String.valueOf(p.getNutriscore()));
-                pstmt.setDouble(5, p.getPoidsProduit());
-                pstmt.setString(6, p.getConditionnementProduit());
-                pstmt.setString(7, p.getMarqueProduit());
+                pstmt.setDouble(4, p.getPoidsProduit());
+                pstmt.setString(5, p.getConditionnementProduit());
+                pstmt.setString(6, p.getMarqueProduit());
 
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
@@ -49,7 +48,11 @@ public class GestionnaireDAO {
                 pstmt.setString(1, p.getLibelleProduit()); 
                 pstmt.setDouble(2, p.getPrixUnitaire());
                 pstmt.setDouble(3, p.getPrixKilo());
-                pstmt.setString(4, String.valueOf(p.getNutriscore()));
+                if(p.getNutriscore() != 'A' && p.getNutriscore() != 'B' && p.getNutriscore() != 'C' && p.getNutriscore() != 'D' && p.getNutriscore() != 'E') {
+                    pstmt.setNull(4, Types.CHAR);
+                } else {
+                    pstmt.setString(4, String.valueOf(p.getNutriscore()));
+                }   
                 pstmt.setDouble(5, p.getPoidsProduit());
                 pstmt.setString(6, p.getConditionnementProduit());
                 pstmt.setString(7, p.getMarqueProduit());
@@ -70,8 +73,6 @@ public class GestionnaireDAO {
                 }
 
             } catch (SQLException e) {
-                //rollback si erreur
-                connection.rollback();
                 System.out.println("Erreur lors de l'ajout : " + e.getMessage());
             }
 
@@ -88,8 +89,6 @@ public class GestionnaireDAO {
                 } 
 
             } catch (SQLException e) {
-                //rollback si erreur
-                connection.rollback();
                 System.out.println("Erreur lors de l'ajout : " + e.getMessage());
             }
 
@@ -448,50 +447,33 @@ public class GestionnaireDAO {
     public void importerProduitsDepuisCSV(String cheminFichier) {
         String ligne;
 
-    try (BufferedReader br = new BufferedReader(new FileReader(cheminFichier))) {
-        // Lire l'en-tête du fichier CSV
-        br.readLine(); // Ignorer la première ligne (en-tête)
+        try (BufferedReader br = new BufferedReader(new FileReader(cheminFichier))) {
+            br.readLine();
 
-        while ((ligne = br.readLine()) != null) {
-            String[] valeurs = ligne.split(";");
+            while ((ligne = br.readLine()) != null) {
+                String[] valeurs = ligne.split(";");
 
-            if (valeurs.length == 7) { // Vérifier que la ligne a bien 7 colonnes
-                String libelleProduit = valeurs[0].trim();
-                double prixUnitaire = Double.parseDouble(valeurs[1].trim());
-                double prixKilo = Double.parseDouble(valeurs[2].trim());
-                String nutriscore = valeurs[3].trim();
-                double poidsProduit = Double.parseDouble(valeurs[4].trim());
-                String conditionnementProduit = valeurs[5].trim();
-                String marqueProduit = valeurs[6].trim();
-
-                // Insertion dans la base de données
-                String sql = "INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-                try (Connection connection = DBConnection.getConnection();
-                     PreparedStatement pstmt = connection.prepareStatement(sql)) {
-
-                    pstmt.setString(1, libelleProduit);
-                    pstmt.setDouble(2, prixUnitaire);
-                    pstmt.setDouble(3, prixKilo);
-                    pstmt.setString(4, nutriscore);
-                    pstmt.setDouble(5, poidsProduit);
-                    pstmt.setString(6, conditionnementProduit);
-                    pstmt.setString(7, marqueProduit);
-
-                    pstmt.executeUpdate();
-                    System.out.println("Produit ajouté : " + libelleProduit);
-
-                } catch (SQLException e) {
-                    System.err.println("Erreur lors de l'insertion du produit : " + libelleProduit + ", " + e.getMessage());
+                //vérifier que toutes les infos sont mises
+                if (valeurs.length == 8) { 
+                    String libelleProduit = valeurs[0].trim();
+                    double prixUnitaire = Double.parseDouble(valeurs[1].trim());
+                    double prixKilo = Double.parseDouble(valeurs[2].trim());
+                    char nutriscore = valeurs[3].trim().charAt(0);
+                    double poidsProduit = Double.parseDouble(valeurs[4].trim());
+                    String conditionnementProduit = valeurs[5].trim();
+                    String marqueProduit = valeurs[6].trim();
+                    int idCategorie = Integer.parseInt(valeurs[7].trim());
+                    Produit produit = new Produit(libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit);
+                    ajouterProduitCatalogue(produit, idCategorie);
+                } else {
+                    System.err.println("Format incorrect pour la ligne : " + ligne);
                 }
-            } else {
-                System.err.println("Format incorrect pour la ligne : " + ligne);
             }
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la lecture du fichier CSV : " + e.getMessage());
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        System.err.println("Erreur lors de la lecture du fichier CSV : " + e.getMessage());
-        e.printStackTrace();
-    }}
+    }
 
     //TODO afficher les profils des clients (pour chaque client, on regarde si 50% ou plus de ses produits commandés sont dans la même catégorie, si oui, on lui attribue le profil correspondant)
     /* 

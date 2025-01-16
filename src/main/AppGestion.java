@@ -88,12 +88,12 @@ public class AppGestion {
 
                     if (prixKilo < 0) prixKilo = 0; // Prix non applicable
 
-                    System.out.print("Entrez le nutriscore (A, B, C, D, E) : ");
+                    System.out.print("Entrez le nutriscore (A, B, C, D, E, ou autre si non applicable) : ");
                     String nutriscore = scanner.next().toUpperCase();
-                    while (!nutriscore.matches("[A-E]")) {
+                    /*while (!nutriscore.matches("[A-E]")) {
                         System.out.print("Nutriscore invalide, veuillez recommencer : ");
                         nutriscore = scanner.next().toUpperCase();
-                    }
+                    }*/
 
                     System.out.print("Entrez le poids du produit (en kg) : ");
                     while (!scanner.hasNextDouble()) {
@@ -117,7 +117,15 @@ public class AppGestion {
                         marqueProduit = scanner.nextLine();
                     }
 
-                    Produit produit = new Produit(libelleProduit, prixUnitaire, prixKilo, nutriscore.charAt(0), poidsProduit, conditionnementProduit, marqueProduit);
+                    Produit produit;
+                    // Vérification si le nutriscore est null
+                    if(!nutriscore.matches("[A-E]")) {
+                        produit = new Produit(libelleProduit, prixUnitaire, prixKilo, poidsProduit, conditionnementProduit, marqueProduit);
+                    }
+                    else {
+                        produit = new Produit(libelleProduit, prixUnitaire, prixKilo, nutriscore.charAt(0), poidsProduit, conditionnementProduit, marqueProduit);
+                    }
+
 
                     //affichage des catégories disponibles
                     List<String> categories = categorieDAO.getCategoriesDisponibles();
@@ -155,7 +163,7 @@ public class AppGestion {
                     break;
 
                 case 2:
-                    //TODO
+                    marc.importerProduitsDepuisCSV("src/produit/catalogue.csv");
                     break;
 
                 case 3:

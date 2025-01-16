@@ -26,7 +26,7 @@ CREATE TABLE `produit` (
   `libelleProduit` varchar(128) NOT NULL,
   `prixUnitaire` DECIMAL(6,2) NOT NULL,
   `prixKilo` DECIMAL(6,2),
-  `nutriscore` enum('A', 'B', 'C', 'D', 'E') NOT NULL,
+  `nutriscore` enum('A', 'B', 'C', 'D', 'E'),
   `poidsProduit` DECIMAL(6,3) NOT NULL,
   `conditionnementProduit` varchar(128) NOT NULL,
   `marqueProduit` varchar(128) NOT NULL,
