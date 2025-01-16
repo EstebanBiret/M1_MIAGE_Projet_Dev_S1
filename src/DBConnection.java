@@ -1,6 +1,7 @@
 package src;
 import java.sql.*;
 
+//le jar mysql-connector-java-8.0.23.jar doit être ajouté dans le projet pour que cette classe fonctionne (dans le dossier /lib)
 public class DBConnection {
 
     //propriétés de connexion à la base de données
