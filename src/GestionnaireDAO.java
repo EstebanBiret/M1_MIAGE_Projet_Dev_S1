@@ -441,10 +441,9 @@ public class GestionnaireDAO {
             
             if (rs.next()) {
                 tempsMoyen = rs.getDouble("temps_moyen_preparation");
-                System.out.println(tempsMoyen);
-            } else {
-                System.out.println("Aucune commande préparée trouvée.");
-            }
+                //on arrondit
+                return Math.round(tempsMoyen * 10.0) / 10.0;            
+            } 
         } catch (SQLException e) {
             System.out.println("Erreur lors du calcul du temps moyen de préparation : " + e.getMessage());
         }
