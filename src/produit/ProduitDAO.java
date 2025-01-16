@@ -20,7 +20,7 @@ public class ProduitDAO {
                 if (resultSet.next()) {
                     // Vérification si le nutriscore est null
                     String nutriscoreStr = resultSet.getString("nutriscore");
-                    Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+                    Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : 'N';
 
                     produit = new Produit(
                             resultSet.getInt("idProduit"),
@@ -53,7 +53,7 @@ public class ProduitDAO {
                     while (rs.next()) {
                         // Vérification si le nutriscore est null
                         String nutriscoreStr = rs.getString("nutriscore");
-                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : 'N';
 
                         Produit produit = new Produit(
                             rs.getString("libelleProduit"),
@@ -99,7 +99,7 @@ public class ProduitDAO {
 
                         // Vérification si le nutriscore est null
                         String nutriscoreStr = rs.getString("nutriscore");
-                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : 'N';
 
                         Produit produit = new Produit(
                             rs.getString("libelleProduit"),
@@ -147,7 +147,7 @@ public class ProduitDAO {
 
                         // Vérification si le nutriscore est null
                         String nutriscoreStr = rs.getString("nutriscore");
-                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : 'N';
 
                         Produit produit = new Produit(
                             rs.getString("libelleProduit"),
@@ -186,7 +186,7 @@ public class ProduitDAO {
 
                         // Vérification si le nutriscore est null
                         String nutriscoreStr = rs.getString("nutriscore");
-                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : 'N';
 
                         Produit produit = new Produit(
                             rs.getString("libelleProduit"),

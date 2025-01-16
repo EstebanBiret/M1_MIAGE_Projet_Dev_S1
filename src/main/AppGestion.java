@@ -120,7 +120,7 @@ public class AppGestion {
                     Produit produit;
                     // Vérification si le nutriscore est null
                     if(!nutriscore.matches("[A-E]")) {
-                        produit = new Produit(libelleProduit, prixUnitaire, prixKilo, poidsProduit, conditionnementProduit, marqueProduit);
+                        produit = new Produit(libelleProduit, prixUnitaire, prixKilo, 'N', poidsProduit, conditionnementProduit, marqueProduit);
                     }
                     else {
                         produit = new Produit(libelleProduit, prixUnitaire, prixKilo, nutriscore.charAt(0), poidsProduit, conditionnementProduit, marqueProduit);

@@ -12,7 +12,7 @@ public class Produit {
     private String marqueProduit;
 
     /*
-     * Constructeur de produit AVEC l'ID pour l'algo de recommandation, ne pas utiliser sinon
+     * Constructeur de produit AVEC l'ID
      */
     public Produit(int idProduit, String libelleProduit, double prixUnitaire, double prixKilo, char nutriscore, double poidsProduit, String conditionnementProduit, String marqueProduit) {
         this.idProduit = idProduit;
@@ -33,17 +33,6 @@ public class Produit {
         this.prixUnitaire = prixUnitaire;
         this.prixKilo = prixKilo;
         this.nutriscore = nutriscore;
-        this.poidsProduit = poidsProduit;
-        this.conditionnementProduit = conditionnementProduit;
-        this.marqueProduit = marqueProduit;
-    }
-
-    //constructeur sans nutriscore
-    public Produit(String libelleProduit, double prixUnitaire, double prixKilo, double poidsProduit, String conditionnementProduit, String marqueProduit) {
-        this.libelleProduit = libelleProduit;
-        this.prixUnitaire = prixUnitaire;
-        this.prixKilo = prixKilo;
-        this.nutriscore = 'N';
         this.poidsProduit = poidsProduit;
         this.conditionnementProduit = conditionnementProduit;
         this.marqueProduit = marqueProduit;

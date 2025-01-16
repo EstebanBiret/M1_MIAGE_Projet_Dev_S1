@@ -109,12 +109,12 @@ public class ClientDAO {
     public String getMagasinFavori(int idClient) {
         String magasinFavori = null;
         try (Connection connection = DBConnection.getConnection()) {
-            String selectQuery = "SELECT nomMagasin FROM client c, magasin m WHERE idClient = ? AND c.idMagasin = m.idMagasin";
+            String selectQuery = "SELECT nomMagasin, adresseMagasin FROM client c, magasin m WHERE idClient = ? AND c.idMagasin = m.idMagasin";
             try (PreparedStatement pstmt = connection.prepareStatement(selectQuery)) {
                 pstmt.setInt(1, idClient);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
-                        magasinFavori = rs.getString("nomMagasin");
+                        magasinFavori = rs.getString("nomMagasin") + ", " + rs.getString("adresseMagasin");
                     } else {
                         System.out.println("Magasin favori introuvable  pour le client (" + idClient + ")");
                     }
@@ -163,7 +163,7 @@ public class ClientDAO {
 
                         // Vérification si le nutriscore est null
                         String nutriscoreStr = resultSet.getString("nutriscore");
-                        String nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr : null;
+                        String nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr : "N";
 
                         int quantite = resultSet.getInt("quantiteVoulue");
     

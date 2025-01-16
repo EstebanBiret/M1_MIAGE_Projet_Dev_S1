@@ -38,7 +38,7 @@ public class AppClient {
         System.out.println("| ~ Recherche de produits ~       |");
         System.out.println("|                                 |");
         System.out.println("| [1] Voir tout le catalogue      |");
-        System.out.println("| [2] Mot-clé (nom ou catégorie ) |");
+        System.out.println("| [2] Mot-clé (nom ou catégorie) |");
         System.out.println("| [3] Catégorie                   |");
         System.out.println("| [4] Tri par critères            |");
         System.out.println("| [0] Retour                      |");

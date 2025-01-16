@@ -67,14 +67,16 @@ public class Algorithmes {
                     default:
                         break;
                 }
-    
+                
+                System.out.println("Requête : " + statement.toString());
+
                 // Exécution de la requête et ajout des résultats à la liste
                 try (ResultSet resultSet = statement.executeQuery()) {
                     while (resultSet.next() && produitsAlternatifs.size() < 5) {
 
                         // Vérification si le nutriscore est null
                         String nutriscoreStr = resultSet.getString("nutriscore");
-                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : null;
+                        Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : 'N';
 
                         ProduitRemplacement produit = new ProduitRemplacement (
                         resultSet.getInt("idProduit"),
@@ -169,7 +171,7 @@ public class Algorithmes {
                     AND s.idProduit = p.idProduit
                     AND s.idMagasin = m.idMagasin
                     AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
-                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                    AND a.idCategorie IN (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.nutriscore = (SELECT nutriscore FROM produit WHERE idProduit = ?)
                     AND s.idMagasin = ?
@@ -187,7 +189,7 @@ public class Algorithmes {
                     AND s.idProduit = p.idProduit
                     AND s.idMagasin = m.idMagasin
                     AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
-                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                    AND a.idCategorie IN (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.nutriscore = (SELECT nutriscore FROM produit WHERE idProduit = ?)
                     AND p.idProduit != ?;
@@ -204,7 +206,7 @@ public class Algorithmes {
                     AND s.idProduit = p.idProduit
                     AND s.idMagasin = m.idMagasin
                     AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
-                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                    AND a.idCategorie IN (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.idProduit != ?;
                 """;
@@ -220,7 +222,7 @@ public class Algorithmes {
                     AND s.idProduit = p.idProduit
                     AND s.idMagasin = m.idMagasin
                     AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
-                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                    AND a.idCategorie IN (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.idProduit != ?;
                 """;
                 break;
@@ -234,7 +236,7 @@ public class Algorithmes {
                     WHERE p.idProduit = a.idProduit
                     AND s.idProduit = p.idProduit
                     AND s.idMagasin = m.idMagasin
-                    AND a.idCategorie = (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
+                    AND a.idCategorie IN (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.idProduit != ?;
                 """;
                 break;
