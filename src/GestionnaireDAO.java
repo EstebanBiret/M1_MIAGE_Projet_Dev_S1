@@ -1,5 +1,7 @@
 package src;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.sql.*;
 import src.client.Client;
 import src.client.ClientDAO;
@@ -442,6 +444,54 @@ public class GestionnaireDAO {
 
         return tempsMoyen;
     }
+
+    public void importerProduitsDepuisCSV(String cheminFichier) {
+        String ligne;
+
+    try (BufferedReader br = new BufferedReader(new FileReader(cheminFichier))) {
+        // Lire l'en-tête du fichier CSV
+        br.readLine(); // Ignorer la première ligne (en-tête)
+
+        while ((ligne = br.readLine()) != null) {
+            String[] valeurs = ligne.split(";");
+
+            if (valeurs.length == 7) { // Vérifier que la ligne a bien 7 colonnes
+                String libelleProduit = valeurs[0].trim();
+                double prixUnitaire = Double.parseDouble(valeurs[1].trim());
+                double prixKilo = Double.parseDouble(valeurs[2].trim());
+                String nutriscore = valeurs[3].trim();
+                double poidsProduit = Double.parseDouble(valeurs[4].trim());
+                String conditionnementProduit = valeurs[5].trim();
+                String marqueProduit = valeurs[6].trim();
+
+                // Insertion dans la base de données
+                String sql = "INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsProduit, conditionnementProduit, marqueProduit) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+                try (Connection connection = DBConnection.getConnection();
+                     PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+                    pstmt.setString(1, libelleProduit);
+                    pstmt.setDouble(2, prixUnitaire);
+                    pstmt.setDouble(3, prixKilo);
+                    pstmt.setString(4, nutriscore);
+                    pstmt.setDouble(5, poidsProduit);
+                    pstmt.setString(6, conditionnementProduit);
+                    pstmt.setString(7, marqueProduit);
+
+                    pstmt.executeUpdate();
+                    System.out.println("Produit ajouté : " + libelleProduit);
+
+                } catch (SQLException e) {
+                    System.err.println("Erreur lors de l'insertion du produit : " + libelleProduit + ", " + e.getMessage());
+                }
+            } else {
+                System.err.println("Format incorrect pour la ligne : " + ligne);
+            }
+        }
+    } catch (Exception e) {
+        System.err.println("Erreur lors de la lecture du fichier CSV : " + e.getMessage());
+        e.printStackTrace();
+    }}
 
     //TODO afficher les profils des clients (pour chaque client, on regarde si 50% ou plus de ses produits commandés sont dans la même catégorie, si oui, on lui attribue le profil correspondant)
     /* 
