@@ -186,7 +186,6 @@ class PreparateurDAO {
 
 class Panier_Produit {
     + quantiteDemande: int
-    + modeLivraison: enum
 }
 
 class GestionnaireDAO {                             
