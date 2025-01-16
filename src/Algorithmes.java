@@ -15,7 +15,7 @@ public class Algorithmes {
         int nbIterations = 0;
     
         //tant que la liste n'est pas pleine ou que l'on a pas encore fait tous les filtres
-        while (produitsAlternatifs.size() < 5 && nbIterations < 5) {
+        while (produitsAlternatifs.size() < 5 && nbIterations < 6) {
             String query = construireQuery(nbIterations, idProduit);
     
             try (Connection connection = DBConnection.getConnection();
@@ -53,6 +53,10 @@ public class Algorithmes {
                         break;
 
                     case 4:
+                        statement.setInt(1, idProduit);       
+                        statement.setInt(2, idProduit);       
+                        break;
+                    case 5:
                         statement.setInt(1, idProduit);       
                         statement.setInt(2, idProduit);       
                         break;
@@ -161,7 +165,7 @@ public class Algorithmes {
                     WHERE p.idProduit = a.idProduit
                     AND s.idProduit = p.idProduit
                     AND s.idMagasin = m.idMagasin
-                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    AND p.libelleProduit LIKE CONCAT('%', (SELECT libelleProduit FROM produit WHERE idProduit = ?), '%')
                     AND a.idCategorie IN (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.nutriscore = (SELECT nutriscore FROM produit WHERE idProduit = ?)
@@ -179,7 +183,7 @@ public class Algorithmes {
                     WHERE p.idProduit = a.idProduit
                     AND s.idProduit = p.idProduit
                     AND s.idMagasin = m.idMagasin
-                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    AND p.libelleProduit LIKE CONCAT('%', (SELECT libelleProduit FROM produit WHERE idProduit = ?), '%')
                     AND a.idCategorie IN (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.nutriscore = (SELECT nutriscore FROM produit WHERE idProduit = ?)
@@ -196,7 +200,7 @@ public class Algorithmes {
                     WHERE p.idProduit = a.idProduit
                     AND s.idProduit = p.idProduit
                     AND s.idMagasin = m.idMagasin
-                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    AND p.libelleProduit LIKE CONCAT('%', (SELECT libelleProduit FROM produit WHERE idProduit = ?), '%')
                     AND a.idCategorie IN (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.marqueProduit = (SELECT marqueProduit FROM produit WHERE idProduit = ?)
                     AND p.idProduit != ?;
@@ -212,13 +216,25 @@ public class Algorithmes {
                     WHERE p.idProduit = a.idProduit
                     AND s.idProduit = p.idProduit
                     AND s.idMagasin = m.idMagasin
-                    AND p.libelleProduit = (SELECT libelleProduit FROM produit WHERE idProduit = ?)
+                    AND p.libelleProduit LIKE CONCAT('%', (SELECT libelleProduit FROM produit WHERE idProduit = ?), '%')
                     AND a.idCategorie IN (SELECT idCategorie FROM appartenir WHERE idProduit = ?)
                     AND p.idProduit != ?;
                 """;
                 break;
+            case 4: // même libellé
+                requete += """
+                    SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
+                           p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
+                           s.quantiteEnStock, s.idMagasin, m.nomMagasin
+                    FROM produit p, stocker s, magasin m
+                    WHERE s.idProduit = p.idProduit
+                    AND s.idMagasin = m.idMagasin
+                    AND p.libelleProduit LIKE CONCAT('%', (SELECT libelleProduit FROM produit WHERE idProduit = ?), '%')
+                    AND p.idProduit != ?;
+                """;
+                break;
     
-            case 4: // même catégorie
+            case 5: // même catégorie
                 requete += """
                     SELECT p.idProduit, p.libelleProduit, p.prixUnitaire, p.prixKilo, p.nutriscore, 
                            p.poidsProduit, p.conditionnementProduit, p.marqueProduit, 
