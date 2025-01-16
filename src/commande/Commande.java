@@ -44,5 +44,4 @@ public class Commande {
                 + statutCommande + ", dateReception=" + dateReception
                 + ", datePreparation=" + datePreparation + ", dateFinalisation=" + dateFinalisation + "]";
     }  
-    
 }

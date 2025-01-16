@@ -10,6 +10,7 @@ import src.commande.Commande;
 
 public class AppPreparation {
 
+    //met en place le système de pages des commandes
     public static void afficherCommandesAvecPagination(List<Commande> commandes, Scanner scanner, PreparateurDAO preparateurDAO, boolean preparationMode) {
         if (commandes.isEmpty()) {
             System.out.println("Aucune commande trouvée.");
@@ -82,6 +83,7 @@ public class AppPreparation {
                 case "r":
                     continuer = false;
                     break;
+                //voir le détail d'une commande
                 default:
                     if (choixUtilisateur.startsWith("v")) {
                         try {
@@ -93,8 +95,10 @@ public class AppPreparation {
 
                                 System.out.println("\nOptions :");
                                 if (preparationMode) {
+                                    //seulement pour commande en attente
                                     System.out.println("[p] Commencer à préparer cette commande");
                                 } else {
+                                    //seulement pour commande en préparation
                                     if (commande.getDateFinalisation() == null) {
                                         System.out.println("[f] Finaliser cette commande");
                                     }

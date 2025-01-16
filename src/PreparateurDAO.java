@@ -1,10 +1,6 @@
 package src;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,10 +8,11 @@ import src.commande.Commande;
 
 public class PreparateurDAO {
 
+    //récupérer toutes les commandes en attente (date de réception la plus ancienne en premier)
     public List<Commande> getCommandesEnAttente() {
         List<Commande> commandesEnAttente = new ArrayList<>();
 
-        //requête SQL pour récupérer les commandes avec statut "en attente" triées par dateReception (la plus ancienne en premier)
+        //récupérer les commandes avec statut "en attente" triées par dateReception (la plus ancienne en premier)
         String query = """
             SELECT *
             FROM commande
@@ -27,7 +24,6 @@ public class PreparateurDAO {
             PreparedStatement pstmt = connection.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery()) {
     
-            //System.out.println("Liste des commandes en attente (par date de réception la plus ancienne) :");
             while (rs.next()) {
                 int idCommande = rs.getInt("idCommande");
                 int idPanier = rs.getInt("idPanier");
@@ -45,8 +41,11 @@ public class PreparateurDAO {
         return commandesEnAttente;
     }
 
+    //récupérer les commandes en préparation (date de préparation la plus ancienne en premier)
     public List<Commande> getCommandesPreparees() {
-        //requête SQL pour récupérer les commandes avec statut "préparée" triées par date de préparation (la plus ancienne en premier)
+        List<Commande> commandesPreparees = new ArrayList<>();
+
+        //récupérer les commandes avec statut "préparée" triées par date de préparation (la plus ancienne en premier)
         String query = """
             SELECT *
             FROM commande
@@ -54,7 +53,6 @@ public class PreparateurDAO {
             ORDER BY datePreparation ASC;
         """;
     
-        List<Commande> commandesPreparees = new ArrayList<>();
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query);
              ResultSet rs = pstmt.executeQuery()) {
@@ -78,7 +76,10 @@ public class PreparateurDAO {
         return commandesPreparees;
     }
     
+    //récupérer les commandes finalisées (date de finalisation la plus ancienne en premier)
     public List<Commande> getCommandesFinalisees() {
+        List<Commande> commandesFinalisees = new ArrayList<>();
+
         // Requête SQL pour récupérer les commandes avec statut "finalisée" triées par date de réception
         String query = """
             SELECT *
@@ -87,7 +88,6 @@ public class PreparateurDAO {
             ORDER BY dateFinalisation ASC;
         """;
     
-        List<Commande> commandesFinalisees = new ArrayList<>();
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(query);
              ResultSet rs = pstmt.executeQuery()) {
@@ -108,12 +108,10 @@ public class PreparateurDAO {
         } catch (SQLException e) {
             System.out.println("Erreur lors de la récupération des commandes finalisées : " + e.getMessage());
         }
-    
         return commandesFinalisees;
     }
     
-
-    //US 4.2
+    //marquer une commande en préparation
     public void commencerAPreparer(int idCommande) {
         try (Connection connection = DBConnection.getConnection()) {
             String query = "SELECT statutCommande FROM commande WHERE idCommande = ? AND datePreparation IS NULL";
@@ -146,18 +144,17 @@ public class PreparateurDAO {
         }
     }
 
-    // US 4.3 finaliser la préparation d'une commande
+    //finaliser la préparation d'une commande
     public void finaliserCommande(int idCommande) {
         try (Connection connection = DBConnection.getConnection()) {
-            // Requête pour mettre à jour le statut de la commande et la date de finalisation,
-            // uniquement si le statut actuel est 'preparation'
+            //requête pour mettre à jour le statut de la commande et la date de finalisation,
+            //uniquement si le statut actuel est 'preparation'
             String queryUpdateCommande = "UPDATE commande " +
                                          "SET statutCommande = 'terminee',dateFinalisation = NOW()"+
                                          "WHERE idCommande = ? AND statutCommande = 'preparation' AND dateFinalisation IS NULL";
             try (PreparedStatement pstmtUpdate = connection.prepareStatement(queryUpdateCommande)) {
                 pstmtUpdate.setInt(1, idCommande);
                
-                
                 int rowsUpdated = pstmtUpdate.executeUpdate();
     
                 if (rowsUpdated > 0) {
@@ -168,9 +165,9 @@ public class PreparateurDAO {
             } catch (SQLException e) {
                 System.err.println("Erreur lors de la finalisation de la commande " + idCommande + " : " + e.getMessage());
             }
+            connection.close();
         } catch (SQLException e) {
             System.err.println("Erreur de connexion à la base de données : " + e.getMessage());
         }
     }
-
 }

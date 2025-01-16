@@ -58,6 +58,7 @@ public class AppGestion {
             scanner.nextLine();
 
             switch (choix) {
+                //ajout manuel de produits
                 case 1:
                     System.out.println("Ajouter un produit au catalogue.");
 
@@ -74,7 +75,7 @@ public class AppGestion {
                         scanner.next();
                     }
                     double prixUnitaire = scanner.nextDouble();
-                    scanner.nextLine(); // Consommer la fin de ligne restante
+                    scanner.nextLine();
 
                     System.out.print("Entrez le prix au kilo (optionnel, ou 0 si non applicable) : ");
                     while (!scanner.hasNextDouble()) {
@@ -83,7 +84,7 @@ public class AppGestion {
                     }
 
                     double prixKilo = scanner.nextDouble();
-                    scanner.nextLine(); // Consommer la fin de ligne restante
+                    scanner.nextLine();
 
                     if (prixKilo < 0) prixKilo = 0; // Prix non applicable
 
@@ -125,7 +126,6 @@ public class AppGestion {
                         produit = new Produit(libelleProduit, prixUnitaire, prixKilo, nutriscore.charAt(0), poidsProduit, conditionnementProduit, marqueProduit);
                     }
 
-
                     //affichage des catégories disponibles
                     List<String> categories = categorieDAO.getCategoriesDisponibles();
                     System.out.println("Catégories disponibles :");
@@ -142,29 +142,29 @@ public class AppGestion {
                     while (!categorieValide) {
                         if (scanner.hasNextInt()) {
                             idCategorie = scanner.nextInt();
-                            scanner.nextLine(); // Consommer la fin de ligne restante
+                            scanner.nextLine();
 
-                            // Vérification que l'ID est dans les limites valides
                             if (idCategorie >= 1 && idCategorie <= categories.size()) {
                                 categorieValide = true;
                             } else {
                                 System.out.print("ID de catégorie invalide. Réessayez : ");
                             }
                         } else {
-                            // Si l'utilisateur ne tape pas un entier
                             System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
-                            scanner.nextLine(); // Consommer la fin de ligne restante
+                            scanner.nextLine();
                         }
                     }
 
-                    scanner.nextLine(); // Consommer la fin de ligne restante
+                    scanner.nextLine();
                     marc.ajouterProduitCatalogue(produit, idCategorie);
                     break;
 
+                //import auto de produits
                 case 2:
                     marc.importerProduitsDepuisCSV("src/produit/catalogue.csv");
                     break;
 
+                //augmenter le stock
                 case 3:
                     System.out.print("Entrez l'ID du produit à augmenter : ");
                     while (!scanner.hasNextInt()) {
@@ -190,6 +190,7 @@ public class AppGestion {
                     marc.majStockProduit(idProduitAug, quantiteAug, magasin, true);
                     break;
 
+                //diminuer le stock
                 case 4:
                     System.out.print("Entrez l'ID du produit à diminuer : ");
                     while (!scanner.hasNextInt()) {
@@ -215,6 +216,7 @@ public class AppGestion {
                     marc.majStockProduit(idProduitDim, quantiteDim, magasin2, false);
                     break;
 
+                //statistiques
                 case 5:
                     int choixStats = -1;
                     while (choixStats != 0) {
@@ -239,7 +241,6 @@ public class AppGestion {
                             case 5:
                                 System.out.println("Temps moyen de réalisation des paniers : " + marc.calculerTempsMoyenRealisationPaniers() + " heures.");
                                 break;
-            
                             case 6:
                                 System.out.println("Temps moyen de préparation des commandes : " + marc.calculerTempsMoyenPreparationCommandes() + " heures.");
                                 break;
@@ -252,10 +253,10 @@ public class AppGestion {
                         System.out.println("\n");
                     }
                     break;
+                //affiche les profils de consommateurs
                 case 6:
-                    marc.analyserProfilsClients();  // Appelle la méthode d'analyse des profils
+                    marc.analyserProfilsClients();
                     break;
-
                 case 0:
                     System.out.println("Fermeture du menu ...");
                     break;

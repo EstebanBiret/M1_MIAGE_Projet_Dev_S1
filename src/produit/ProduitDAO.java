@@ -7,13 +7,13 @@ import java.util.List;
 
 public class ProduitDAO {
     
-    // Constructeur avec un paramètre (récupérer un produit de la BD avec son ID ou libellé) --> US 0.1
+    //écupérer un produit de la BD avec son ID
     public Produit getProduitById(int idProduit) {
         Produit produit = null;
         String query = "SELECT * FROM produit WHERE idProduit = ?";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnection.getConnection()){
+             PreparedStatement statement = connection.prepareStatement(query);
 
             statement.setInt(1, idProduit);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -34,12 +34,14 @@ public class ProduitDAO {
                     );
                 }
             }
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return produit;
     }
 
+    //récupère tous les produits de la BD
     public List<Produit> getAllProduits() {
         List<Produit> produits = new ArrayList<>();
 
@@ -51,7 +53,7 @@ public class ProduitDAO {
 
                     //tant qu'il y a des produits, on les ajoute à la liste
                     while (rs.next()) {
-                        // Vérification si le nutriscore est null
+                        //vérifier si le nutriscore est null
                         String nutriscoreStr = rs.getString("nutriscore");
                         Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : 'N';
 
@@ -70,7 +72,6 @@ public class ProduitDAO {
                 }
             }
             connection.close();
-
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
@@ -81,7 +82,7 @@ public class ProduitDAO {
         return produits;
     }
 
-    //fonction qui retourne la liste des produits de la catégorie fournie en paramètre
+    //retourne la liste des produits de la catégorie fournie en paramètre
     public List<Produit> produitsParCategorie(String categorie) {
         List<Produit> produits = new ArrayList<>();
 
@@ -97,7 +98,7 @@ public class ProduitDAO {
                     //tant qu'il y a des produits, on les ajoute à la liste
                     while (rs.next()) {
 
-                        // Vérification si le nutriscore est null
+                        //vérifier si le nutriscore est null
                         String nutriscoreStr = rs.getString("nutriscore");
                         Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : 'N';
 
@@ -172,6 +173,7 @@ public class ProduitDAO {
         return produits;
     }
 
+    //récupérer un produit par son nom partiel de marque
     public List<Produit> getProduitsByMarque(String marque) {
         List<Produit> produits = new ArrayList<>();
 

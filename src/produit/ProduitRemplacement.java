@@ -1,6 +1,8 @@
 package src.produit;
 
 public class ProduitRemplacement {
+
+    //propriétés
     private int idProduit;
     private String libelleProduit;
     private double prixUnitaire;
@@ -14,7 +16,7 @@ public class ProduitRemplacement {
     private String nomMagasin;
     private int quantiteChoisie;
 
-    // Constructeur
+    //constructeur
     public ProduitRemplacement(int idProduit, String libelleProduit, double prixUnitaire, double prixKilo, char nutriscore,
                               double poidsProduit, String conditionnementProduit, String marqueProduit,
                               int quantiteDisponible, int idMagasin, String nomMagasin) {
@@ -31,7 +33,7 @@ public class ProduitRemplacement {
         this.nomMagasin = nomMagasin;
     }
 
-    // Getters et Setters
+    //getters & setters
     public int getIdProduit() { return idProduit; }
     public String getLibelleProduit() { return libelleProduit; }
     public double getPrixUnitaire() { return prixUnitaire; }
@@ -46,7 +48,6 @@ public class ProduitRemplacement {
     public int getQuantiteChoisie() { return quantiteChoisie; }
     public void setQuantiteChoisie(int quantiteChoisie) { this.quantiteChoisie = quantiteChoisie; }
 
-    // Méthode toString
     @Override
     public String toString() {
         return "ProduitRemplacement{" +

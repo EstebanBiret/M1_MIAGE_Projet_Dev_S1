@@ -11,7 +11,7 @@ public class Client {
     private String telClient;
     private int idMagasinFavori;
 
-    // Constructeur utilisant les données récupérées par ClientDAO
+    //constructeur utilisant les données récupérées par ClientDAO
     public Client(int idClient, String nomClient, String prenomClient, String adresseClient, String telClient, int idMagasinFavori) {
         this.idClient = idClient;
         this.nomClient = nomClient;

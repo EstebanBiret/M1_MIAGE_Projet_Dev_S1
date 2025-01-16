@@ -5,15 +5,12 @@ import java.io.FileReader;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 import src.client.Client;
 import src.client.ClientDAO;
 import src.produit.Produit;
 import src.produit.ProduitDAO;
 
-
-//classe pour les US 3, Marc - Gérer
 public class GestionnaireDAO {
 
     ClientDAO clientDAO = new ClientDAO();
@@ -62,7 +59,6 @@ public class GestionnaireDAO {
                 pstmt.setString(6, p.getConditionnementProduit());
                 pstmt.setString(7, p.getMarqueProduit());
 
-                //exécution de la requête
                 int rowsAffected = pstmt.executeUpdate();
 
                 //on récupère l'id auto increment de la ligne tout juste générée pour l'attribuer à l'id du produit
@@ -70,7 +66,7 @@ public class GestionnaireDAO {
                     try (ResultSet rs = pstmt.getGeneratedKeys()) {
                         if (rs.next()) {
                             p.setIdProduit(rs.getInt(1));
-                            System.out.println("Produit ajouté avec succès (" + p.toString() + ").");
+                            System.out.println("Produit ajouté avec succès " + p.toString());
                         }
                     }
                 } else {
@@ -98,7 +94,6 @@ public class GestionnaireDAO {
             }
 
             connection.close();
-
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
@@ -130,8 +125,6 @@ public class GestionnaireDAO {
                 }
 
             } catch (SQLException e) {
-                //rollback si erreur
-                connection.rollback();
                 System.out.println("Erreur lors de la modification : " + e.getMessage());
             }
             connection.close();
@@ -192,7 +185,7 @@ public class GestionnaireDAO {
                 return;
             }
 
-            // Récupérer la quantité actuelle en stock
+            //récupérer la quantité actuelle en stock
             selectStatement.setInt(1, idProduit);
             selectStatement.setInt(2, idMagasin);
             ResultSet resultSet = selectStatement.executeQuery();
@@ -238,7 +231,7 @@ public class GestionnaireDAO {
             LIMIT 5
         """;
     
-        int rank = 1;
+        int rang = 1;
 
         try (Connection connection = DBConnection.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
@@ -253,16 +246,16 @@ public class GestionnaireDAO {
                     Produit produit = produitDAO.getProduitById(idProduit);
         
                     if (produit != null) {
-                        res.append(rank).append(". ")
+                        res.append(rang).append(". ")
                            .append(produit.toString())
                            .append(" (Commandé ").append(totalQuantite).append(" fois)\n");
                     } else {
-                        res.append(rank).append(". Produit inconnu (ID: ")
+                        res.append(rang).append(". Produit inconnu (ID: ")
                            .append(idProduit).append(") - ")
                            .append(totalQuantite).append(" fois commandé\n");
                     }
         
-                    rank++;
+                    rang++;
                 }
             }
     
@@ -313,7 +306,6 @@ public class GestionnaireDAO {
        return res.toString();
     }
     
-
     /*
      * Permet de récupérer les clients qui ont le plus commandés
      */
@@ -340,20 +332,17 @@ public class GestionnaireDAO {
                 while (resultSet.next()) {
                     int idClient = resultSet.getInt("idClient");
                     int nbCommandes = resultSet.getInt("nbCommandes");
-    
-                    // Charger les informations du client
                     Client client = clientDAO.getClientById(idClient);
     
-                    // Ajouter les détails au résultat
+                    //ajouter les détails au résultat
                     res.append(rank++).append(". ").append(client.toString())
                         .append(" (Commandes: ").append(nbCommandes).append(")\n");
                 }
             }
-    
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
         return res.toString();
     }
 
@@ -375,11 +364,9 @@ public class GestionnaireDAO {
             LIMIT 5
         """;
 
-    
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
     
-            // Exécute la requête pour récupérer les clients ayant généré le plus de chiffre d'affaires
             try (ResultSet resultSet = statement.executeQuery()) {
                 res = new StringBuilder("Top 5 des clients ayant généré le plus de chiffre d'affaires :\n");
                 int rank = 1;
@@ -387,25 +374,22 @@ public class GestionnaireDAO {
                 while (resultSet.next()) {
                     int idClient = resultSet.getInt("idClient");
                     double totalCA = resultSet.getDouble("totalCA");
-    
-                    // Charger les informations du client
                     Client client = clientDAO.getClientById(idClient);
     
-                    // Ajouter les détails au résultat
+                    //ajouter les détails au résultat
                     res.append(rank++).append(". ").append(client.toString())
                         .append(" (Chiffre d'affaires: ").append(totalCA).append(" euros)\n");
                 } 
                 
             }
-    
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
         return res.toString();
     }
     
-    // Méthode pour calculer le temps moyen de réalisation des paniers terminés (en heures)
+    //calculer le temps moyen de réalisation des paniers terminés (en heures)
     public double calculerTempsMoyenRealisationPaniers() {
         try (Connection connection = DBConnection.getConnection()){
             String queryTempsMoyen = "SELECT AVG(TIMESTAMPDIFF(HOUR, dateDebutPanier, dateFinPanier)) AS tempsMoyen " +
@@ -415,19 +399,19 @@ public class GestionnaireDAO {
                 try (ResultSet rs = pstmtTempsMoyen.executeQuery()) {
                     if (rs.next()) {
                         double tempsMoyenHeures = rs.getDouble("tempsMoyen");
-
                         //on arrondit
                         return Math.round(tempsMoyenHeures * 10.0) / 10.0;
                     }
                 }
             } 
+            connection.close();
         } catch (SQLException e) {
             System.err.println("Erreur lors du calcul du temps moyen de réalisation des paniers : " + e.getMessage());
         }
         return 0;
     }
 
-    // Méthode pour calculer le temps moyen de préparation des commandes (en heures)
+    //calculer le temps moyen de préparation des commandes (en heures)
     public double calculerTempsMoyenPreparationCommandes() {
         double tempsMoyen = 0;
 
@@ -444,13 +428,14 @@ public class GestionnaireDAO {
                 //on arrondit
                 return Math.round(tempsMoyen * 10.0) / 10.0;            
             } 
+            connection.close();
         } catch (SQLException e) {
             System.out.println("Erreur lors du calcul du temps moyen de préparation : " + e.getMessage());
         }
-
         return tempsMoyen;
     }
 
+    //importer des produits dans le catalogue depuis un fichier CSV
     public void importerProduitsDepuisCSV(String cheminFichier) {
         String ligne;
 
@@ -482,6 +467,7 @@ public class GestionnaireDAO {
         }
     }
 
+    //afficher les profils avec le nb de clients
     public void analyserProfilsClients() {
         String requeteCategoriesClients = """
             SELECT c.idClient, c.nomClient, c.prenomClient, cat.nomCategorie, COUNT(pp.idProduit) AS productCount
@@ -495,13 +481,13 @@ public class GestionnaireDAO {
             ORDER BY c.idClient, productCount DESC;
         """;
 
-        try (Connection conn = DBConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(requeteCategoriesClients)) {
+        try (Connection connnexion = DBConnection.getConnection();
+            PreparedStatement stmt = connnexion.prepareStatement(requeteCategoriesClients)) {
 
             ResultSet rs = stmt.executeQuery();
             Map<Integer, Map<String, Integer>> comptageCategoriesClients = new HashMap<>();
 
-            // Agréger le comptage des catégories pour chaque client
+            //agréger le comptage des catégories pour chaque client
             while (rs.next()) {
                 int idClient = rs.getInt("idClient");
                 String categorie = rs.getString("nomCategorie");
@@ -519,26 +505,26 @@ public class GestionnaireDAO {
 
                 int totalProduits = comptageCategoriesClient.values().stream().mapToInt(Integer::intValue).sum();
 
-                // Vérifier si le client a une catégorie dominante
+                //vérifier si le client a une catégorie dominante
                 for (Map.Entry<String, Integer> categorieEntry : comptageCategoriesClient.entrySet()) {
                     String categorie = categorieEntry.getKey();
                     int nombreProduits = categorieEntry.getValue();
 
-                    // Si 40% ou plus des produits du client sont dans cette catégorie
+                    //si 40% ou plus des produits du client sont dans cette catégorie
                     if (nombreProduits * 100 / totalProduits >= 40) {
                         comptageCategories.put(categorie, comptageCategories.getOrDefault(categorie, 0) + 1);
                     }
                 }
             }
 
-            // Afficher les catégories avec le nombre de clients
+            //afficher les profils avec le nombre de clients
             System.out.println("\n Profils de consommateurs :");
             for (Map.Entry<String, Integer> entry : comptageCategories.entrySet()) {
                 String categorie = entry.getKey();
                 int nbClients = entry.getValue();
                 System.out.println(categorie + " (" + nbClients + " clients)");
             }
-
+            connnexion.close();
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("Une erreur est survenue lors de l'analyse des profils des clients.");

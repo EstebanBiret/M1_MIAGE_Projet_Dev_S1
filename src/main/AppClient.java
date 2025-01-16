@@ -165,6 +165,7 @@ public class AppClient {
                     continuer = false;
                     break;
                 default:
+                    //détails d'un produit
                     if (choixUtilisateur.startsWith("v")) {
                         try {
                             int numeroProduit = Integer.parseInt(choixUtilisateur.substring(2).trim()) - 1;

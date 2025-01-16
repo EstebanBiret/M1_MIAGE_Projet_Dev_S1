@@ -42,7 +42,7 @@ public class CategorieDAO {
         return categories;
     }
 
-    //pour chaque catégorie, on créé une option
+    //affichage du menu des catégories disponibles, pour chaque catégorie, on créé une option
     public void afficherMenuCategorie() {
         System.out.println("------------------------------------------");
         System.out.println("| ~ Catégories ~                         |");
@@ -55,6 +55,7 @@ public class CategorieDAO {
         System.out.println("------------------------------------------");
     }
 
+    //logique de gestion de ce menu
     public void gererMenuCategorie(ProduitDAO produitDAO, Scanner scanner, Panier panierClient) {
         int choix = -1;
 

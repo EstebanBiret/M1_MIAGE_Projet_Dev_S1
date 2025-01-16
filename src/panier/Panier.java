@@ -7,6 +7,7 @@ import src.client.ClientDAO;
 
 public class Panier {
     
+    //propriétés
     private int idPanier;
     private int idClient;
     private boolean panierTermine;
@@ -40,7 +41,4 @@ public class Panier {
     public Timestamp getDateDebutPanier() {return dateDebutPanier;}
     public Timestamp getDateFinPanier() {return dateFinPanier;}
     public void setDateFinPanier(Timestamp dateFinPanier) {this.dateFinPanier = dateFinPanier;}
-
-    //savoir si le panier recherché existe bien en BD
-    public boolean exists() {return this.idPanier != 0;}
 }

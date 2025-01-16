@@ -5,16 +5,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import src.DBConnection;
 import src.commande.Commande;
 import src.panier.Panier;
 import src.produit.Produit;
 import src.produit.ProduitDAO;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
 
 public class ClientDAO {
     
+    //récupérer un client en BD par son ID, et le construire en Java
     public Client getClientById(int idClient) {
         Client client = null;
         try (Connection connection = DBConnection.getConnection()) {
@@ -36,6 +39,7 @@ public class ClientDAO {
                     }
                 }
             }
+            connection.close();
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
@@ -44,28 +48,27 @@ public class ClientDAO {
 
     //retourne le panier en cours du client, null si aucun panier en cours
     public Panier getPanierEnCours(int idClient) {  
-
         Panier p = null;
 
         try (Connection connection = DBConnection.getConnection()) {
 
-        String selectPanier = "SELECT * FROM panier WHERE idClient = ? AND panierTermine = false";
-        try (PreparedStatement pstmt = connection.prepareStatement(selectPanier)) {
-            pstmt.setInt(1, idClient);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    p = new Panier(rs.getInt("idPanier"), idClient, rs.getTimestamp("dateDebutPanier"));
+            String selectPanier = "SELECT * FROM panier WHERE idClient = ? AND panierTermine = false";
+            try (PreparedStatement pstmt = connection.prepareStatement(selectPanier)) {
+                pstmt.setInt(1, idClient);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        p = new Panier(rs.getInt("idPanier"), idClient, rs.getTimestamp("dateDebutPanier"));
+                    }
                 }
             }
-        }
-        connection.close();
-
+            connection.close();
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
         return p;
     }
 
+    //récupérer le nom d'un client en BD avec son ID
     public String getNomClient(int idClient) {
         String nomClient = null;
         try (Connection connection = DBConnection.getConnection()) {
@@ -80,12 +83,14 @@ public class ClientDAO {
                     }
                 }
             }
+            connection.close();
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
         return nomClient;
     }
 
+    //récupérer le prénom d'un client en BD avec son ID
     public String getPrenomClient(int idClient) {
         String prenomClient = null;
         try (Connection connection = DBConnection.getConnection()) {
@@ -100,12 +105,14 @@ public class ClientDAO {
                     }
                 }
             }
+            connection.close();
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
         return prenomClient;
     }
 
+    //récupérer le nom du magasin et son adresse en BD avec l'ID du client
     public String getMagasinFavori(int idClient) {
         String magasinFavori = null;
         try (Connection connection = DBConnection.getConnection()) {
@@ -120,13 +127,14 @@ public class ClientDAO {
                     }
                 }
             }
+            connection.close();
         } catch (SQLException e) {
             System.out.println("Erreur : " + e.getMessage());
         }
         return magasinFavori;
     }
 
-    // Méthode pour récupérer les habitudes de consommation
+    //récupérer les habitudes de consommation
     public List<String> getHabitudesConsos(int idClient) {
         List<String> habitudes = new ArrayList<>();
         List<Commande> commandes = getCommandes(idClient);
@@ -149,9 +157,8 @@ public class ClientDAO {
         AND ppm.idPanier = ?
         """;
 
-    
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnection.getConnection()) {
+             PreparedStatement statement = connection.prepareStatement(query);
     
             for (Commande commande : commandes) {
                 statement.setInt(1, commande.getIdPanier());
@@ -161,7 +168,7 @@ public class ClientDAO {
                         String categorie = resultSet.getString("nomCategorie");
                         String marque = resultSet.getString("marqueProduit");
 
-                        // Vérification si le nutriscore est null
+                        //on vérifie si le nutriscore est null
                         String nutriscoreStr = resultSet.getString("nutriscore");
                         String nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr : "N";
 
@@ -173,10 +180,12 @@ public class ClientDAO {
                     }
                 }
             }
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     
+        //suite de streams pour trier les habitudes de consommation
         habitudes.add("\nCatégories les plus commandées :");
         categorieCounts.entrySet().stream()
             .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
@@ -195,6 +204,7 @@ public class ClientDAO {
         return habitudes;
     }
 
+    //affiche les commandes du client, en prenant en paramètre la liste des commandes
     public void afficherCommandes(List<Commande> commandes) {
         if (commandes.isEmpty()) {
             System.out.println("Aucune commande trouvée.");
@@ -215,11 +225,11 @@ public class ClientDAO {
                 commande.getTypeCommande(),
                 dateStr
             );
-    
             System.out.println(commandeString);
         }
     }
     
+    //récupérer toutes les commandes du client qui a pour idClient l'idClient en paramètre
     public List<Commande> getCommandes(int idClient) {
         List<Commande> commandes = new ArrayList<>();
     
@@ -234,9 +244,8 @@ public class ClientDAO {
             ORDER BY c.dateReception DESC
         """;
 
-    
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnection.getConnection()){
+            PreparedStatement pstmt = connection.prepareStatement(query);
     
             pstmt.setInt(1, idClient);
     
@@ -254,14 +263,14 @@ public class ClientDAO {
                     commandes.add(commande);
                 }
             }
+            connection.close();
         } catch (SQLException e) {
             System.out.println("Erreur lors de la récupération des commandes : " + e.getMessage());
         }
-    
         return commandes;
     }
 
-    // Méthode pour récupérer les 5 produits les plus commandés avec classement numéroté
+    //récupérer les 5 produits les plus commandés d'un client avec classement numéroté
     public List<String> getProduitsPlusCommandes(int idClient) {
         List<String> produits = new ArrayList<>();
         List<Commande> commandes = getCommandes(idClient);
@@ -298,7 +307,9 @@ public class ClientDAO {
             e.printStackTrace();
         }
     
-        final int[] rank = {1};
+        //on trie la map de produits avec leur fréquence, on garde les 5 premiers, et pour chaque produit on récupère son ID, 
+        //et on construit l'objet, pour enfin mettre ses infos et son rang dans la liste de retour
+        int[] rank = {1};
         produitCounts.entrySet().stream()
             .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
             .limit(5)
@@ -310,10 +321,10 @@ public class ClientDAO {
                 Produit produit = produitDAO.getProduitById(idProduit);
                 if (produit != null) {
                     produits.add(rank[0] + ". " + produit.getLibelleProduit() + " - " + produit.getMarqueProduit() + " (Commandé " + quantite + " fois)");
+                    //on augmente le classement
                     rank[0]++;
                 }
             });
-    
         return produits;
     }
 }

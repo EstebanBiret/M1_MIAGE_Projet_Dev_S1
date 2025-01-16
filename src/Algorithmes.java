@@ -1,9 +1,6 @@
 package src;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -11,10 +8,6 @@ import java.util.Scanner;
 import src.produit.ProduitRemplacement;
 
 public class Algorithmes {
-
-    /*public int remplacementProduitHabitudes(int idClient, int idProduit, int qte) {
-        //en se basant sur les habitudes de conso du client et le produit désiré, on propose une liste de produits de remplacement, et on laisse le client choisir
-    }*/
 
     //remplacement d'un produit avec gestion des alternatives
     public static ProduitRemplacement remplacementProduit(int idProduit, int idMagasin, int quantiteDemandee, Scanner scanner) {
@@ -70,11 +63,11 @@ public class Algorithmes {
                 
                 System.out.println("Requête : " + statement.toString());
 
-                // Exécution de la requête et ajout des résultats à la liste
+                //exécution de la requête et ajout des résultats à la liste
                 try (ResultSet resultSet = statement.executeQuery()) {
                     while (resultSet.next() && produitsAlternatifs.size() < 5) {
 
-                        // Vérification si le nutriscore est null
+                        //vérifier si le nutriscore est null
                         String nutriscoreStr = resultSet.getString("nutriscore");
                         Character nutriscore = (nutriscoreStr != null && !nutriscoreStr.isEmpty()) ? nutriscoreStr.charAt(0) : 'N';
 
@@ -92,7 +85,7 @@ public class Algorithmes {
                         resultSet.getString("nomMagasin")
                         );
 
-                        // Vérification de la quantité disponible
+                        //vérifier la quantité disponible
                         if (produit.getQuantiteDisponible() > 0) {
                             // on regarde grâce à un stream si un produit dans la liste a déjà le même id que le produit que l'on veut ajouter à celle-ci
                             boolean produitExistant = produitsAlternatifs.stream().anyMatch(p -> p.getIdProduit() == produit.getIdProduit());
@@ -130,7 +123,7 @@ public class Algorithmes {
         }    
 
         System.out.print("Veuillez entrer le numéro du produit souhaité : ");
-        int choix = -1; // Initialisation avec une valeur invalide
+        int choix = -1;
         while (choix < 1 || choix > produitsAlternatifs.size()) {
             if (scanner.hasNextInt()) {
                 choix = scanner.nextInt();
@@ -139,14 +132,13 @@ public class Algorithmes {
                 }
             } else {
                 System.out.print("Entrée invalide. Veuillez entrer un chiffre : ");
-                scanner.next(); // Consommer l'entrée incorrecte
+                scanner.next();
             }
         }
 
-    
         ProduitRemplacement produitChoisi = produitsAlternatifs.get(choix - 1);
 
-        // Gestion de la quantité à retourner
+        //gestion de la quantité à retourner (même si la quantité demandée est supérieure à la quantité disponible)
         int quantiteRetournee = Math.min(quantiteDemandee, produitChoisi.getQuantiteDisponible());
         System.out.printf(
             "Produit choisi : %s (Quantité demandée : %d, Quantité retournée : %d)%n",
@@ -157,6 +149,7 @@ public class Algorithmes {
         return produitChoisi;
     }
     
+    //permet de construire la requête en fonction du nombre d'itérations
     private static String construireQuery(int nbIterations, int idProduit) {
         String requete = "";
     
@@ -244,7 +237,6 @@ public class Algorithmes {
             default:
                 throw new IllegalArgumentException("Étape inconnue : " + nbIterations);
         }
-    
         return requete;
     }
 }

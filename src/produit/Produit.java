@@ -2,6 +2,7 @@ package src.produit;
 
 public class Produit {
     
+    //propriétés
     private int idProduit; //pas dans le 2ème constructeur car on prend l'id en BD (auto increment)
     private String libelleProduit;
     private double prixUnitaire;
@@ -60,8 +61,8 @@ public class Produit {
 
     @Override
     public String toString() {
-        return "Produit [id=" + idProduit + ", conditionnement=" + conditionnementProduit + ", libellé=" + libelleProduit
+        return "[libellé=" + libelleProduit 
                 + ", marque=" + marqueProduit + ", nutriscore=" + nutriscore + ", poids=" + poidsProduit
-                + ", prixKilo=" + prixKilo + ", prixUnitaire=" + prixUnitaire + "]";
+                + ", prixKilo=" + prixKilo + ", prixUnitaire=" + prixUnitaire + ", conditionnement=" + conditionnementProduit + "]";
     }
 }
