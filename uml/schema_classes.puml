@@ -214,7 +214,8 @@ Panier "1" -- "*" Client : rempli
 Commande "1" -- "*" panier_commande : contient
 Panier "1" -- "*" panier_commande: fait partie
 Produit "1" -- "*" Appartenir : appartient à
-Produit "1" -- "*" Stocker : stocké dans
+Produit "*" -- "*" Stocker : stocké dans
+Magasin "*" -- "*" Stocker : stocké dans
 Produit "1" -- "*" Panier_Produit : ajouté à
 Panier "1" -- "*" Panier_Produit : contient
 Magasin "1" -- "*" Panier_Produit : disponible dans
