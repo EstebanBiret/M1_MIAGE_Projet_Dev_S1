@@ -1,15 +1,6 @@
 @startuml schema-classes-uml
 
-class Magasin 
-{
-    - idMagasin: int
-    - nomMagasin: String
-    - adresseMagasin: String
-}
-
-class Produit 
-{
-    - idProduit: int
+class Produit {
     - libelleProduit: String
     - prixUnitaire: double
     - prixKilo: double
@@ -18,11 +9,6 @@ class Produit
     - conditionnementProduit: String
     - marqueProduit: String
 
-    + Produit(idProduit: int, libelleProduit: String, prixUnitaire: double, prixKilo: double, nutriscore: char, poidsProduit: double, conditionnementProduit: String, marqueProduit: String)
-    + Produit(libelleProduit: String, prixUnitaire: double, prixKilo: double, nutriscore: char, poidsProduit: double, conditionnementProduit: String, marqueProduit: String)
-    + Produit(idProduit: int)
-    + Produit(libelleProduit: String, nomExact: boolean)
-    
     + getLibelleProduit(): String
     + setLibelleProduit(libelleProduit: String): void
     + getPrixUnitaire(): double
@@ -39,143 +25,200 @@ class Produit
     + setMarqueProduit(marqueProduit: String): void
     + getIdProduit(): int
     + setIdProduit(idProduit: int): void
-    + exists(): boolean
     + toString(): String
 }
 
-class Categorie 
-{
-    - idCategorie: int
-    - nomCategorie: String
+class ProduitDAO {
+    + getProduitbyID(idProduit: int): Produit
+    + getAllProduits(): List<Produit>
+    + produitsParCategorie(categorie: String): List<Produit>
+    + getProduitsByLibelle(libelleProduit: String, nomexact: boolean): List<Produit>
+    + getProduitsByMarque(marque: String): List<Produit>
 }
 
-class Profil 
-{
-    - idProfil: int
-    - nomProfil: String
+class ProduitRemplacements {
+    - libelleProduit: String
+    - prixUnitaire: double
+    - prixKilo: double
+    - nutriscore: char
+    - poidsProduit: double
+    - conditionnementProduit: String
+    - marqueProduit: String
+    - quantiteDisponible: int
+    - idMagasin: int
+    - nomMagasin: String
+    - quantiteChoisie: int
+
+    + getIdProduit(): int
+    + getLibelleProduit(): String
+    + getPrixUnitaire(): double
+    + getPrixKilo(): double
+    + getNutriscore(): char
+    + getPoidsProduit(): double
+    + getConditionnementProduit(): String
+    + getMarqueProduit(): String
+    + getquantiteDisponible(): int
+    + getidMagasin(): int
+    + getnomMagasin(): String
+    + getquantiteChoisie(): int
+    + setquantiteChoisie(quantiteChoisie: int): void
 }
 
-class Client 
-{
-    - idClient: int
+class CategorieDAO {
+    - categoriesDisponibles: List<String>
+    + CategorieDAO()
+    + getCategoriesDisponibles(): List<String>
+    + getCategories(): List<String>
+    + afficherMenuCategorie(): void
+    + gererMenuCategorie(produitDAO: ProduitDAO, scanner: Scanner, panierClient: Panier): void
+}
+
+class Client {
     - nomClient: String
     - prenomClient: String
     - adresseClient: String
     - telClient: String
     - idMagasinFavori: int
 
-    + Client(idClient: int)
+    + Client(idClient: int, nomClient: String, prenomClient: String, adresseClient: String, telClient: String, idMagasinFavori: int)
     + getIdClient(): int
+    + getNomClient(): String
+    + setNomClient(nom: String): void
+    + getPrenomClient(): String
+    + setPrenomClient(prenom: String): void
+    + getAdresseClient(): String
+    + setAdresseClient(adresse: String): void
+    + getTelClient(): String
+    + setTelClient(tel: String): void
     + getIdMagasinFavori(): int
-    + getPanierEnCours(): Panier
+    + setIdMagasinFavori(idMagasin: int): void
     + creerPanier(): Panier
     + toString(): String
 }
 
-class Client_Profil 
-{
-    - idClient: int
-    - idProfil: int
+class ClientDAO {
+    + getClientById(idClient: int): Client
+    + getPanierEnCours(idClient: int): Panier
+    + getNomClient(idClient: int): String
+    + getPrenomClient(idClient: int): String
+    + getMagasinFavori(idClient: int): String
+    + getHabitudesConsos(idClient: int): List<String>
+    + afficherCommandes(commandes: List<Commande>): void
+    + getCommandes(idClient: int): List<Commande>
+    + getProduitsPlusCommandes(idClient: int): List<String>
 }
 
-class Appartenir 
-{
-    - idCategorie: int
-    - idProduit: int
-}
+class Appartenir {}
 
-class Stocker 
-{
-    - idMagasin: int
-    - idProduit: int
+class Stocker {
     - quantiteEnStock: int
 }
 
-class Panier 
-{
-    - idPanier: int
-    - idClient: int
-    - panierTermine: boolean
-    - dateDebutPanier: Timestamp
-    - dateFinPanier: Timestamp
-
-    + Panier(idClient: int)
-    + Panier(idPanier: int, idClient: int, dateDebutPanier: Timestamp)
-    + ajouterProduitPanier(idProduit: int, qte: int, idMagasin: int, modeLivraison: String): void
-    + validerPanier(): void
-    + annulerPanier(): void
-    + comparaisonTemps(): void
-    + getIdPanier(): int
-    + setIdPanier(idPanier: int): void
-    + getIdClient(): int
-    + setIdClient(idClient: int): void
-    + isPanierTermine(): boolean
-    + setPanierTermine(panierTermine: boolean): void
-    + getDateDebutPanier(): Timestamp
-    + setDateDebutPanier(dateDebutPanier: Timestamp): void
-    + getDateFinPanier(): Timestamp
-    + setDateFinPanier(dateFinPanier: Timestamp): void
-    + exists(): boolean
-    + toString(): String
+class PanierDAO {
+     + creerPanier(idClient: int): Panier   
+     + ajouterProduitPanier(idPanier: int, idClient: int, idProduit: int, qteVoulue: int, scanner: Scanner): void   
+     + checkProduitMagasinDejaPanier(idPanier: int, idProduit: int, idMagasin: int): boolean    
+     + checkQteStockMagasin(idProduit: int, idMagasin: int, qte: int): boolean  
+     + getQteProduitPanier(idPanier: int, idProduit: int, idMagasin: int): int  
+     + insertProduitPanier(idPanier: int, idProduit: int, idMagasin: int, qteVoulue: int): void     
+     + updateProduitPanier(idPanier: int, idProduit: int, idMagasin: int, qteVoulue: int): void     
+     + afficherPanier(idPanier: int): String     
+     + estVide(idPanier: int): boolean   
+     + validerPanier(panier: Panier, choix: int): void   
+     + annulerPanier(panier: Panier): void   
 }
 
-class Commande 
-{
-    - idCommande: int
+class Magasin {
+    - idMagasin: int
+    - nomMagasin: String
+}
+
+class Panier {                  
+    - panierTermine: boolean           
+    - dateDebutPanier: Timestamp       
+    - dateFinPanier: Timestamp         
+
+    + Panier(idClient: int)            
+    + Panier(idPanier: int, idClient: int, dateDebutPanier: Timestamp) 
+    + getIdPanier(): int               
+    + setIdPanier(idPanier: int): void 
+    + getIdClient(): int               
+    + getClient(): Client              
+    + isPanierTermine(): boolean      
+    + setPanierTermine(panierTermine: boolean): void 
+    + getDateDebutPanier(): Timestamp  
+    + getDateFinPanier(): Timestamp    
+    + setDateFinPanier(dateFinPanier: Timestamp): void 
+    + exists(): boolean     
+}
+
+class Commande {
     - idPanier: int
-    - statutCommande: String
     - typeCommande: String
+    - statutCommande: String
     - dateReception: Timestamp
     - datePreparation: Timestamp
     - dateFinalisation: Timestamp
-
-    + Commande(idPanier: int, typeCommande: String, dateReception: Timestamp)
+    
     + getIdCommande(): int
-    + getIdPanier(): int
-    + getStatutCommande(): String
-    + getTypeCommande(): String
-    + getDateReception(): Timestamp
-    + getDatePreparation(): Timestamp
-    + getDateFinalisation(): Timestamp
     + setIdCommande(idCommande: int): void
-    + setIdPanier(idPanier: int): void
-    + setStatutCommande(statutCommande: String): void
+    + getIdPanier(): int
+    + getTypeCommande(): String
     + setTypeCommande(typeCommande: String): void
+    + getStatutCommande(): String
+    + setStatutCommande(statutCommande: String): void
+    + getDateReception(): Timestamp
     + setDateReception(dateReception: Timestamp): void
+    + getDatePreparation(): Timestamp
     + setDatePreparation(datePreparation: Timestamp): void
+    + getDateFinalisation(): Timestamp
     + setDateFinalisation(dateFinalisation: Timestamp): void
     + toString(): String
 }
 
-class Panier_Produit 
-{
-    - idPanier: int
-    - idProduit: int
+class PreparateurDAO {
+    + getCommandesEnAttente(): List<Commande>             
+    + getCommandesPreparees(): List<Commande>             
+    + getCommandesFinalisees(): List<Commande>            
+    + commencerAPreparer(idCommande: int): void           
+    + finaliserCommande(idCommande: int): void       
+}
+
+class Panier_Produit {
     + quantiteDemande: int
     + modeLivraison: enum
 }
 
-class Gestionnaire 
-{
-    + ajouterProduitCatalogue(p: Produit): void
-    + majProduitCatalogue(p: Produit): void
-    + supprProduitCatalogue(p: Produit): void
-    + majStockProduit(idProduit: int, quantite: int, idsMagasins: List<int>, augmenter: boolean): void
+class GestionnaireDAO {                             
+    + ajouterProduitCatalogue(p: Produit, idCategorie: int): void 
+    + majStockProduit(idProduit: int, quantite: int, idMagasin: int, augmenter: boolean): void 
+    + getProduitPlusCommandes(): String                    
+    + getTopsCategories(): String                          
+    + getTopClientsNbCommandes(): String                   
+    + getTopsClientsChiffreAffaires(): String              
+    + calculerTempsMoyenRealisationPaniers(): double       
+    + calculerTempsMoyenPreparationCommandes(): double     
+    + importerProduitsDepuisCSV(cheminFichier: String): void 
+    + analyserProfilsClients(): void
 }
 
-'Les relations entre les tables'
+class panier_commande{}
 
-Client "1" --> "0..*" Client_Profil : "a le profil"
-Profil "1" --> "0..*" Client_Profil : "appartient au client"
-Client "1" --> "0..*" Panier : "rempli"
-Magasin "1" --> "0..*" Panier : "choisi"
-Panier "1" --> "0..1" Commande : "associé à"
-Panier "1" --> "0..*" Panier_Produit : "contiens"
-Produit "1" --> "0..*" Panier_Produit : "est contenu"
-Produit "1" --> "0..*" Appartenir : "fait partie"
-Categorie "1" --> "0..*" Appartenir : "possède"
-Magasin "1" --> "0..*" Stocker : "stock"
-Produit "1" --> "0..*" Stocker : "fait parti du stock"
-Gestionnaire "1" --> "0..*" Produit : "gère"
+' Associations
+Produit "1" -- "*" ProduitDAO : gère
+CategorieDAO "1" -- "*" Appartenir : gère
+Client "1" -- "*" ClientDAO : gère
+Panier "1" -- "*" PanierDAO : gère
+GestionnaireDAO "1" -- "*" Produit : gère
+PreparateurDAO "1" -- "*" Commande : gère
+Panier "1" -- "*" Client : rempli
+Commande "1" -- "*" panier_commande : contient
+Panier "1" -- "*" panier_commande: fait partie
+Produit "1" -- "*" Appartenir : appartient à
+Produit "1" -- "*" Stocker : stocké dans
+Produit "1" -- "*" Panier_Produit : ajouté à
+Panier "1" -- "*" Panier_Produit : contient
+Magasin "1" -- "*" Panier_Produit : disponible dans
+ProduitRemplacements "1" -- "*" Panier_Produit : proposé comme
 
 @enduml
