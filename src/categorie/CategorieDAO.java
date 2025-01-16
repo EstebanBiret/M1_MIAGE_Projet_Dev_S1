@@ -74,12 +74,9 @@ public class CategorieDAO {
 
                 List<Produit> produitsCategorie = produitDAO.produitsParCategorie(categorieChoisie);
 
-                if (produitsCategorie.isEmpty()) {
-                    System.out.println("Aucun produit trouvé dans la catégorie : " + categorieChoisie);
-                } else {
-                    // Appel à la méthode de pagination
+                if (!produitsCategorie.isEmpty()) {
                     AppClient.afficherProduitsAvecPagination(produitsCategorie, scanner, panierClient);
-                }
+                } 
             } else if (choix != 0) {
                 System.out.println("Choix invalide. Veuillez réessayer.");
             }

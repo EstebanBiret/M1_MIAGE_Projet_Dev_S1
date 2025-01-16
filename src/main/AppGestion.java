@@ -46,10 +46,7 @@ public class AppGestion {
 
         Scanner scanner = new Scanner(System.in);
         int choix = -1;
-
-        marc.analyserProfilsClients();
-        
-        
+                
         while (choix != 0) {
             menuGestion();
             System.out.print("Veuillez choisir une option : ");
@@ -256,7 +253,7 @@ public class AppGestion {
                     }
                     break;
                 case 6:
-                    //TODO
+                    marc.analyserProfilsClients();  // Appelle la méthode d'analyse des profils
                     break;
 
                 case 0:

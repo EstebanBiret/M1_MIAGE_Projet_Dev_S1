@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
+
 import src.client.Client;
 import src.client.ClientDAO;
 import src.produit.Produit;
@@ -403,25 +405,28 @@ public class GestionnaireDAO {
         return res.toString();
     }
     
-    //US 3.2
     // Méthode pour calculer le temps moyen de réalisation des paniers terminés (en heures)
     public double calculerTempsMoyenRealisationPaniers() {
         try (Connection connection = DBConnection.getConnection()){
-        String queryTempsMoyen = "SELECT AVG(TIMESTAMPDIFF(HOUR, dateDebutPanier, dateFinPanier)) AS tempsMoyen " +
-                                 "FROM panier " +
-                                 "WHERE panierTermine = TRUE AND dateFinPanier IS NOT NULL";
-        try (PreparedStatement pstmtTempsMoyen = connection.prepareStatement(queryTempsMoyen)) {
-            try (ResultSet rs = pstmtTempsMoyen.executeQuery()) {
-                if (rs.next()) {
-                    double tempsMoyenHeures = rs.getDouble("tempsMoyen");
-                    return tempsMoyenHeures;
+            String queryTempsMoyen = "SELECT AVG(TIMESTAMPDIFF(HOUR, dateDebutPanier, dateFinPanier)) AS tempsMoyen " +
+                                    "FROM panier " +
+                                    "WHERE panierTermine = TRUE AND dateFinPanier IS NOT NULL";
+            try (PreparedStatement pstmtTempsMoyen = connection.prepareStatement(queryTempsMoyen)) {
+                try (ResultSet rs = pstmtTempsMoyen.executeQuery()) {
+                    if (rs.next()) {
+                        double tempsMoyenHeures = rs.getDouble("tempsMoyen");
+
+                        //on arrondit
+                        return Math.round(tempsMoyenHeures * 10.0) / 10.0;
+                    }
                 }
-            }
-        } } catch (SQLException e) {
+            } 
+        } catch (SQLException e) {
             System.err.println("Erreur lors du calcul du temps moyen de réalisation des paniers : " + e.getMessage());
         }
         return 0;
     }
+
     // Méthode pour calculer le temps moyen de préparation des commandes (en heures)
     public double calculerTempsMoyenPreparationCommandes() {
         double tempsMoyen = 0;
@@ -478,7 +483,6 @@ public class GestionnaireDAO {
         }
     }
 
-    //TODO afficher les profils des clients (pour chaque client, on regarde si 50% ou plus de ses produits commandés sont dans la même catégorie, si oui, on lui attribue le profil correspondant)
     public void analyserProfilsClients() {
         String requeteCategoriesClients = """
             SELECT c.idClient, c.nomClient, c.prenomClient, cat.nomCategorie, COUNT(pp.idProduit) AS productCount
@@ -491,117 +495,54 @@ public class GestionnaireDAO {
             GROUP BY c.idClient, c.nomClient, c.prenomClient, cat.nomCategorie
             ORDER BY c.idClient, productCount DESC;
         """;
-    
+
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(requeteCategoriesClients)) {
-    
+            PreparedStatement stmt = conn.prepareStatement(requeteCategoriesClients)) {
+
             ResultSet rs = stmt.executeQuery();
             Map<Integer, Map<String, Integer>> comptageCategoriesClients = new HashMap<>();
-    
+
             // Agréger le comptage des catégories pour chaque client
-            int clientCount = 0;  // Pour suivre le nombre de clients traités
             while (rs.next()) {
-                clientCount++;  // Incrémenter le nombre de clients traités
-    
                 int idClient = rs.getInt("idClient");
                 String categorie = rs.getString("nomCategorie");
                 int nombreProduits = rs.getInt("productCount");
-    
+
                 comptageCategoriesClients
                     .computeIfAbsent(idClient, k -> new HashMap<>())
                     .merge(categorie, nombreProduits, Integer::sum);
             }
-    
-            System.out.println("Nombre total de clients traités : " + clientCount);  // Sortie de débogage
-    
-            // Maintenant, déterminer le profil de chaque client
-            Map<Integer, String> profilsClients = new HashMap<>();
+
+            //trouver les profils avec le nombre de clients
+            Map<String, Integer> comptageCategories = new HashMap<>();
             for (Map.Entry<Integer, Map<String, Integer>> entry : comptageCategoriesClients.entrySet()) {
-                int idClient = entry.getKey();
-                Map<String, Integer> comptageCategories = entry.getValue();
-    
-                // Calculer le nombre total de produits pour le client
-                int totalProduits = comptageCategories.values().stream().mapToInt(Integer::intValue).sum();
-    
-                // Trouver la catégorie ayant le plus grand pourcentage du total
-                String categorieDominante = null;
-                int nombreCategorieDominante = 0;
-                for (Map.Entry<String, Integer> categorieEntry : comptageCategories.entrySet()) {
+                Map<String, Integer> comptageCategoriesClient = entry.getValue();
+
+                int totalProduits = comptageCategoriesClient.values().stream().mapToInt(Integer::intValue).sum();
+
+                // Vérifier si le client a une catégorie dominante
+                for (Map.Entry<String, Integer> categorieEntry : comptageCategoriesClient.entrySet()) {
                     String categorie = categorieEntry.getKey();
-                    int nombreCategorie = categorieEntry.getValue();
-    
-                    // Vérifier si le nombre de produits d'une catégorie représente plus de 40% du total
-                    if (nombreCategorie * 100 / totalProduits > 40) {
-                        categorieDominante = categorie;
-                        break;
+                    int nombreProduits = categorieEntry.getValue();
+
+                    // Si 40% ou plus des produits du client sont dans cette catégorie
+                    if (nombreProduits * 100 / totalProduits >= 40) {
+                        comptageCategories.put(categorie, comptageCategories.getOrDefault(categorie, 0) + 1);
                     }
-    
-                    // Sinon, trouver la catégorie ayant le plus grand nombre de produits
-                    if (nombreCategorie > nombreCategorieDominante) {
-                        categorieDominante = categorie;
-                        nombreCategorieDominante = nombreCategorie;
-                    }
-                }
-    
-                // Assigner la catégorie dominante au client
-                if (categorieDominante != null) {
-                    profilsClients.put(idClient, categorieDominante);
                 }
             }
-    
-            // Afficher les profils pour chaque client
-            System.out.println("\nProfils des clients :");
-            profilsClients.forEach((id, categorie) ->
-                System.out.println("ID Client : " + id + ", Catégorie Dominante : " + categorie)
-            );
-    
-        } catch (Exception e) {
+
+            // Afficher les catégories avec le nombre de clients
+            System.out.println("\n Profils de consommateurs :");
+            for (Map.Entry<String, Integer> entry : comptageCategories.entrySet()) {
+                String categorie = entry.getKey();
+                int nbClients = entry.getValue();
+                System.out.println(categorie + " (" + nbClients + " clients)");
+            }
+
+        } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("Une erreur est survenue lors de l'analyse des profils des clients.");
         }
     }
-    
-    public void obtenirClientsParCategorie(String nomCategorie) {
-        String requete = """
-            SELECT c.idClient, c.nomClient, c.prenomClient
-            FROM CLIENT c
-            WHERE c.idClient IN (
-                SELECT DISTINCT c2.idClient
-                FROM CLIENT c2
-                JOIN PANIER p ON c2.idClient = p.idClient
-                JOIN panier_produit_magasin pp ON p.idPanier = pp.idPanier
-                JOIN PRODUIT pr ON pp.idProduit = pr.idProduit
-                JOIN Appartenir ap ON pr.idProduit = ap.idProduit
-                JOIN CATEGORIE cat ON ap.idCategorie = cat.idCategorie
-                WHERE cat.nomCategorie = ?
-            );
-        """;
-    
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(requete)) {
-    
-            stmt.setString(1, nomCategorie);
-            ResultSet rs = stmt.executeQuery();
-    
-            System.out.println("Clients avec la catégorie '" + nomCategorie + "' :");
-            boolean aDesResultats = false;
-    
-            while (rs.next()) {
-                aDesResultats = true;
-                int idClient = rs.getInt("idClient");
-                String nomClient = rs.getString("nomClient");
-                String prenomClient = rs.getString("prenomClient");
-                System.out.println("ID Client : " + idClient + ", Nom : " + prenomClient + " " + nomClient);
-            }
-    
-            if (!aDesResultats) {
-                System.out.println("Aucun client trouvé pour la catégorie '" + nomCategorie + "'.");
-            }
-    
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Une erreur est survenue lors de la récupération des clients par catégorie.");
-        }
-    }
-    
 }   

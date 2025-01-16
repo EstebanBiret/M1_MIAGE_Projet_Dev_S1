@@ -720,6 +720,320 @@ INSERT INTO produit (libelleProduit, prixUnitaire, prixKilo, nutriscore, poidsPr
 ('Projecteur LED', 60.00, NULL, NULL, 1.500, 'Boîte 1.5kg', 'Philips'),
 ('Vase en céramique', 30.00, NULL, NULL, 2.000, 'Pièce', 'Ikea');
 
+-- Insertion des données pour la table CATEGORIE
+INSERT INTO categorie (nomCategorie) VALUES
+('Produits frais'),
+('Produits bio'),
+('Produits surgelés'),
+('Épicerie'),
+('Boissons'),
+('Snacks'),
+('Plats préparés'),
+('Pâtisseries et confiseries'),
+('Produits pour bébés'),
+('Jardin'),
+('Électroménager'),
+('Mode'),
+('Livres'),
+('Mobilier'),
+('Décoration'),
+('Bricolage'),
+('Sports'),
+('Informatique'),
+('High-tech'),
+('Beauté et soin'),
+('Hygiène'),
+('Produits pour animaux'),
+('Papeterie'),
+('Jouets'),
+('Bagages et maroquinerie'),
+('Auto et moto');
+
+INSERT INTO appartenir (idCategorie, idProduit) VALUES
+(1, 1), (1, 2), (2, 7), (2, 8), (3, 5), (3, 6),
+(4, 13), (4, 14), (5, 21), (5, 22), (6, 33), (6, 34),
+(7, 27), (7, 28), (8, 29), (8, 30), (9, 17), (9, 18),
+(10, 19), (10, 20), (11, 25), (11, 26), (12, 11), (12, 12),
+(13, 3), (13, 4), (14, 9), (14, 10), (15, 15), (15, 16),
+(16, 23), (16, 24), (17, 31), (17, 32), (18, 35), (18, 36),
+(19, 37), (19, 38), (5, 39), (20, 40), (21, 41), (21, 42),
+(22, 43), (22, 44), (23, 45), (23, 46), (24, 47), (24, 48),
+(25, 49), (25, 50),
+(1, 51),  -- Pois chiches bio -> Produits frais
+(2, 52),  -- Chips nature (Lay's) -> Snacks
+(2, 53),  -- Chips nature (Bret's) -> Snacks
+(3, 54),  -- Pizza Margherita (Buitoni) -> Produits surgelés
+(3, 55),  -- Pizza Margherita (Dr. Oetker) -> Produits surgelés
+(4, 56),  -- Céréales complètes (Jordan's) -> Épicerie
+(4, 57),  -- Céréales complètes (Nestlé) -> Épicerie
+(1, 58),  -- Yaourt aux fruits (Danone) -> Produits frais
+(1, 59),  -- Yaourt aux fruits (Yoplait) -> Produits frais
+(4, 60),  -- Pain de mie complet (Harry's) -> Épicerie
+(4, 61),  -- Pain de mie complet (Jacquet) -> Épicerie
+(5, 62),  -- Jus de pomme bio (Innocent) -> Boissons
+(5, 63),  -- Jus de pomme bio (Carrefour Bio) -> Boissons
+(7, 64),  -- Raviolis bolognaise (Zapetti) -> Plats préparés
+(7, 65),  -- Raviolis bolognaise (William Saurin) -> Plats préparés
+(2, 66),  -- Quinoa bio (Markal) -> Produits bio
+(2, 68),  -- Quinoa bio (Carrefour Bio) -> Produits bio
+(8, 69),  -- Compote de pommes (Materne) -> Pâtisseries et confiseries
+(1, 70),  -- Saucisses de Strasbourg (Herta) -> Produits frais
+(1, 71),  -- Saucisses de Strasbourg (Fleury Michon) -> Produits frais
+(3, 72),  -- Bâtonnets de poisson (Findus) -> Produits surgelés
+(3, 73),  -- Bâtonnets de poisson (Iglo) -> Produits surgelés
+(2, 74),  -- Riz complet bio (Markal) -> Produits bio
+(2, 75),  -- Riz complet bio (Taureau Ailé) -> Produits bio
+(5, 76),  -- Lait d'amande (Alpro) -> Boissons
+(5, 77),  -- Lait d'amande (Bjorg) -> Boissons
+(2, 78),  -- Thé vert bio (Lipton) -> Produits bio
+(2, 79),  -- Thé vert bio (Twinings) -> Produits bio
+(8, 80),  -- Gâteau au chocolat (Bonne Maman) -> Pâtisseries et confiseries
+(8, 81),  -- Gâteau au chocolat (La Mie Câline) -> Pâtisseries et confiseries
+(8, 82),  -- Confiture d'abricot (Bonne Maman) -> Pâtisseries et confiseries
+(8, 83),  -- Confiture d'abricot (Andros) -> Pâtisseries et confiseries
+(2, 84),  -- Farine de blé bio (Markal) -> Produits bio
+(2, 85),  -- Farine de blé bio (Francine) -> Produits bio
+(8, 86),  -- Chocolat noir 85% (Lindt) -> Pâtisseries et confiseries
+(8, 87),  -- Chocolat noir 85% (Nestlé) -> Pâtisseries et confiseries
+(1, 88),  -- Yaourt aux fraises (Danone) -> Produits frais
+(1, 89),  -- Yaourt aux fraises (Yoplait) -> Produits frais
+(2, 90),  -- Filet de cabillaud (Labeyrie) -> Produits bio
+(2, 91),  -- Filet de cabillaud (Marine Harvest) -> Produits bio
+(1, 92),  -- Banane bio (Bio Village) -> Produits frais
+(1, 93),  -- Banane bio (Carrefour Bio) -> Produits frais
+(8, 94),  -- Croissant au beurre (Tradition) -> Pâtisseries et confiseries
+(8, 95),  -- Croissant au beurre (Le Fournil) -> Pâtisseries et confiseries
+(7, 96),  -- Lasagnes bio (Barilla) -> Plats préparés
+(7, 97),  -- Lasagnes bio (Panzani) -> Plats préparés
+(1, 98),  -- Camembert bio (Président) -> Produits frais
+(1, 99),  -- Camembert bio (Soignon) -> Produits frais
+(2, 100), -- Pois cassés bio (Markal) -> Produits bio
+(2, 101), -- Pois cassés bio (Carrefour Bio) -> Produits bio
+
+-- Carottes râpées bio
+(1, 102), -- Produits frais
+(2, 102), -- Produits bio
+
+-- Riz jasmin bio (Taureau Ailé)
+(4, 103), -- Épicerie
+(2, 103), -- Produits bio
+
+-- Riz jasmin bio (Carrefour Bio)
+(4, 104), -- Épicerie
+(2, 104), -- Produits bio
+
+-- Huile de colza bio (Puget)
+(4, 105), -- Épicerie
+(2, 105), -- Produits bio
+
+-- Huile de colza bio (Terre d’Italie)
+(4, 106), -- Épicerie
+(2, 106), -- Produits bio
+
+-- Chocolat blanc (Lindt)
+(8, 107), -- Pâtisseries et confiseries
+
+-- Chocolat blanc (Milka)
+(8, 108), -- Pâtisseries et confiseries
+
+-- Lait entier bio (Lactel)
+(2, 109), -- Produits bio
+(21, 109), -- Hygiène
+
+-- Lait entier bio (Carrefour Bio)
+(2, 110), -- Produits bio
+(21, 110), -- Hygiène
+
+-- Saucisse fumée (Herta)
+(1, 111), -- Produits frais
+
+-- Saucisse fumée (Fleury Michon)
+(1, 112), -- Produits frais
+
+-- Gâteau au yaourt (Bonne Maman)
+(8, 113), -- Pâtisseries et confiseries
+
+-- Gâteau au yaourt (La Mie Câline)
+(8, 114), -- Pâtisseries et confiseries
+
+-- Thé noir bio (Lipton)
+(2, 115), -- Produits bio
+(4, 115), -- Épicerie
+
+-- Thé noir bio (Twinings)
+(2, 116), -- Produits bio
+(4, 116), -- Épicerie
+
+-- Compote de poire (Materne)
+(4, 117), -- Épicerie
+(8, 117), -- Pâtisseries et confiseries
+
+-- Compote de poire (Andros)
+(4, 118), -- Épicerie
+(8, 118), -- Pâtisseries et confiseries
+
+-- Pâtes tortellini (Barilla)
+(4, 119), -- Épicerie
+
+-- Pâtes tortellini (Panzani)
+(4, 120), -- Épicerie
+
+-- Lentilles corail bio (Markal)
+(4, 121), -- Épicerie
+(2, 121), -- Produits bio
+
+-- Lentilles corail bio (Carrefour Bio)
+(4, 122), -- Épicerie
+(2, 122), -- Produits bio
+
+-- Crème fraîche bio (Président)
+(1, 123), -- Produits frais
+(2, 123), -- Produits bio
+
+-- Crème fraîche bio (Elle & Vire)
+(1, 124), -- Produits frais
+(2, 124), -- Produits bio
+
+-- Farine complète bio (Francine)
+(4, 125), -- Épicerie
+(2, 125), -- Produits bio
+
+-- Farine complète bio (Markal)
+(4, 126), -- Épicerie
+(2, 126), -- Produits bio
+
+-- Jus multifruits (Innocent)
+(5, 127), -- Boissons
+(2, 127), -- Produits bio
+
+-- Jus multifruits (Carrefour Bio)
+(5, 128), -- Boissons
+(2, 128), -- Produits bio
+
+-- Bouillon de légumes (Knorr)
+(4, 129), -- Épicerie
+
+-- Bouillon de légumes (Maggi)
+(4, 130), -- Épicerie
+
+-- Biscuits apéritifs (Belin)
+(6, 131), -- Snacks
+
+-- Biscuits apéritifs (Bret’s)
+(6, 132), -- Snacks
+
+-- Steak haché 5% MG (Charal)
+(1, 133), -- Produits frais
+
+-- Steak haché 15% MG (Bigard)
+(1, 134), -- Produits frais
+
+-- Escalope de dinde (Le Gaulois)
+(1, 135), -- Produits frais
+
+-- Escalope de poulet (Maître Coq)
+(1, 136), -- Produits frais
+
+-- Côte de porc (Bigard)
+(1, 137), -- Produits frais
+
+-- Côte de veau (Charal)
+(1, 138), -- Produits frais
+
+-- Saucisse de Toulouse (Jean Rozé)
+(1, 139), -- Produits frais
+
+-- Saucisse fumée (Herta)
+(1, 140), -- Produits frais
+
+-- Rôti de porc (Fleury Michon)
+(1, 141), -- Produits frais
+
+-- Rôti de veau (Charal)
+(1, 142), -- Produits frais
+
+-- Cuisses de poulet (Le Gaulois)
+(1, 143), -- Produits frais
+
+-- Filet de canard (Fleury Michon)
+(1, 144), -- Produits frais
+
+-- Foie gras (Labeyrie)
+(1, 145), -- Produits frais
+
+-- Magret de canard (Jean Rozé)
+(1, 146), -- Produits frais
+
+-- Cuisse de lapin (Fleury Michon)
+(1, 147), -- Produits frais
+
+-- Filet mignon de porc (Herta)
+(1, 148), -- Produits frais
+
+-- Tournedos de bœuf (Charal)
+(1, 149), -- Produits frais
+
+-- Rosbif (Jean Rozé)
+(1, 150), -- Produits frais
+
+-- Jarret de veau (Bigard)
+(1, 151), -- Produits frais
+
+-- Émincé de bœuf (Charal)
+(1, 152),-- Produits frais
+(1, 153), -- Gigot d’agneau -> Produits frais
+(10, 154), -- Tondeuse à gazon -> Jardin
+(11, 155), -- Robot de cuisine -> Électroménager
+(12, 156), -- Pull en laine -> Mode
+(19, 157), -- Console de jeux vidéo -> High-tech
+(13, 158), -- Livre de cuisine -> Livres
+(15, 159), -- Chaise de bureau -> Mobilier
+(15, 160), -- Table basse -> Mobilier
+(16, 161), -- Perceuse sans fil -> Bricolage
+(17, 162), -- Rameur de fitness -> Sports
+(19, 163), -- Smartphone -> High-tech
+(19, 164), -- Tablette tactile -> High-tech
+(20, 165), -- Shampooing bio -> Beauté et soin
+(20, 166), -- Parfum floral -> Beauté et soin
+(11, 167), -- Grill électrique -> Électroménager
+(10, 168), -- Jardinère extérieure -> Jardin
+(15, 169), -- Lit double -> Mobilier
+(21, 170), -- Sèche-cheveux -> Hygiène
+(19, 171), -- Montre connectée -> High-tech
+(18, 172), -- Guitare acoustique -> Informatique
+(19, 173), -- Caméra de surveillance -> High-tech
+(17, 174), -- Tapis de yoga -> Sports
+(15, 175), -- Bougie parfumée -> Décoration
+(19, 176), -- Enceinte Bluetooth -> High-tech
+(19, 177), -- Casque audio -> High-tech
+(19, 178), -- Liseuse électronique -> High-tech
+(17, 179), -- Vélo électrique -> Sports
+(10, 180), -- Plante verte -> Jardin
+(11, 181), -- Machine à laver -> Électroménager
+(15, 182), -- Lampadaire design -> Décoration
+(15, 183), -- Miroir mural -> Décoration
+(14, 184), -- Couverts inox -> Épicerie
+(14, 185), -- Serviettes de bain -> Épicerie
+(11, 186), -- Presse-agrumes électrique -> Électroménager
+(11, 187), -- Réfrigérateur -> Électroménager
+(11, 188), -- Four à micro-ondes -> Électroménager
+(15, 189), -- Tapis d’entrée -> Décoration
+(24, 190), -- Jeu de société -> Jouets
+(11, 191), -- Aspirateur robot -> Électroménager
+(14, 192), -- Set de casseroles -> Épicerie
+(10, 193), -- Hamac de jardin -> Jardin
+(11, 194), -- Ventilateur colonne -> Électroménager
+(15, 195), -- Armoire de rangement -> Mobilier
+(11, 196), -- Plancha électrique -> Électroménager
+(15, 197), -- Boîte de rangement plastique -> Décoration
+(25, 198), -- Valise cabine -> Bagages et maroquinerie
+(11, 199), -- Mixeur plongeant -> Électroménager
+(15, 200), -- Abat-jour -> Décoration
+(15, 201), -- Horloge murale -> Décoration
+(11, 202), -- Machine à coudre -> Électroménager
+(19, 203), -- Projecteur LED -> High-tech
+(15,204);
+
 INSERT INTO stocker (idMagasin, idProduit, quantiteEnStock) VALUES
 (15, 55, 462),
 (16, 23, 215),
@@ -2718,321 +3032,6 @@ INSERT INTO stocker (idMagasin, idProduit, quantiteEnStock) VALUES
 (12, 160, 409),
 (15, 203, 487);
 
--- Insertion des données pour la table CATEGORIE
-INSERT INTO categorie (nomCategorie) VALUES
-('Produits frais'),
-('Produits bio'),
-('Produits surgelés'),
-('Épicerie'),
-('Boissons'),
-('Snacks'),
-('Plats préparés'),
-('Pâtisseries et confiseries'),
-('Produits pour bébés'),
-('Jardin'),
-('Électroménager'),
-('Mode'),
-('Livres'),
-('Mobilier'),
-('Décoration'),
-('Bricolage'),
-('Sports'),
-('Informatique'),
-('High-tech'),
-('Beauté et soin'),
-('Hygiène'),
-('Produits pour animaux'),
-('Papeterie'),
-('Jouets'),
-('Bagages et maroquinerie'),
-('Auto et moto');
-
-INSERT INTO appartenir (idCategorie, idProduit) VALUES
-(1, 1), (1, 2), (2, 7), (2, 8), (3, 5), (3, 6),
-(4, 13), (4, 14), (5, 21), (5, 22), (6, 33), (6, 34),
-(7, 27), (7, 28), (8, 29), (8, 30), (9, 17), (9, 18),
-(10, 19), (10, 20), (11, 25), (11, 26), (12, 11), (12, 12),
-(13, 3), (13, 4), (14, 9), (14, 10), (15, 15), (15, 16),
-(16, 23), (16, 24), (17, 31), (17, 32), (18, 35), (18, 36),
-(19, 37), (19, 38), (5, 39), (20, 40), (21, 41), (21, 42),
-(22, 43), (22, 44), (23, 45), (23, 46), (24, 47), (24, 48),
-(25, 49), (25, 50),
-(1, 51),  -- Pois chiches bio -> Produits frais
-(2, 52),  -- Chips nature (Lay's) -> Snacks
-(2, 53),  -- Chips nature (Bret's) -> Snacks
-(3, 54),  -- Pizza Margherita (Buitoni) -> Produits surgelés
-(3, 55),  -- Pizza Margherita (Dr. Oetker) -> Produits surgelés
-(4, 56),  -- Céréales complètes (Jordan's) -> Épicerie
-(4, 57),  -- Céréales complètes (Nestlé) -> Épicerie
-(1, 58),  -- Yaourt aux fruits (Danone) -> Produits frais
-(1, 59),  -- Yaourt aux fruits (Yoplait) -> Produits frais
-(4, 60),  -- Pain de mie complet (Harry's) -> Épicerie
-(4, 61),  -- Pain de mie complet (Jacquet) -> Épicerie
-(5, 62),  -- Jus de pomme bio (Innocent) -> Boissons
-(5, 63),  -- Jus de pomme bio (Carrefour Bio) -> Boissons
-(7, 64),  -- Raviolis bolognaise (Zapetti) -> Plats préparés
-(7, 65),  -- Raviolis bolognaise (William Saurin) -> Plats préparés
-(2, 66),  -- Quinoa bio (Markal) -> Produits bio
-(2, 67),  -- Quinoa bio (Carrefour Bio) -> Produits bio
-(8, 68),  -- Compote de pommes (Materne) -> Pâtisseries et confiseries
-(8, 69),  -- Compote de pommes (Andros) -> Pâtisseries et confiseries
-(1, 70),  -- Saucisses de Strasbourg (Herta) -> Produits frais
-(1, 71),  -- Saucisses de Strasbourg (Fleury Michon) -> Produits frais
-(3, 72),  -- Bâtonnets de poisson (Findus) -> Produits surgelés
-(3, 73),  -- Bâtonnets de poisson (Iglo) -> Produits surgelés
-(2, 74),  -- Riz complet bio (Markal) -> Produits bio
-(2, 75),  -- Riz complet bio (Taureau Ailé) -> Produits bio
-(5, 76),  -- Lait d'amande (Alpro) -> Boissons
-(5, 77),  -- Lait d'amande (Bjorg) -> Boissons
-(2, 78),  -- Thé vert bio (Lipton) -> Produits bio
-(2, 79),  -- Thé vert bio (Twinings) -> Produits bio
-(8, 80),  -- Gâteau au chocolat (Bonne Maman) -> Pâtisseries et confiseries
-(8, 81),  -- Gâteau au chocolat (La Mie Câline) -> Pâtisseries et confiseries
-(8, 82),  -- Confiture d'abricot (Bonne Maman) -> Pâtisseries et confiseries
-(8, 83),  -- Confiture d'abricot (Andros) -> Pâtisseries et confiseries
-(2, 84),  -- Farine de blé bio (Markal) -> Produits bio
-(2, 85),  -- Farine de blé bio (Francine) -> Produits bio
-(8, 86),  -- Chocolat noir 85% (Lindt) -> Pâtisseries et confiseries
-(8, 87),  -- Chocolat noir 85% (Nestlé) -> Pâtisseries et confiseries
-(1, 88),  -- Yaourt aux fraises (Danone) -> Produits frais
-(1, 89),  -- Yaourt aux fraises (Yoplait) -> Produits frais
-(2, 90),  -- Filet de cabillaud (Labeyrie) -> Produits bio
-(2, 91),  -- Filet de cabillaud (Marine Harvest) -> Produits bio
-(1, 92),  -- Banane bio (Bio Village) -> Produits frais
-(1, 93),  -- Banane bio (Carrefour Bio) -> Produits frais
-(8, 94),  -- Croissant au beurre (Tradition) -> Pâtisseries et confiseries
-(8, 95),  -- Croissant au beurre (Le Fournil) -> Pâtisseries et confiseries
-(7, 96),  -- Lasagnes bio (Barilla) -> Plats préparés
-(7, 97),  -- Lasagnes bio (Panzani) -> Plats préparés
-(1, 98),  -- Camembert bio (Président) -> Produits frais
-(1, 99),  -- Camembert bio (Soignon) -> Produits frais
-(2, 100), -- Pois cassés bio (Markal) -> Produits bio
-(2, 101), -- Pois cassés bio (Carrefour Bio) -> Produits bio
-
--- Carottes râpées bio
-(1, 102), -- Produits frais
-(2, 102), -- Produits bio
-
--- Riz jasmin bio (Taureau Ailé)
-(4, 103), -- Épicerie
-(2, 103), -- Produits bio
-
--- Riz jasmin bio (Carrefour Bio)
-(4, 104), -- Épicerie
-(2, 104), -- Produits bio
-
--- Huile de colza bio (Puget)
-(4, 105), -- Épicerie
-(2, 105), -- Produits bio
-
--- Huile de colza bio (Terre d’Italie)
-(4, 106), -- Épicerie
-(2, 106), -- Produits bio
-
--- Chocolat blanc (Lindt)
-(8, 107), -- Pâtisseries et confiseries
-
--- Chocolat blanc (Milka)
-(8, 108), -- Pâtisseries et confiseries
-
--- Lait entier bio (Lactel)
-(2, 109), -- Produits bio
-(21, 109), -- Hygiène
-
--- Lait entier bio (Carrefour Bio)
-(2, 110), -- Produits bio
-(21, 110), -- Hygiène
-
--- Saucisse fumée (Herta)
-(1, 111), -- Produits frais
-
--- Saucisse fumée (Fleury Michon)
-(1, 112), -- Produits frais
-
--- Gâteau au yaourt (Bonne Maman)
-(8, 113), -- Pâtisseries et confiseries
-
--- Gâteau au yaourt (La Mie Câline)
-(8, 114), -- Pâtisseries et confiseries
-
--- Thé noir bio (Lipton)
-(2, 115), -- Produits bio
-(4, 115), -- Épicerie
-
--- Thé noir bio (Twinings)
-(2, 116), -- Produits bio
-(4, 116), -- Épicerie
-
--- Compote de poire (Materne)
-(4, 117), -- Épicerie
-(8, 117), -- Pâtisseries et confiseries
-
--- Compote de poire (Andros)
-(4, 118), -- Épicerie
-(8, 118), -- Pâtisseries et confiseries
-
--- Pâtes tortellini (Barilla)
-(4, 119), -- Épicerie
-
--- Pâtes tortellini (Panzani)
-(4, 120), -- Épicerie
-
--- Lentilles corail bio (Markal)
-(4, 121), -- Épicerie
-(2, 121), -- Produits bio
-
--- Lentilles corail bio (Carrefour Bio)
-(4, 122), -- Épicerie
-(2, 122), -- Produits bio
-
--- Crème fraîche bio (Président)
-(1, 123), -- Produits frais
-(2, 123), -- Produits bio
-
--- Crème fraîche bio (Elle & Vire)
-(1, 124), -- Produits frais
-(2, 124), -- Produits bio
-
--- Farine complète bio (Francine)
-(4, 125), -- Épicerie
-(2, 125), -- Produits bio
-
--- Farine complète bio (Markal)
-(4, 126), -- Épicerie
-(2, 126), -- Produits bio
-
--- Jus multifruits (Innocent)
-(5, 127), -- Boissons
-(2, 127), -- Produits bio
-
--- Jus multifruits (Carrefour Bio)
-(5, 128), -- Boissons
-(2, 128), -- Produits bio
-
--- Bouillon de légumes (Knorr)
-(4, 129), -- Épicerie
-
--- Bouillon de légumes (Maggi)
-(4, 130), -- Épicerie
-
--- Biscuits apéritifs (Belin)
-(6, 131), -- Snacks
-
--- Biscuits apéritifs (Bret’s)
-(6, 132), -- Snacks
-
--- Steak haché 5% MG (Charal)
-(1, 133), -- Produits frais
-
--- Steak haché 15% MG (Bigard)
-(1, 134), -- Produits frais
-
--- Escalope de dinde (Le Gaulois)
-(1, 135), -- Produits frais
-
--- Escalope de poulet (Maître Coq)
-(1, 136), -- Produits frais
-
--- Côte de porc (Bigard)
-(1, 137), -- Produits frais
-
--- Côte de veau (Charal)
-(1, 138), -- Produits frais
-
--- Saucisse de Toulouse (Jean Rozé)
-(1, 139), -- Produits frais
-
--- Saucisse fumée (Herta)
-(1, 140), -- Produits frais
-
--- Rôti de porc (Fleury Michon)
-(1, 141), -- Produits frais
-
--- Rôti de veau (Charal)
-(1, 142), -- Produits frais
-
--- Cuisses de poulet (Le Gaulois)
-(1, 143), -- Produits frais
-
--- Filet de canard (Fleury Michon)
-(1, 144), -- Produits frais
-
--- Foie gras (Labeyrie)
-(1, 145), -- Produits frais
-
--- Magret de canard (Jean Rozé)
-(1, 146), -- Produits frais
-
--- Cuisse de lapin (Fleury Michon)
-(1, 147), -- Produits frais
-
--- Filet mignon de porc (Herta)
-(1, 148), -- Produits frais
-
--- Tournedos de bœuf (Charal)
-(1, 149), -- Produits frais
-
--- Rosbif (Jean Rozé)
-(1, 150), -- Produits frais
-
--- Jarret de veau (Bigard)
-(1, 151), -- Produits frais
-
--- Émincé de bœuf (Charal)
-(1, 152),-- Produits frais
-(1, 153), -- Gigot d’agneau -> Produits frais
-(10, 154), -- Tondeuse à gazon -> Jardin
-(11, 155), -- Robot de cuisine -> Électroménager
-(12, 156), -- Pull en laine -> Mode
-(19, 157), -- Console de jeux vidéo -> High-tech
-(13, 158), -- Livre de cuisine -> Livres
-(15, 159), -- Chaise de bureau -> Mobilier
-(15, 160), -- Table basse -> Mobilier
-(16, 161), -- Perceuse sans fil -> Bricolage
-(17, 162), -- Rameur de fitness -> Sports
-(19, 163), -- Smartphone -> High-tech
-(19, 164), -- Tablette tactile -> High-tech
-(20, 165), -- Shampooing bio -> Beauté et soin
-(20, 166), -- Parfum floral -> Beauté et soin
-(11, 167), -- Grill électrique -> Électroménager
-(10, 168), -- Jardinère extérieure -> Jardin
-(15, 169), -- Lit double -> Mobilier
-(21, 170), -- Sèche-cheveux -> Hygiène
-(19, 171), -- Montre connectée -> High-tech
-(18, 172), -- Guitare acoustique -> Informatique
-(19, 173), -- Caméra de surveillance -> High-tech
-(17, 174), -- Tapis de yoga -> Sports
-(15, 175), -- Bougie parfumée -> Décoration
-(19, 176), -- Enceinte Bluetooth -> High-tech
-(19, 177), -- Casque audio -> High-tech
-(19, 178), -- Liseuse électronique -> High-tech
-(17, 179), -- Vélo électrique -> Sports
-(10, 180), -- Plante verte -> Jardin
-(11, 181), -- Machine à laver -> Électroménager
-(15, 182), -- Lampadaire design -> Décoration
-(15, 183), -- Miroir mural -> Décoration
-(14, 184), -- Couverts inox -> Épicerie
-(14, 185), -- Serviettes de bain -> Épicerie
-(11, 186), -- Presse-agrumes électrique -> Électroménager
-(11, 187), -- Réfrigérateur -> Électroménager
-(11, 188), -- Four à micro-ondes -> Électroménager
-(15, 189), -- Tapis d’entrée -> Décoration
-(24, 190), -- Jeu de société -> Jouets
-(11, 191), -- Aspirateur robot -> Électroménager
-(14, 192), -- Set de casseroles -> Épicerie
-(10, 193), -- Hamac de jardin -> Jardin
-(11, 194), -- Ventilateur colonne -> Électroménager
-(15, 195), -- Armoire de rangement -> Mobilier
-(11, 196), -- Plancha électrique -> Électroménager
-(15, 197), -- Boîte de rangement plastique -> Décoration
-(25, 198), -- Valise cabine -> Bagages et maroquinerie
-(11, 199), -- Mixeur plongeant -> Électroménager
-(15, 200), -- Abat-jour -> Décoration
-(15, 201), -- Horloge murale -> Décoration
-(11, 202), -- Machine à coudre -> Électroménager
-(19, 203), -- Projecteur LED -> High-tech
-(15,204);
-
 -- La table panier
 INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VALUES
 (1, TRUE, '2024-01-01 10:00:00', '2024-01-01 12:30:00'),
@@ -3221,109 +3220,109 @@ INSERT INTO panier (idClient, panierTermine, dateDebutPanier, dateFinPanier) VAL
 -- Données générées pour la table commande
 INSERT INTO commande (idPanier, typeCommande, statutCommande, dateReception, datePreparation, dateFinalisation) VALUES
 (1, 'livraison', 'preparation', '2024-01-01 12:30:00', '2024-01-01 14:30:00', NULL),
-(3, 'retrait', 'terminee', '2024-01-03 11:45:00', '2024-01-03 13:00:00', '2024-01-03 14:00:00'),
+(3, 'retrait', 'terminee', '2024-01-03 11:45:00', '2024-01-03 13:00:00', '2024-01-05 14:40:00'),
 (5, 'livraison', 'en attente', '2024-01-05 14:45:00', NULL, NULL),
 (7, 'retrait', 'preparation', '2024-01-07 19:20:00', '2024-01-07 21:00:00', NULL),
-(9, 'livraison', 'terminee', '2024-01-09 16:45:00', '2024-01-09 18:00:00', '2024-01-09 19:00:00'),
+(9, 'livraison', 'terminee', '2024-01-09 16:45:00', '2024-01-09 18:00:00', '2024-01-10 21:00:00'),
 (10, 'retrait', 'en attente', '2024-01-10 13:20:00', NULL, NULL),
 (12, 'livraison', 'preparation', '2024-01-12 18:30:00', '2024-01-12 20:00:00', NULL),
-(13, 'retrait', 'terminee', '2024-01-13 12:50:00', '2024-01-13 14:00:00', '2024-01-13 15:00:00'),
+(13, 'retrait', 'terminee', '2024-01-13 12:50:00', '2024-01-13 14:00:00', '2024-01-18 17:00:00'),
 (15, 'livraison', 'en attente', '2024-01-15 09:40:00', NULL, NULL),
 (17, 'retrait', 'preparation', '2024-01-17 11:30:00', '2024-01-17 13:00:00', NULL),
-(19, 'livraison', 'terminee', '2024-01-19 10:15:00', '2024-01-19 11:30:00', '2024-01-19 12:30:00'),
+(19, 'livraison', 'terminee', '2024-01-19 10:15:00', '2024-01-19 11:30:00', '2024-01-21 14:32:40'),
 (20, 'retrait', 'en attente', '2024-01-20 18:40:00', NULL, NULL),
 (22, 'livraison', 'preparation', '2024-01-22 12:50:00', '2024-01-22 14:00:00', NULL),
-(24, 'retrait', 'terminee', '2024-01-24 09:45:00', '2024-01-24 11:00:00', '2024-01-24 12:00:00'),
+(24, 'retrait', 'terminee', '2024-01-24 09:45:00', '2024-01-24 11:00:00', '2024-01-25 22:00:00'),
 (26, 'livraison', 'en attente', '2024-01-26 12:15:00', NULL, NULL),
 (28, 'retrait', 'preparation', '2024-01-28 10:40:00', '2024-01-28 12:00:00', NULL),
-(29, 'livraison', 'terminee', '2024-01-29 16:45:00', '2024-01-29 18:00:00', '2024-01-29 19:00:00'),
+(29, 'livraison', 'terminee', '2024-01-29 16:45:00', '2024-01-29 18:00:00', '2024-01-30 23:00:00'),
 (31, 'retrait', 'en attente', '2024-01-31 10:20:00', NULL, NULL),
 (33, 'livraison', 'preparation', '2024-02-02 12:40:00', '2024-02-02 14:00:00', NULL),
-(35, 'retrait', 'terminee', '2024-02-04 11:00:00', '2024-02-04 12:00:00', '2024-02-04 13:00:00'),
+(35, 'retrait', 'terminee', '2024-02-04 11:00:00', '2024-02-04 12:00:00', '2024-02-04 15:50:00'),
 (36, 'livraison', 'en attente', '2024-02-05 17:15:00', NULL, NULL),
 (38, 'retrait', 'preparation', '2024-02-07 10:10:00', '2024-02-07 11:30:00', NULL),
-(40, 'livraison', 'terminee', '2024-02-09 12:15:00', '2024-02-09 13:30:00', '2024-02-09 14:30:00'),
+(40, 'livraison', 'terminee', '2024-02-09 12:15:00', '2024-02-09 13:30:00', '2024-02-12 14:30:00'),
 (42, 'retrait', 'en attente', '2024-02-11 10:40:00', NULL, NULL),
 (43, 'livraison', 'preparation', '2024-02-12 16:30:00', '2024-02-12 18:00:00', NULL),
-(45, 'retrait', 'terminee', '2024-02-14 10:20:00', '2024-02-14 11:30:00', '2024-02-14 12:30:00'),
+(45, 'retrait', 'terminee', '2024-02-14 10:20:00', '2024-02-14 11:30:00', '2024-02-14 19:30:00'),
 (47, 'livraison', 'en attente', '2024-02-16 12:45:00', NULL, NULL),
 (49, 'retrait', 'preparation', '2024-02-18 09:40:00', '2024-02-18 11:00:00', NULL),
-(50, 'livraison', 'terminee', '2024-02-19 20:00:00', '2024-02-19 21:30:00', '2024-02-19 22:30:00'),
+(50, 'livraison', 'terminee', '2024-02-19 20:00:00', '2024-02-19 21:30:00', '2024-02-21 22:30:00'),
 (52, 'livraison', 'preparation', '2024-02-21 15:15:00', '2024-02-21 17:15:00', NULL),
-(54, 'retrait', 'terminee', '2024-02-23 18:10:00', '2024-02-23 20:10:00', '2024-02-23 21:10:00'),
+(54, 'retrait', 'terminee', '2024-02-23 18:10:00', '2024-02-23 20:10:00', '2024-02-25 23:10:00'),
 (56, 'livraison', 'en attente', '2024-02-25 10:15:00', NULL, NULL),
 (57, 'retrait', 'preparation', '2024-02-26 16:00:00', '2024-02-26 18:00:00', NULL),
-(59, 'livraison', 'terminee', '2024-02-28 09:30:00', '2024-02-28 11:30:00', '2024-02-28 12:30:00'),
+(59, 'livraison', 'terminee', '2024-02-28 09:30:00', '2024-02-28 11:30:00', '2024-02-28 17:30:00'),
 (61, 'retrait', 'en attente', '2024-03-01 10:00:00', NULL, NULL),
 (63, 'livraison', 'preparation', '2024-03-03 16:00:00', '2024-03-03 18:00:00', NULL),
-(64, 'retrait', 'terminee', '2024-03-04 10:45:00', '2024-03-04 12:45:00', '2024-03-04 13:45:00'),
+(64, 'retrait', 'terminee', '2024-03-04 10:45:00', '2024-03-04 12:45:00', '2024-03-08 13:45:00'),
 (66, 'livraison', 'en attente', '2024-03-06 19:00:00', NULL, NULL),
 (68, 'retrait', 'preparation', '2024-03-08 09:45:00', '2024-03-08 11:45:00', NULL),
-(69, 'livraison', 'terminee', '2024-03-09 17:00:00', '2024-03-09 19:00:00', '2024-03-09 20:00:00'),
+(69, 'livraison', 'terminee', '2024-03-09 17:00:00', '2024-03-09 19:00:00', '2024-03-15 20:00:00'),
 (71, 'retrait', 'en attente', '2024-03-11 10:10:00', NULL, NULL),
 (72, 'livraison', 'preparation', '2024-03-12 15:45:00', '2024-03-12 17:45:00', NULL),
-(74, 'retrait', 'terminee', '2024-03-14 17:45:00', '2024-03-14 19:45:00', '2024-03-14 20:45:00'),
+(74, 'retrait', 'terminee', '2024-03-14 17:45:00', '2024-03-14 19:45:00', '2024-03-17 20:45:00'),
 (75, 'livraison', 'en attente', '2024-03-15 11:30:00', NULL, NULL),
 (77, 'retrait', 'preparation', '2024-03-17 16:30:00', '2024-03-17 18:30:00', NULL),
-(79, 'livraison', 'terminee', '2024-03-19 09:30:00', '2024-03-19 11:30:00', '2024-03-19 12:30:00'),
+(79, 'livraison', 'terminee', '2024-03-19 09:30:00', '2024-03-19 11:30:00', '2024-03-25 12:30:00'),
 (80, 'retrait', 'en attente', '2024-03-20 18:15:00', NULL, NULL),
 (82, 'livraison', 'preparation', '2024-03-22 14:45:00', '2024-03-22 16:45:00', NULL),
-(84, 'retrait', 'terminee', '2024-03-24 17:10:00', '2024-03-24 19:10:00', '2024-03-24 20:10:00'),
+(84, 'retrait', 'terminee', '2024-03-24 17:10:00', '2024-03-24 19:10:00', '2024-03-27 20:10:00'),
 (86, 'livraison', 'en attente', '2024-03-26 12:20:00', NULL, NULL),
 (88, 'retrait', 'preparation', '2024-03-28 11:00:00', '2024-03-28 13:00:00', NULL),
-(90, 'livraison', 'terminee', '2024-03-30 11:30:00', '2024-03-30 13:30:00', '2024-03-30 14:30:00'),
+(90, 'livraison', 'terminee', '2024-03-30 11:30:00', '2024-03-30 13:30:00', '2024-03-30 22:30:00'),
 (91, 'retrait', 'en attente', '2024-03-31 10:15:00', NULL, NULL),
 (93, 'livraison', 'preparation', '2024-04-02 12:50:00', '2024-04-02 14:50:00', NULL),
-(95, 'retrait', 'terminee', '2024-04-04 15:30:00', '2024-04-04 17:30:00', '2024-04-04 18:30:00'),
+(95, 'retrait', 'terminee', '2024-04-04 15:30:00', '2024-04-04 17:30:00', '2024-04-07 18:30:00'),
 (96, 'livraison', 'en attente', '2024-04-05 10:20:00', NULL, NULL),
 (98, 'retrait', 'preparation', '2024-04-07 12:15:00', '2024-04-07 14:15:00', NULL),
-(100, 'livraison', 'terminee', '2024-04-09 15:40:00', '2024-04-09 17:40:00', '2024-04-09 18:40:00'),
+(100, 'livraison', 'terminee', '2024-04-09 15:40:00', '2024-04-09 17:40:00', '2024-04-11 18:40:00'),
 (101, 'livraison', 'preparation', '2024-04-10 10:45:00', '2024-04-10 12:45:00', NULL),
-(103, 'retrait', 'terminee', '2024-04-12 11:30:00', '2024-04-12 13:30:00', '2024-04-12 14:30:00'),
+(103, 'retrait', 'terminee', '2024-04-12 11:30:00', '2024-04-12 13:30:00', '2024-04-15 14:30:00'),
 (105, 'livraison', 'en attente', '2024-04-14 16:45:00', NULL, NULL),
 (106, 'retrait', 'preparation', '2024-04-15 12:20:00', '2024-04-15 14:20:00', NULL),
-(108, 'livraison', 'terminee', '2024-04-17 15:15:00', '2024-04-17 17:15:00', '2024-04-17 18:15:00'),
+(108, 'livraison', 'terminee', '2024-04-17 15:15:00', '2024-04-17 17:15:00', '2024-04-23 18:15:00'),
 (110, 'retrait', 'en attente', '2024-04-19 18:10:00', NULL, NULL),
 (111, 'livraison', 'preparation', '2024-04-20 12:00:00', '2024-04-20 14:00:00', NULL),
-(113, 'retrait', 'terminee', '2024-04-22 16:00:00', '2024-04-22 18:00:00', '2024-04-22 19:00:00'),
+(113, 'retrait', 'terminee', '2024-04-22 16:00:00', '2024-04-22 18:00:00', '2024-05-02 19:00:00'),
 (114, 'livraison', 'en attente', '2024-04-23 10:10:00', NULL, NULL),
 (116, 'retrait', 'preparation', '2024-04-25 13:15:00', '2024-04-25 15:15:00', NULL),
-(118, 'livraison', 'terminee', '2024-04-27 17:00:00', '2024-04-27 19:00:00', '2024-04-27 20:00:00'),
+(118, 'livraison', 'terminee', '2024-04-27 17:00:00', '2024-04-27 19:00:00', '2024-04-29 20:00:00'),
 (120, 'retrait', 'en attente', '2024-04-29 15:40:00', NULL, NULL),
 (121, 'livraison', 'preparation', '2024-04-30 10:45:00', '2024-04-30 12:45:00', NULL),
-(123, 'retrait', 'terminee', '2024-05-02 10:15:00', '2024-05-02 12:15:00', '2024-05-02 13:15:00'),
+(123, 'retrait', 'terminee', '2024-05-02 10:15:00', '2024-05-02 12:15:00', '2024-05-02 23:15:00'),
 (125, 'livraison', 'en attente', '2024-05-04 12:20:00', NULL, NULL),
 (126, 'retrait', 'preparation', '2024-05-05 09:40:00', '2024-05-05 11:40:00', NULL),
-(128, 'livraison', 'terminee', '2024-05-07 10:30:00', '2024-05-07 12:30:00', '2024-05-07 13:30:00'),
+(128, 'livraison', 'terminee', '2024-05-07 10:30:00', '2024-05-07 12:30:00', '2024-05-10 13:30:00'),
 (130, 'retrait', 'en attente', '2024-05-09 12:50:00', NULL, NULL),
 (131, 'livraison', 'preparation', '2024-05-10 11:15:00', '2024-05-10 13:15:00', NULL),
-(133, 'retrait', 'terminee', '2024-05-12 09:30:00', '2024-05-12 11:30:00', '2024-05-12 12:30:00'),
+(133, 'retrait', 'terminee', '2024-05-12 09:30:00', '2024-05-12 11:30:00', '2024-05-14 12:30:00'),
 (134, 'livraison', 'preparation', '2024-05-13 16:30:00', '2024-05-13 18:30:00', NULL),
-(136, 'retrait', 'terminee', '2024-05-15 11:10:00', '2024-05-15 13:10:00', '2024-05-15 14:10:00'),
+(136, 'retrait', 'terminee', '2024-05-15 11:10:00', '2024-05-15 13:10:00', '2024-05-17 14:10:00'),
 (138, 'livraison', 'en attente', '2024-05-17 11:45:00', NULL, NULL),
 (140, 'retrait', 'preparation', '2024-05-19 16:15:00', '2024-05-19 18:15:00', NULL),
-(141, 'livraison', 'terminee', '2024-05-20 11:20:00', '2024-05-20 13:20:00', '2024-05-20 14:20:00'),
+(141, 'livraison', 'terminee', '2024-05-20 11:20:00', '2024-05-20 13:20:00', '2024-05-21 14:20:00'),
 (143, 'retrait', 'en attente', '2024-05-22 15:00:00', NULL, NULL),
 (145, 'livraison', 'preparation', '2024-05-24 17:00:00', '2024-05-24 19:00:00', NULL),
-(146, 'retrait', 'terminee', '2024-05-25 12:15:00', '2024-05-25 14:15:00', '2024-05-25 15:15:00'),
+(146, 'retrait', 'terminee', '2024-05-25 12:15:00', '2024-05-25 14:15:00', '2024-05-29 09:15:00'),
 (148, 'livraison', 'en attente', '2024-05-27 15:45:00', NULL, NULL),
 (150, 'retrait', 'preparation', '2024-05-29 18:45:00', '2024-05-29 20:45:00', NULL),
-(152, 'livraison', 'terminee', '2024-05-31 11:15:00', '2024-05-31 13:15:00', '2024-05-31 14:15:00'),
+(152, 'livraison', 'terminee', '2024-05-31 11:15:00', '2024-05-31 13:15:00', '2024-05-31 17:05:00'),
 (154, 'retrait', 'en attente', '2024-06-02 12:30:00', NULL, NULL),
 (156, 'livraison', 'preparation', '2024-06-04 16:00:00', '2024-06-04 18:00:00', NULL),
-(158, 'retrait', 'terminee', '2024-06-06 10:20:00', '2024-06-06 12:20:00', '2024-06-06 13:20:00'),
+(158, 'retrait', 'terminee', '2024-06-06 10:20:00', '2024-06-06 12:20:00', '2024-06-08 13:20:00'),
 (159, 'livraison', 'en attente', '2024-06-07 17:10:00', NULL, NULL),
 (161, 'retrait', 'preparation', '2024-06-09 15:30:00', '2024-06-09 17:30:00', NULL),
-(163, 'livraison', 'terminee', '2024-06-11 15:10:00', '2024-06-11 17:10:00', '2024-06-11 18:10:00'),
+(163, 'livraison', 'terminee', '2024-06-11 15:10:00', '2024-06-11 17:10:00', '2024-06-13 18:10:00'),
 (165, 'retrait', 'en attente', '2024-06-13 17:45:00', NULL, NULL),
 (166, 'livraison', 'preparation', '2024-06-14 12:30:00', '2024-06-14 14:30:00', NULL),
-(168, 'retrait', 'terminee', '2024-06-16 16:10:00', '2024-06-16 18:10:00', '2024-06-16 19:10:00'),
+(168, 'retrait', 'terminee', '2024-06-16 16:10:00', '2024-06-16 18:10:00', '2024-06-16 23:15:00'),
 (170, 'livraison', 'en attente', '2024-06-18 09:50:00', NULL, NULL),
 (171, 'retrait', 'preparation', '2024-06-19 17:15:00', '2024-06-19 19:15:00', NULL),
-(173, 'livraison', 'terminee', '2024-06-21 10:45:00', '2024-06-21 12:45:00', '2024-06-21 13:45:00'),
+(173, 'livraison', 'terminee', '2024-06-21 10:45:00', '2024-06-21 12:45:00', '2024-06-21 21:45:00'),
 (175, 'retrait', 'en attente', '2024-06-23 10:10:00', NULL, NULL),
 (176, 'livraison', 'preparation', '2024-06-24 16:50:00', '2024-06-24 18:50:00', NULL),
-(178, 'retrait', 'terminee', '2024-06-26 11:20:00', '2024-06-26 13:20:00', '2024-06-26 14:20:00'),
+(178, 'retrait', 'terminee', '2024-06-26 11:20:00', '2024-06-26 13:20:00', '2024-06-27 14:20:00'),
 (180, 'livraison', 'en attente', '2024-06-28 11:40:00', NULL, NULL),
 (182, 'retrait', 'preparation', '2024-06-30 15:50:00', '2024-06-30 17:50:00', NULL);
 

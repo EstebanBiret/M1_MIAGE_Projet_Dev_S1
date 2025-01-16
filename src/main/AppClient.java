@@ -22,15 +22,15 @@ public class AppClient {
     static CategorieDAO categorieDAO = new CategorieDAO();
 
     public static void afficherMenuPrincipal(String prenom, String nom, String magasinFavori) {
-        System.out.println("----------------------------------------------------");
-        System.out.println("| Bonjour " + prenom + " " + nom + " !                          |");
+        System.out.println("----------------------------------------------------------------------");
+        System.out.println("| Bonjour " + prenom + " " + nom + " !                                              |");
         System.out.println("| Votre magasin favori : " + magasinFavori + " |");
-        System.out.println("|                                                  |");
-        System.out.println("| [1] Recherche de produits                        |");
-        System.out.println("| [2] Visualiser et gérer le panier                |");
-        System.out.println("| [3] Tableau de bord                              |");
-        System.out.println("| [0] Quitter                                      |");
-        System.out.println("----------------------------------------------------");
+        System.out.println("|                                                                    |");
+        System.out.println("| [1] Recherche de produits                                          |");
+        System.out.println("| [2] Visualiser et gérer le panier                                  |");
+        System.out.println("| [3] Tableau de bord                                                |");
+        System.out.println("| [0] Quitter                                                        |");
+        System.out.println("----------------------------------------------------------------------");
     }
 
     public static void afficherMenuRecherche() {
@@ -98,7 +98,6 @@ public class AppClient {
                         }                                  
                     } 
                     else {
-                        System.out.println(typeCommande);
                         System.out.println("Votre panier est vide.");
                     }
                     continuer = false;
