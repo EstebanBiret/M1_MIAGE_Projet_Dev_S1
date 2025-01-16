@@ -548,8 +548,6 @@ INSERT INTO appartenir (idCategorie, idProduit) VALUES
 (22, 43), (22, 44), (23, 45), (23, 46), (24, 47), (24, 48),
 (25, 49), (25, 50),
 (1, 51),  -- Pois chiches bio -> Produits frais
-(2, 52),  -- Chips nature (Lay's) -> Snacks
-(2, 53),  -- Chips nature (Bret's) -> Snacks
 (3, 54),  -- Pizza Margherita (Buitoni) -> Produits surgelés
 (3, 55),  -- Pizza Margherita (Dr. Oetker) -> Produits surgelés
 (4, 56),  -- Céréales complètes (Jordan's) -> Épicerie
@@ -562,7 +560,6 @@ INSERT INTO appartenir (idCategorie, idProduit) VALUES
 (5, 63),  -- Jus de pomme bio (Carrefour Bio) -> Boissons
 (7, 64),  -- Raviolis bolognaise (Zapetti) -> Plats préparés
 (7, 65),  -- Raviolis bolognaise (William Saurin) -> Plats préparés
-(2, 66),  -- Quinoa bio (Markal) -> Produits bio
 (2, 68),  -- Quinoa bio (Carrefour Bio) -> Produits bio
 (8, 69),  -- Compote de pommes (Materne) -> Pâtisseries et confiseries
 (1, 70),  -- Saucisses de Strasbourg (Herta) -> Produits frais
