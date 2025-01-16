@@ -61,8 +61,6 @@ public class Algorithmes {
                         break;
                 }
                 
-                System.out.println("Requête : " + statement.toString());
-
                 //exécution de la requête et ajout des résultats à la liste
                 try (ResultSet resultSet = statement.executeQuery()) {
                     while (resultSet.next() && produitsAlternatifs.size() < 5) {
